@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>KnowCoder-V2: Deep Knowledge Analysis</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.BSep1QQP.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 KnowCoder-V2: Deep Knowledge Analysis</h1> <p class="text-sm text-gray-500"> 2025/6/10 – arXiv AI  <a href="https://arxiv.org/abs/2506.06881" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Computer Science &gt; Artificial Intelligence
+[Submitted on 7 Jun 2025]
+Title:KnowCoder-V2: Deep Knowledge Analysis
+View PDFAbstract:Deep knowledge analysis tasks always involve the systematic extraction and association of knowledge from large volumes of data, followed by logical reasoning to discover insights. However, to solve such complex tasks, existing deep research frameworks face three major challenges: 1) They lack systematic organization and management of knowledge; 2) They operate purely online, making it inefficient for tasks that rely on shared and large-scale knowledge; 3) They cannot perform complex knowledge computation, limiting their abilities to produce insightful analytical results. Motivated by these, in this paper, we propose a \textbf{K}nowledgeable \textbf{D}eep \textbf{R}esearch (\textbf{KDR}) framework that empowers deep research with deep knowledge analysis capability. Specifically, it introduces an independent knowledge organization phase to preprocess large-scale, domain-relevant data into systematic knowledge offline. Based on this knowledge, it extends deep research with an additional kind of reasoning steps that perform complex knowledge computation in an online manner. To enhance the abilities of LLMs to solve knowledge analysis tasks in the above framework, we further introduce \textbf{\KCII}, an LLM that bridges knowledge organization and reasoning via unified code generation. For knowledge organization, it generates instantiation code for predefined classes, transforming data into knowledge objects. For knowledge computation, it generates analysis code and executes on the above knowledge objects to obtain deep analysis results. Experimental results on more than thirty datasets across six knowledge analysis tasks demonstrate the effectiveness of \KCII. Moreover, when integrated into the KDR framework, \KCII can generate high-quality reports with insightful analytical results compared to the mainstream deep research framework.
+References &amp; Citations
+Bibliographic and Citation Tools
+Bibliographic Explorer (What is the Explorer?)
+Connected Papers (What is Connected Papers?)
+Litmaps (What is Litmaps?)
+scite Smart Citations (What are Smart Citations?)
+Code, Data and Media Associated with this Article
+alphaXiv (What is alphaXiv?)
+CatalyzeX Code Finder for Papers (What is CatalyzeX?)
+DagsHub (What is DagsHub?)
+Gotit.pub (What is GotitPub?)
+Hugging Face (What is Huggingface?)
+Papers with Code (What is Papers with Code?)
+ScienceCast (What is ScienceCast?)
+Demos
+Recommenders and Search Tools
+Influence Flower (What are Influence Flowers?)
+CORE Recommender (What is CORE?)
+arXivLabs: experimental projects with community collaborators
+arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+Have an idea for a project that will add value for arXiv&#39;s community? Learn more about arXivLabs. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
