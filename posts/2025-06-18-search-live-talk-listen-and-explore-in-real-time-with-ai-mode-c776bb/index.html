@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Search Live: Talk, listen and explore in real time with AI Mode</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Search Live: Talk, listen and explore in real time with AI Mode</h1> <p class="text-sm text-gray-500"> 2025/6/18 – Google AI Blog  <a href="https://blog.google/products/search/search-live-ai-mode/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Search Live: Talk, listen and explore in real time with AI Mode
+Today we’re launching Search Live with voice input in the Google app for Android and iOS. Available in the U.S. for users enrolled in the AI Mode experiment in Labs, you can now have a free-flowing, back-and-forth voice conversation with Search and explore links from across the web.
+This is perfect for when you&#39;re on the go or multitasking, like if you&#39;re packing for a trip. Simply open the Google app, tap the new “Live” icon and verbally ask your question, like, &quot;What are some tips for preventing a linen dress from wrinkling in a suitcase?” You&#39;ll hear a helpful AI-generated audio response and you can easily follow up with another question, like, &quot;What should I do if it still wrinkles?&quot; You&#39;ll also find easy-to-access links right on your screen so you can dig deeper with content from the web.
+Because Search Live works in the background, you can seamlessly continue the conversation while in another app. Want to explore even more? Tap the “transcript” button to view the text response and continue to ask questions by typing. If you want to revisit a Search Live response, pick up where you left off by heading to your AI Mode history.
+Behind the scenes, Search Live in AI Mode uses a custom version of Gemini with advanced voice capabilities. Our custom model is built on Search&#39;s best-in-class quality and information systems, so you still get reliable, helpful responses no matter where, or how, you’re asking your question. Search Live with voice also uses our query fan-out technique to show you a wider and more diverse set of helpful web content, enabling new opportunities for exploration.
+You can access Search Live with a new icon directly under your search bar when you opt in to the AI Mode experiment in Labs — test it out today and let us know how you’re using it.
+In the coming months, we look forward to bringing even more Live capabilities to AI Mode, including using your camera when you talk back-and-forth so you can show Search what you’re seeing in real time. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
