@@ -29,7 +29,7 @@ Running inference on the deployed model endpoint can be done in just a few lines
 Here&#39;s a small snippet to test the deployed checkpoint quickly.
 import requests
 ENDPOINT_URL = &quot;https://&lt;your‑hf‑endpoint&gt;.cloud/api/v1/audio/transcriptions&quot; # 🌐 replace with your URL endpoint
-HF_TOKEN = &quot;hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot; # 🔑 replace with your HF token
+HF_TOKEN = &quot;[REDACTED_TOKEN]&quot; # 🔑 replace with your HF token
 AUDIO_FILE = &quot;sample.wav&quot; # 🔊 path to your local audio file
 headers = {&quot;Authorization&quot;: f&quot;Bearer {HF_TOKEN}&quot;}
 with open(AUDIO_FILE, &quot;rb&quot;) as f:

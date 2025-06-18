@@ -187,7 +187,7 @@ Once you have your model ID and your Hugging Face token ID, go back to your Zap 
 - On &quot;Set up action&quot;, you will need to first add the tweet &quot;full text&quot; as &quot;input_data&quot;. Then you will need to add these 28 lines of python code in the &quot;Code&quot; section. This code will allow the Zap to call the Inference API and make the predictions with sentiment analysis. Before adding this code to your zap, please make sure that you do the following:
 - Change line 5 and add your Hugging Face token, that is, instead of
 hf_token = &quot;ADD_YOUR_HUGGING_FACE_TOKEN_HERE&quot;
-, you will need to change it to something likehf_token = &quot;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&quot;
+, you will need to change it to something likehf_token = &quot;[REDACTED_TOKEN]&quot;
 - If you want to use a different sentiment analysis model, you will need to change line 4 and specify the id of the new model here. For example, instead of using the default model, you could use this model to do sentiment analysis on tweets in Spanish by changing this line
 model = &quot;cardiffnlp/twitter-roberta-base-sentiment-latest&quot;
 tomodel = &quot;finiteautomata/beto-sentiment-analysis&quot;

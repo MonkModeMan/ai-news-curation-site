@@ -94,24 +94,24 @@ HuggingFaceEmbeddings
 This class uses sentence-transformers embeddings. It computes the embedding locally, hence using your computer resources.
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 model_name = &quot;mixedbread-ai/mxbai-embed-large-v1&quot;
-hf_embeddings = HuggingFaceEmbeddings(
+[REDACTED_TOKEN] = HuggingFaceEmbeddings(
 model_name=model_name,
 )
 texts = [&quot;Hello, world!&quot;, &quot;How are you?&quot;]
-hf_embeddings.embed_documents(texts)
+[REDACTED_TOKEN].embed_documents(texts)
 HuggingFaceEndpointEmbeddings
 HuggingFaceEndpointEmbeddings
 is very similar to what HuggingFaceEndpoint
 does for the LLM, in the sense that it also uses the InferenceClient under the hood to compute the embeddings.
 It can be used with models on the hub, and TEI instances whether they are deployed locally or online.
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
-hf_embeddings = HuggingFaceEndpointEmbeddings(
+[REDACTED_TOKEN] = HuggingFaceEndpointEmbeddings(
 model= &quot;mixedbread-ai/mxbai-embed-large-v1&quot;,
 task=&quot;feature-extraction&quot;,
 huggingfacehub_api_token=&quot;&lt;HF_TOKEN&gt;&quot;,
 )
 texts = [&quot;Hello, world!&quot;, &quot;How are you?&quot;]
-hf_embeddings.embed_documents(texts)
+[REDACTED_TOKEN].embed_documents(texts)
 Conclusion
 We are committed to making langchain-huggingface
 better by the day. We will be actively monitoring feedback and issues and working to address them as quickly as possible. We will also be adding new features and functionality and expanding the package to support an even wider range of the community&#39;s use cases. We strongly encourage you to try this package and to give your opinion, as it will pave the way for the package&#39;s future. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">

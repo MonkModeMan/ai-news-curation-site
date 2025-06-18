@@ -141,10 +141,10 @@ web_paths=(&quot;https://huggingface.co/blog/open-source-llms-as-agents&quot;,),
 )
 docs = loader.load()
 # Declare an HF embedding model and vector store
-hf_embeddings = HuggingFaceEmbeddings(model_name=&quot;BAAI/bge-large-en-v1.5&quot;)
+[REDACTED_TOKEN] = HuggingFaceEmbeddings(model_name=&quot;BAAI/bge-large-en-v1.5&quot;)
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=200)
 splits = text_splitter.split_documents(docs)
-vectorstore = Chroma.from_documents(documents=splits, embedding=hf_embeddings)
+vectorstore = Chroma.from_documents(documents=splits, embedding=[REDACTED_TOKEN])
 # Retrieve and generate using the relevant pieces of context
 retriever = vectorstore.as_retriever()
 prompt = hub.pull(&quot;rlm/rag-prompt&quot;)
