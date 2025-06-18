@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Improving Hugging Face Training Efficiency Through Packing with Flash Attention</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Improving Hugging Face Training Efficiency Through Packing with Flash Attention</h1> <p class="text-sm text-gray-500"> 2024/8/21 – Hugging Face Blog  <a href="https://huggingface.co/blog/packing-with-FA2" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Improving Hugging Face Training Efficiency Through Packing with Flash Attention
+TL;DR
+Training with packed instruction tuning examples (without padding) is now compatible with Flash Attention 2 in Hugging Face, thanks to a recent PR and the new DataCollatorWithFlattening
+It can provide up to 2x improvement in training throughput while maintaining convergence quality. Read on for the details!
+Introduction
+Padding input sequences in mini-batches is a usual method to collate inputs during training. However, this introduces inefficiencies because of the irrelevant padding tokens. Packing examples without padding, and using the token position information, is a more efficient alternative. However, previous implementations of packing did not consider example boundaries when using Flash Attention 2, resulting in undesired cross-example attention that reduce quality and convergence.
+Hugging Face Transformers now addresses this with a new feature that maintains boundary awareness during packing, alongside the introduction of a new data collator, DataCollatorWithFlattening
+.
+By selecting DataCollatorWithFlattening
+, Hugging Face Trainer
+users can now seamlessly concatenate sequences into a single tensor while accounting for sequence boundaries during Flash Attention 2 computations. This is achieved through the flash_attn_varlen_func
+, which calculates the cumulative sequence lengths in each mini-batch (cu_seqlens
+).
+The same feature is available to Hugging Face SFTTrainer
+users in the TRL
+library by setting a new flag, padding_free=True
+, when calling the data collator DataCollatorForCompletionOnlyLM
+.
+Up to 2x throughput increase
+We see significant improvement in training throughput using this feature with the new DataCollatorWithFlattening
+. The figure below shows the throughput measured in tokens/second during training. In this example, the throughput is the per-GPU average over 8 A100-80 GPU over one epoch of a 20K randomly selected sample from two different instruct tuning datasets, FLAN and OrcaMath.
+FLAN has short sequences on average but a large variance in sequence length, so example lengths in each batch may vary widely. This means that padded FLAN batches may incur a significant overhead in unused padding tokens. Training on the FLAN dataset shows a significant benefit using the new DataCollatorWithFlattening
+in terms of increased throughput. We see a 2x throughput increase on the models shown here: llama2-7B, mistral-7B, and granite-8B-code.
+OrcaMath has longer examples and a lower variance in example length. As such, the improvement from packing is lower. Our experiments show a 1.4x increase in throughput when training using this form of packing on the OrcaMath dataset across these three models.
+Memory usage also improves through packing with the new DataCollatorWithFlattening
+. The following figure shows the peak memory usage of the same three models training on the same two datasets. Peak memory is reduced by 20% on the FLAN dataset, which benefits considerably from packing.
+Peak memory reduction is 6% on the OrcaMath dataset with its more homogeneous example lengths.
+Packing examples, when it reduces the number of optimization steps, may harm training convergence. The new feature, however, retains the minibatches and, hence, the same number of optimization steps as would be used with padded examples. Thus, there is no impact on train convergence, as we see in the next figure, which shows identical validation loss of the same three models training on the same two datasets, whether the models are trained with packing using the new DataCollatorWithFlattening
+or with padding.
+How it works
+Consider a batch of data with a batchsize = 4 where the four sequences are as follows:
+After concatenating the examples, the padding-free collator returns the input_ids
+, labels
+, and position_ids
+of each example. Hence, the collator provides, for this batch of data,
+The modifications required are lightweight and are limited to providing the position_ids
+to Flash Attention 2.
+This relies, however, on the model exposing position_ids
+. As of the time of writing, 14 models expose them and are supported by the solution. Specifically, Llama 2 and 3, Mistral, Mixtral, Granite, DBRX, Falcon, Gemma, OLMo, Phi 1, 2, and 3, phi3, Qwen 2 and 2 MoE, StableLM, and StarCoder 2 are all supported by the solution.
+Getting started
+Reaping the benefits of packing with position_ids
+is easy.
+If you are using Hugging Face Trainer
+from Transformers
+, only two steps are required:
+- Instantiate the model with Flash Attention 2
+- Use the new
+DataCollatorWithFlattening
+If you are using Hugging Face SFTTrainer
+from TRL
+with DataCollatorForCompletionOnlyLM
+, then the two required steps are:
+- Instantiate the model with Flash Attention 2
+- Set
+padding_free=True
+when callingDataCollatorForCompletionOnlyLM
+as follows:collator = DataCollatorForCompletionOnlyLM(response_template_ids, tokenizer=tokenizer, padding_free=True)
+How to use it
+For Trainer
+users, the example below illustrates how to use the new feature.
+# Example using DataCollatorWithFlattening
+import torch
+# load model as usual
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(
+&quot;instructlab/merlinite-7b-lab&quot;,
+torch_dtype=torch.bfloat16,
+attn_implementation=&quot;flash_attention_2&quot;
+)
+# read dataset as usual
+from datasets import load_dataset
+train_dataset = load_dataset(&quot;json&quot;, data_files=&quot;path/to/my/dataset&quot;)[&quot;train&quot;]
+# use DataCollatorWithFlattening
+from transformers import DataCollatorWithFlattening
+data_collator = DataCollatorWithFlattening()
+# train
+from transformers import TrainingArguments, Trainer
+train_args = TrainingArguments(output_dir=&quot;/save/path&quot;)
+trainer = Trainer(
+args=train_args,
+model=model,
+train_dataset=train_dataset,
+data_collator=data_collator
+)
+trainer.train()
+For TRL
+users, the example below shows how to use the new feature with SFTTrainer
+.
+# SFTTrainer example using DataCollatorForCompletionOnlyLM
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from datasets import load_dataset
+from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
+dataset = load_dataset(&quot;lucasmccabe-lmi/CodeAlpaca-20k&quot;, split=&quot;train&quot;)
+model = AutoModelForCausalLM.from_pretrained(
+&quot;instructlab/merlinite-7b-lab&quot;,
+torch_dtype=torch.bfloat16,
+attn_implementation=&quot;flash_attention_2&quot;)
+tokenizer = AutoTokenizer.from_pretrained(&quot;instructlab/merlinite-7b-lab&quot;)
+tokenizer.pad_token = tokenizer.eos_token
+def formatting_prompts_func(example):
+output_texts = []
+for i in range(len(example[&#39;instruction&#39;])):
+text = f&quot;### Question: {example[&#39;instruction&#39;][i]}\n ### Answer: {example[&#39;output&#39;][i]}&quot;
+output_texts.append(text)
+return output_texts
+response_template = &quot; ### Answer:&quot;
+response_template_ids = tokenizer.encode(response_template, add_special_tokens=False)[2:]
+collator = DataCollatorForCompletionOnlyLM(response_template_ids, tokenizer=tokenizer, padding_free=True)
+trainer = SFTTrainer(
+model,
+train_dataset=dataset,
+args=SFTConfig(
+output_dir=&quot;./tmp&quot;,
+gradient_checkpointing=True,
+per_device_train_batch_size=8
+),
+formatting_func=formatting_prompts_func,
+data_collator=collator,
+)
+trainer.train()
+Conclusions
+Packing instruction tuning examples, instead of padding, is now fully compatible with Flash Attention 2, thanks to a recent PR and the new DataCollatorWithFlattening
+. The method is compatible with models that use position_ids
+. Benefits can be seen in throughput and peak memory usage during training, with no degradation in training convergence. Actual throughput and memory improvement depends on the model and the distribution of example lengths in the training data. Training with data that has a wide variation of example lengths will see the greatest benefit, with respect to padding, by using the DataCollatorWithFlattening
+. The same feature is available to SFTTrainer
+users in the TRL
+library by setting a new flag, padding_free=True
+, when calling DataCollatorForCompletionOnlyLM
+.
+For a more detailed analysis, have a look at the paper at https://huggingface.co/papers/2407.09105 </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

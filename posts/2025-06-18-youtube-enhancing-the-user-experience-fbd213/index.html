@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>YouTube: Enhancing the user experience</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 YouTube: Enhancing the user experience</h1> <p class="text-sm text-gray-500"> 2023/6/16 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/youtube-enhancing-the-user-experience/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Research
+YouTube: Enhancing the user experience
+It’s all about using our technology and research to help enrich people’s lives. Like YouTube — and its mission to give everyone a voice and show them the world.
+Our work with YouTube’s product and engineering teams has helped optimize decision-making processes, increase safety and engagement, and enhance the experience for all kinds of users.
+Making Shorts more searchable
+YouTube Shorts — short-form videos less than a minute long — are viewed more than 50 billion times a day.
+Covering everything from emerging K-pop stars to local food guides, they’re quick to watch, quick to make — and getting more popular all the time. But because Shorts are created in just a few minutes, they often don’t include the descriptions and titles that make them easy to find through search. So we introduced Flamingo, our visual language model to help generate descriptions.
+Flamingo analyzes the initial video frames, and explains what’s being shown on screen (e.g. “a dog balancing a stack of crackers on its head”). It saves this text as metadata in YouTube, creating clearer content categories and matching user searches to better results.
+YouTube is rolling out this technology across Shorts, with auto-generated video descriptions on all new uploads. Now viewers can find and watch more relevant videos, from a more diverse range of global creators.
+Optimizing video compression
+Video has exploded in recent years, and with internet traffic only expected to grow in the future — video compression is an increasingly pressing problem.
+We worked with YouTube to test the potential of our AI model, MuZero to improve the VP9 codec, a coding format that helps compress and transmit video over the internet. Then, we applied MuZero to some of YouTube’s live traffic.
+At launch, we saw an average 4% bitrate reduction across a diverse set of videos. Bitrate helps determine the computing ability and bandwidth needed to play and store videos — impacting everything from loading time, to resolution, buffering, and data usage.
+By improving the VP9 codec on YouTube, we’ve helped reduce internet traffic, data usage, and time needed for loading videos. And through optimizing video compression, millions of people around the world are able to watch more videos while using less data.
+Protecting brand safety
+Since 2018, our YouTube collaboration has helped educate creators on the kind of videos that can earn ad revenue, and make sure the right ads appear in the right place.
+We developed a label quality model (LQM) with the YouTube team to label videos more precisely, and in-line with YouTube’s advertiser-friendly guidelines. As well as improving the accuracy of ads running on videos, it’s helping to ensure ads appear alongside content that follows YouTube’s guidelines.
+By improving the way videos are identified and classified, we’ve enhanced trust in the platform for viewers, creators and advertisers alike.
+Improving AutoChapters
+As the way we make and watch video evolves, creators have started adding chapters to their videos. It makes it easier for their audience to find the content they want — but it can be a slow process.
+We worked with the YouTube Search team to develop an AI system that suggests chapter segments and titles for YouTube creators, by automatically processing video transcripts, audio and visual features. With AutoChapters, viewers spend less time searching for content, and creators save time creating chapters for their videos.
+Since the feature was introduced at Google I/O in 2022, auto-generated chapters have been applied to tens of millions of videos (and counting) across YouTube.
+Evolving technologies and products
+We’re continuously looking for ways to improve Alphabet products with our AI research.
+Our collaboration with YouTube has already made a great impact on people’s lives — and with more projects underway, we&#39;re continuing to improve the experience for users. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>TTS Arena: Benchmarking Text-to-Speech Models in the Wild</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 TTS Arena: Benchmarking Text-to-Speech Models in the Wild</h1> <p class="text-sm text-gray-500"> 2024/2/27 – Hugging Face Blog  <a href="https://huggingface.co/blog/arena-tts" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> TTS Arena: Benchmarking Text-to-Speech Models in the Wild
+Automated measurement of the quality of text-to-speech (TTS) models is very difficult. Assessing the naturalness and inflection of a voice is a trivial task for humans, but it is much more difficult for AI. This is why today, we’re thrilled to announce the TTS Arena. Inspired by LMSys&#39;s Chatbot Arena for LLMs, we developed a tool that allows anyone to easily compare TTS models side-by-side. Just submit some text, listen to two different models speak it out, and vote on which model you think is the best. The results will be organized into a leaderboard that displays the community’s highest-rated models.
+Motivation
+The field of speech synthesis has long lacked an accurate method to measure the quality of different models. Objective metrics like WER (word error rate) are unreliable measures of model quality, and subjective measures such as MOS (mean opinion score) are typically small-scale experiments conducted with few listeners. As a result, these measurements are generally not useful for comparing two models of roughly similar quality. To address these drawbacks, we are inviting the community to rank models in an easy-to-use interface. By opening this tool and disseminating results to the public, we aim to democratize how models are ranked and to make model comparison and selection accessible to everyone.
+The TTS Arena
+Human ranking for AI systems is not a novel approach. Recently, LMSys applied this method in their Chatbot Arena with great results, collecting over 300,000 rankings so far. Because of its success, we adopted a similar framework for our leaderboard, inviting any person to rank synthesized audio.
+The leaderboard allows a user to enter text, which will be synthesized by two models. After listening to each sample, the user will vote on which model sounds more natural. Due to the risks of human bias and abuse, model names will be revealed only after a vote is submitted.
+Selected Models
+We selected several SOTA (State of the Art) models for our leaderboard. While most are open-source models, we also included several proprietary models to allow developers to compare the state of open-source development with proprietary models.
+The models available at launch are:
+- ElevenLabs (proprietary)
+- MetaVoice
+- OpenVoice
+- Pheme
+- WhisperSpeech
+- XTTS
+Although there are many other open and closed source models available, we chose these because they are generally accepted as the highest-quality publicly available models.
+The TTS Leaderboard
+The results from Arena voting will be made publicly available in a dedicated leaderboard. Note that it will be initially empty until sufficient votes are accumulated, then models will gradually appear. As raters submit new votes, the leaderboard will automatically update.
+Similar to the Chatbot Arena, models will be ranked using an algorithm similar to the Elo rating system, commonly used in chess and other games.
+Conclusion
+We hope the TTS Arena proves to be a helpful resource for all developers. We&#39;d love to hear your feedback! Please do not hesitate to let us know if you have any questions or suggestions by sending us an X/Twitter DM, or by opening a discussion in the community tab of the Space.
+Credits
+Special thanks to all the people who helped make this possible, including Clémentine Fourrier, Lucian Pouget, Yoach Lacombe, Main Horse, and the Hugging Face team. In particular, I’d like to thank VB for his time and technical assistance. I’d also like to thank Sanchit Gandhi and Apolinário Passos for their feedback and support during the development process. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

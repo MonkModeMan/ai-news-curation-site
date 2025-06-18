@@ -1,0 +1,357 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introduction to ggml</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introduction to ggml</h1> <p class="text-sm text-gray-500"> 2024/8/13 – Hugging Face Blog  <a href="https://huggingface.co/blog/introduction-to-ggml" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introduction to ggml
+ggml is a machine learning (ML) library written in C and C++ with a focus on Transformer inference. The project is open-source and is being actively developed by a growing community. ggml is similar to ML libraries such as PyTorch and TensorFlow, though it is still in its early stages of development and some of its fundamentals are still changing rapidly.
+Over time, ggml has gained popularity alongside other projects like llama.cpp and whisper.cpp. Many other projects also use ggml under the hood to enable on-device LLM, including ollama, jan, LM Studio, GPT4All.
+The main reasons people choose to use ggml over other libraries are:
+- Minimalism: The core library is self-contained in less than 5 files. While you may want to include additional files for GPU support, it&#39;s optional.
+- Easy compilation: You don&#39;t need fancy build tools. Without GPU support, you only need GCC or Clang!
+- Lightweight: The compiled binary size is less than 1MB, which is tiny compared to PyTorch (which usually takes hundreds of MB).
+- Good compatibility: It supports many types of hardware, including x86_64, ARM, Apple Silicon, CUDA, etc.
+- Support for quantized tensors: Tensors can be quantized to save memory (similar to JPEG compression) and in certain cases to improve performance.
+- Extremely memory efficient: Overhead for storing tensors and performing computations is minimal.
+However, ggml also comes with some disadvantages that you need to keep in mind when using it (this list may change in future versions of ggml):
+- Not all tensor operations are supported on all backends. For example, some may work on CPU but won&#39;t work on CUDA.
+- Development with ggml may not be straightforward and may require deep knowledge of low-level programming.
+- The project is in active development, so breaking changes are expected.
+In this article, we will focus on the fundamentals of ggml for developers looking to get started with the library. We do not cover higher-level tasks such as LLM inference with llama.cpp, which builds upon ggml. Instead, we&#39;ll explore the core concepts and basic usage of ggml to provide a solid foundation for further learning and development.
+Getting started
+Great, so how do you start?
+For simplicity, this guide will show you how to compile ggml on Ubuntu. In reality, you can compile ggml on virtually any platform (including Windows, macOS, and BSD).
+# Start by installing build dependencies
+# &quot;gdb&quot; is optional, but is recommended
+sudo apt install build-essential cmake git gdb
+# Then, clone the repository
+git clone https://github.com/ggerganov/ggml.git
+cd ggml
+# Try compiling one of the examples
+cmake -B build
+cmake --build build --config Release --target simple-ctx
+# Run the example
+./build/bin/simple-ctx
+Expected output:
+mul mat (4 x 3) (transposed result):
+[ 60.00 55.00 50.00 110.00
+90.00 54.00 54.00 126.00
+42.00 29.00 28.00 64.00 ]
+If you see the expected result, that means we&#39;re good to go!
+Terminology and concepts
+Before diving deep into ggml, we should understand some key concepts. If you&#39;re coming from high-level libraries like PyTorch or TensorFlow, these may seem challenging to grasp. However, keep in mind that ggml is a low-level library. Understanding these terms can give you much more control over performance:
+- ggml_context: A &quot;container&quot; that holds objects such as tensors, graphs, and optionally data
+- ggml_cgraph: Represents a computational graph. Think of it as the &quot;order of computation&quot; that will be transferred to the backend.
+- ggml_backend: Represents an interface for executing computation graphs. There are many types of backends: CPU (default), CUDA, Metal (Apple Silicon), Vulkan, RPC, etc.
+- ggml_backend_buffer_type: Represents a buffer type. Think of it as a &quot;memory allocator&quot; connected to each
+ggml_backend
+. For example, if you want to perform calculations on a GPU, you need to allocate memory on the GPU viabuffer_type
+(usually abbreviated asbuft
+). - ggml_backend_buffer: Represents a buffer allocated by
+buffer_type
+. Remember: a buffer can hold the data of multiple tensors. - ggml_gallocr: Represents a graph memory allocator, used to allocate efficiently the tensors used in a computation graph.
+- ggml_backend_sched: A scheduler that enables concurrent use of multiple backends. It can distribute computations across different hardware (e.g., GPU and CPU) when dealing with large models or multiple GPUs. The scheduler can also automatically assign GPU-unsupported operations to the CPU, ensuring optimal resource utilization and compatibility.
+Simple example
+In this example, we&#39;ll go through the steps to replicate the code we ran in Getting Started. We need to create 2 matrices, multiply them and get the result. Using PyTorch, the code looks like this:
+import torch
+# Create two matrices
+matrix1 = torch.tensor([
+[2, 8],
+[5, 1],
+[4, 2],
+[8, 6],
+])
+matrix2 = torch.tensor([
+[10, 5],
+[9, 9],
+[5, 4],
+])
+# Perform matrix multiplication
+result = torch.matmul(matrix1, matrix2.T)
+print(result.T)
+With ggml, the following steps must be done to achieve the same result:
+- Allocate
+ggml_context
+to store tensor data - Create tensors and set data
+- Create a
+ggml_cgraph
+for mul_mat operation - Run the computation
+- Retrieve results (output tensors)
+- Free memory and exit
+NOTE: In this example, we will allocate the tensor data inside the ggml_context
+for simplicity. In practice, memory should be allocated as a device buffer, as we&#39;ll see in the next section.
+To get started, let&#39;s create a new directory examples/demo
+cd ggml # make sure you&#39;re in the project root
+# create C source and CMakeLists file
+touch examples/demo/demo.c
+touch examples/demo/CMakeLists.txt
+The code for this example is based on simple-ctx.cpp
+Edit examples/demo/demo.c
+with the content below:
+#include &quot;ggml.h&quot;
+#include &quot;ggml-cpu.h&quot;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+int main(void) {
+// initialize data of matrices to perform matrix multiplication
+const int rows_A = 4, cols_A = 2;
+float matrix_A[rows_A * cols_A] = {
+2, 8,
+5, 1,
+4, 2,
+8, 6
+};
+const int rows_B = 3, cols_B = 2;
+float matrix_B[rows_B * cols_B] = {
+10, 5,
+9, 9,
+5, 4
+};
+// 1. Allocate `ggml_context` to store tensor data
+// Calculate the size needed to allocate
+size_t ctx_size = 0;
+ctx_size += rows_A * cols_A * ggml_type_size(GGML_TYPE_F32); // tensor a
+ctx_size += rows_B * cols_B * ggml_type_size(GGML_TYPE_F32); // tensor b
+ctx_size += rows_A * rows_B * ggml_type_size(GGML_TYPE_F32); // result
+ctx_size += 3 * ggml_tensor_overhead(); // metadata for 3 tensors
+ctx_size += ggml_graph_overhead(); // compute graph
+ctx_size += 1024; // some overhead (exact calculation omitted for simplicity)
+// Allocate `ggml_context` to store tensor data
+struct ggml_init_params params = {
+/*.mem_size =*/ ctx_size,
+/*.mem_buffer =*/ NULL,
+/*.no_alloc =*/ false,
+};
+struct ggml_context * ctx = ggml_init(params);
+// 2. Create tensors and set data
+struct ggml_tensor * tensor_a = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, cols_A, rows_A);
+struct ggml_tensor * tensor_b = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, cols_B, rows_B);
+memcpy(tensor_a-&gt;data, matrix_A, ggml_nbytes(tensor_a));
+memcpy(tensor_b-&gt;data, matrix_B, ggml_nbytes(tensor_b));
+// 3. Create a `ggml_cgraph` for mul_mat operation
+struct ggml_cgraph * gf = ggml_new_graph(ctx);
+// result = a*b^T
+// Pay attention: ggml_mul_mat(A, B) ==&gt; B will be transposed internally
+// the result is transposed
+struct ggml_tensor * result = ggml_mul_mat(ctx, tensor_a, tensor_b);
+// Mark the &quot;result&quot; tensor to be computed
+ggml_build_forward_expand(gf, result);
+// 4. Run the computation
+int n_threads = 1; // Optional: number of threads to perform some operations with multi-threading
+ggml_graph_compute_with_ctx(ctx, gf, n_threads);
+// 5. Retrieve results (output tensors)
+float * result_data = (float *) result-&gt;data;
+printf(&quot;mul mat (%d x %d) (transposed result):\n[&quot;, (int) result-&gt;ne[0], (int) result-&gt;ne[1]);
+for (int j = 0; j &lt; result-&gt;ne[1] /* rows */; j++) {
+if (j &gt; 0) {
+printf(&quot;\n&quot;);
+}
+for (int i = 0; i &lt; result-&gt;ne[0] /* cols */; i++) {
+printf(&quot; %.2f&quot;, result_data[j * result-&gt;ne[0] + i]);
+}
+}
+printf(&quot; ]\n&quot;);
+// 6. Free memory and exit
+ggml_free(ctx);
+return 0;
+}
+Write these lines in the examples/demo/CMakeLists.txt
+file you created:
+set(TEST_TARGET demo)
+add_executable(${TEST_TARGET} demo)
+target_link_libraries(${TEST_TARGET} PRIVATE ggml)
+Edit examples/CMakeLists.txt
+, add this line at the end:
+add_subdirectory(demo)
+Compile and run it:
+cmake -B build
+cmake --build build --config Release --target demo
+# Run it
+./build/bin/demo
+Expected result:
+mul mat (4 x 3) (transposed result):
+[ 60.00 55.00 50.00 110.00
+90.00 54.00 54.00 126.00
+42.00 29.00 28.00 64.00 ]
+Example with a backend
+&quot;Backend&quot; in ggml refers to an interface that can handle tensor operations. Backend can be CPU, CUDA, Vulkan, etc.
+The backend abstracts the execution of the computation graphs. Once defined, a graph can be computed with the available hardware by using the respective backend implementation. Note that ggml will automatically reserve memory for any intermediate tensors necessary for the computation and will optimize the memory usage based on the lifetime of these intermediate results.
+When doing a computation or inference with backend, common steps that need to be done are:
+- Initialize
+ggml_backend
+- Allocate
+ggml_context
+to store tensor metadata (we don&#39;t need to allocate tensor data right away) - Create tensors metadata (only their shapes and data types)
+- Allocate a
+ggml_backend_buffer
+to store all tensors - Copy tensor data from main memory (RAM) to backend buffer
+- Create a
+ggml_cgraph
+for mul_mat operation - Create a
+ggml_gallocr
+for cgraph allocation - Optionally: schedule the cgraph using
+ggml_backend_sched
+- Run the computation
+- Retrieve results (output tensors)
+- Free memory and exit
+The code for this example is based on simple-backend.cpp
+#include &quot;ggml.h&quot;
+#include &quot;ggml-alloc.h&quot;
+#include &quot;ggml-backend.h&quot;
+#ifdef GGML_USE_CUDA
+#include &quot;ggml-cuda.h&quot;
+#endif
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+int main(void) {
+// initialize data of matrices to perform matrix multiplication
+const int rows_A = 4, cols_A = 2;
+float matrix_A[rows_A * cols_A] = {
+2, 8,
+5, 1,
+4, 2,
+8, 6
+};
+const int rows_B = 3, cols_B = 2;
+float matrix_B[rows_B * cols_B] = {
+10, 5,
+9, 9,
+5, 4
+};
+// 1. Initialize backend
+ggml_backend_t backend = NULL;
+#ifdef GGML_USE_CUDA
+fprintf(stderr, &quot;%s: using CUDA backend\n&quot;, __func__);
+backend = ggml_backend_cuda_init(0); // init device 0
+if (!backend) {
+fprintf(stderr, &quot;%s: ggml_backend_cuda_init() failed\n&quot;, __func__);
+}
+#endif
+// if there aren&#39;t GPU Backends fallback to CPU backend
+if (!backend) {
+backend = ggml_backend_cpu_init();
+}
+// Calculate the size needed to allocate
+size_t ctx_size = 0;
+ctx_size += 2 * ggml_tensor_overhead(); // tensors
+// no need to allocate anything else!
+// 2. Allocate `ggml_context` to store tensor data
+struct ggml_init_params params = {
+/*.mem_size =*/ ctx_size,
+/*.mem_buffer =*/ NULL,
+/*.no_alloc =*/ true, // the tensors will be allocated later by ggml_backend_alloc_ctx_tensors()
+};
+struct ggml_context * ctx = ggml_init(params);
+// Create tensors metadata (only there shapes and data type)
+struct ggml_tensor * tensor_a = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, cols_A, rows_A);
+struct ggml_tensor * tensor_b = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, cols_B, rows_B);
+// 4. Allocate a `ggml_backend_buffer` to store all tensors
+ggml_backend_buffer_t buffer = ggml_backend_alloc_ctx_tensors(ctx, backend);
+// 5. Copy tensor data from main memory (RAM) to backend buffer
+ggml_backend_tensor_set(tensor_a, matrix_A, 0, ggml_nbytes(tensor_a));
+ggml_backend_tensor_set(tensor_b, matrix_B, 0, ggml_nbytes(tensor_b));
+// 6. Create a `ggml_cgraph` for mul_mat operation
+struct ggml_cgraph * gf = NULL;
+struct ggml_context * ctx_cgraph = NULL;
+{
+// create a temporally context to build the graph
+struct ggml_init_params params0 = {
+/*.mem_size =*/ ggml_tensor_overhead()*GGML_DEFAULT_GRAPH_SIZE + ggml_graph_overhead(),
+/*.mem_buffer =*/ NULL,
+/*.no_alloc =*/ true, // the tensors will be allocated later by ggml_gallocr_alloc_graph()
+};
+ctx_cgraph = ggml_init(params0);
+gf = ggml_new_graph(ctx_cgraph);
+// result = a*b^T
+// Pay attention: ggml_mul_mat(A, B) ==&gt; B will be transposed internally
+// the result is transposed
+struct ggml_tensor * result0 = ggml_mul_mat(ctx_cgraph, tensor_a, tensor_b);
+// Add &quot;result&quot; tensor and all of its dependencies to the cgraph
+ggml_build_forward_expand(gf, result0);
+}
+// 7. Create a `ggml_gallocr` for cgraph computation
+ggml_gallocr_t allocr = ggml_gallocr_new(ggml_backend_get_default_buffer_type(backend));
+ggml_gallocr_alloc_graph(allocr, gf);
+// (we skip step 8. Optionally: schedule the cgraph using `ggml_backend_sched`)
+// 9. Run the computation
+int n_threads = 1; // Optional: number of threads to perform some operations with multi-threading
+if (ggml_backend_is_cpu(backend)) {
+ggml_backend_cpu_set_n_threads(backend, n_threads);
+}
+ggml_backend_graph_compute(backend, gf);
+// 10. Retrieve results (output tensors)
+// in this example, output tensor is always the last tensor in the graph
+struct ggml_tensor * result = ggml_graph_node(gf, -1);
+float * result_data = malloc(ggml_nbytes(result));
+// because the tensor data is stored in device buffer, we need to copy it back to RAM
+ggml_backend_tensor_get(result, result_data, 0, ggml_nbytes(result));
+printf(&quot;mul mat (%d x %d) (transposed result):\n[&quot;, (int) result-&gt;ne[0], (int) result-&gt;ne[1]);
+for (int j = 0; j &lt; result-&gt;ne[1] /* rows */; j++) {
+if (j &gt; 0) {
+printf(&quot;\n&quot;);
+}
+for (int i = 0; i &lt; result-&gt;ne[0] /* cols */; i++) {
+printf(&quot; %.2f&quot;, result_data[j * result-&gt;ne[0] + i]);
+}
+}
+printf(&quot; ]\n&quot;);
+free(result_data);
+// 11. Free memory and exit
+ggml_free(ctx_cgraph);
+ggml_gallocr_free(allocr);
+ggml_free(ctx);
+ggml_backend_buffer_free(buffer);
+ggml_backend_free(backend);
+return 0;
+}
+Compile and run it, you should get the same result as the last example:
+cmake -B build
+cmake --build build --config Release --target demo
+# Run it
+./build/bin/demo
+Expected result:
+mul mat (4 x 3) (transposed result):
+[ 60.00 55.00 50.00 110.00
+90.00 54.00 54.00 126.00
+42.00 29.00 28.00 64.00 ]
+Printing the computational graph
+The ggml_cgraph
+represents the computational graph, which defines the order of operations that will be executed by the backend. Printing the graph can be a helpful debugging tool, especially when working with more complex models and computations.
+You can add ggml_graph_print
+to print the cgraph:
+...
+// Mark the &quot;result&quot; tensor to be computed
+ggml_build_forward_expand(gf, result0);
+// Print the cgraph
+ggml_graph_print(gf);
+Run it:
+=== GRAPH ===
+n_nodes = 1
+- 0: [ 4, 3, 1] MUL_MAT
+n_leafs = 2
+- 0: [ 2, 4] NONE leaf_0
+- 1: [ 2, 3] NONE leaf_1
+========================================
+Additionally, you can draw the cgraph as graphviz dot format:
+ggml_graph_dump_dot(gf, NULL, &quot;debug.dot&quot;);
+You can use the dot
+command or this online website to render debug.dot
+into a final image:
+Conclusion
+This article has provided an introductory overview of ggml, covering the key concepts, a simple usage example, and an example using a backend. While we&#39;ve covered the basics, there is much more to explore when it comes to ggml.
+In upcoming articles, we&#39;ll dive deeper into other ggml-related subjects, such as the GGUF format, quantization, and how the different backends are organized and utilized. Additionally, you can visit the ggml examples directory to see more advanced use cases and sample code. Stay tuned for more ggml content in the future! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

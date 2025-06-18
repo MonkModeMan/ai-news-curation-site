@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Training and Finetuning Embedding Models with Sentence Transformers v3</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Training and Finetuning Embedding Models with Sentence Transformers v3</h1> <p class="text-sm text-gray-500"> 2024/5/28 – Hugging Face Blog  <a href="https://huggingface.co/blog/train-sentence-transformers" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Training and Finetuning Embedding Models with Sentence Transformers v3
+Sentence Transformers is a Python library for using and training embedding models for a wide range of applications, such as retrieval augmented generation, semantic search, semantic textual similarity, paraphrase mining, and more. Its v3.0 update is the largest since the project&#39;s inception, introducing a new training approach. In this blogpost, I&#39;ll show you how to use it to finetune Sentence Transformer models to improve their performance on specific tasks. You can also use this method to train new Sentence Transformer models from scratch.
+Finetuning Sentence Transformers now involves several components, including datasets, loss functions, training arguments, evaluators, and the new trainer itself. I&#39;ll go through each of these components in detail and provide examples of how to use them to train effective models.
+Table of Contents
+- Why Finetune?
+- Training Components
+- Dataset
+- Loss Function
+- Training Arguments
+- Evaluator
+- Trainer
+- Multi-Dataset Training
+- Deprecation
+- Additional Resources
+Why Finetune?
+Finetuning Sentence Transformer models can significantly enhance their performance on specific tasks. This is because each task requires a unique notion of similarity. Let&#39;s consider a couple of news article headlines as an example:
+- &quot;Apple launches the new iPad&quot;
+- &quot;NVIDIA is gearing up for the next GPU generation&quot;
+Depending on the use case, we might want similar or dissimilar embeddings for these texts. For instance, a classification model for news articles could treat these texts as similar since they both belong to the Technology category. On the other hand, a semantic textual similarity or retrieval model should consider them dissimilar due to their distinct meanings.
+Training Components
+Training Sentence Transformer models involves the following components:
+- Dataset: The data used for training and evaluation.
+- Loss Function: A function that quantifies the model&#39;s performance and guides the optimization process.
+- Training Arguments (optional): Parameters that influence training performance and tracking/debugging.
+- Evaluator (optional): A tool for evaluating the model before, during, or after training.
+- Trainer: Brings together the model, dataset, loss function, and other components for training.
+Now, let&#39;s dive into each of these components in more detail.
+Dataset
+The SentenceTransformerTrainer
+uses datasets.Dataset
+or datasets.DatasetDict
+instances for training and evaluation. You can load data from the Hugging Face Datasets Hub or use local data in various formats such as CSV, JSON, Parquet, Arrow, or SQL.
+Note: Many Hugging Face datasets that work out of the box with Sentence Transformers have been tagged with sentence-transformers
+, allowing you to easily find them by browsing to https://huggingface.co/datasets?other=sentence-transformers. We strongly recommend that you browse these datasets to find training datasets that might be useful for your tasks.
+Data on Hugging Face Hub
+To load data from datasets in the Hugging Face Hub, use the load_dataset
+function:
+from datasets import load_dataset
+train_dataset = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;pair-class&quot;, split=&quot;train&quot;)
+eval_dataset = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;pair-class&quot;, split=&quot;dev&quot;)
+print(train_dataset)
+&quot;&quot;&quot;
+Dataset({
+features: [&#39;premise&#39;, &#39;hypothesis&#39;, &#39;label&#39;],
+num_rows: 942069
+})
+&quot;&quot;&quot;
+Some datasets, like sentence-transformers/all-nli
+, have multiple subsets with different data formats. You need to specify the subset name along with the dataset name.
+Local Data (CSV, JSON, Parquet, Arrow, SQL)
+If you have local data in common file formats, you can easily load it using load_dataset
+too:
+from datasets import load_dataset
+dataset = load_dataset(&quot;csv&quot;, data_files=&quot;my_file.csv&quot;)
+# or
+dataset = load_dataset(&quot;json&quot;, data_files=&quot;my_file.json&quot;)
+Local Data that requires pre-processing
+If your local data requires pre-processing, you can use datasets.Dataset.from_dict
+to initialize your dataset with a dictionary of lists:
+from datasets import Dataset
+anchors = []
+positives = []
+# Open a file, perform preprocessing, filtering, cleaning, etc.
+# and append to the lists
+dataset = Dataset.from_dict({
+&quot;anchor&quot;: anchors,
+&quot;positive&quot;: positives,
+})
+Each key in the dictionary becomes a column in the resulting dataset.
+Dataset Format
+It&#39;s crucial to ensure that your dataset format matches your chosen loss function. This involves checking two things:
+- If your loss function requires a Label (as indicated in the Loss Overview table), your dataset must have a column named &quot;label&quot; or &quot;score&quot;.
+- All columns other than &quot;label&quot; or &quot;score&quot; are considered Inputs (as indicated in the Loss Overview table). The number of these columns must match the number of valid inputs for your chosen loss function. The names of the columns don&#39;t matter, only their order matters.
+For example, if your loss function accepts (anchor, positive, negative) triplets
+, then your first, second, and third dataset columns correspond with anchor
+, positive
+, and negative
+, respectively. This means that your first and second column must contain texts that should embed closely, and that your first and third column must contain texts that should embed far apart. That is why depending on your loss function, your dataset column order matters.
+Consider a dataset with columns [&quot;text1&quot;, &quot;text2&quot;, &quot;label&quot;]
+, where the &quot;label&quot;
+column contains floating point similarity scores. This dataset can be used with CoSENTLoss
+, AnglELoss
+, and CosineSimilarityLoss
+because:
+- The dataset has a &quot;label&quot; column, which is required by these loss functions.
+- The dataset has 2 non-label columns, matching the number of inputs required by these loss functions.
+If the columns in your dataset are not ordered correctly, use Dataset.select_columns
+to reorder them. Additionally, remove any extraneous columns (e.g., sample_id
+, metadata
+, source
+, type
+) using Dataset.remove_columns
+, as they will be treated as inputs otherwise.
+Loss Function
+Loss functions measure how well a model performs on a given batch of data and guide the optimization process. The choice of loss function depends on your available data and target task. Refer to the Loss Overview for a comprehensive list of options.
+Most loss functions can be initialized with just the SentenceTransformer
+model
+that you&#39;re training:
+from datasets import load_dataset
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.losses import CoSENTLoss
+# Load a model to train/finetune
+model = SentenceTransformer(&quot;FacebookAI/xlm-roberta-base&quot;)
+# Initialize the CoSENTLoss
+# This loss requires pairs of text and a floating point similarity score as a label
+loss = CoSENTLoss(model)
+# Load an example training dataset that works with our loss function:
+train_dataset = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;pair-score&quot;, split=&quot;train&quot;)
+&quot;&quot;&quot;
+Dataset({
+features: [&#39;sentence1&#39;, &#39;sentence2&#39;, &#39;label&#39;],
+num_rows: 942069
+})
+&quot;&quot;&quot;
+Training Arguments
+The SentenceTransformersTrainingArguments
+class allows you to specify parameters that influence training performance and tracking/debugging. While optional, experimenting with these arguments can help improve training efficiency and provide insights into the training process.
+In the Sentence Transformers documentation, I&#39;ve outlined some of the most useful training arguments. I would recommend reading it in Training Overview &gt; Training Arguments.
+Here&#39;s an example of how to initialize SentenceTransformersTrainingArguments
+:
+from sentence_transformers.training_args import SentenceTransformerTrainingArguments
+args = SentenceTransformerTrainingArguments(
+# Required parameter:
+output_dir=&quot;models/mpnet-base-all-nli-triplet&quot;,
+# Optional training parameters:
+num_train_epochs=1,
+per_device_train_batch_size=16,
+per_device_eval_batch_size=16,
+warmup_ratio=0.1,
+fp16=True, # Set to False if your GPU can&#39;t handle FP16
+bf16=False, # Set to True if your GPU supports BF16
+batch_sampler=BatchSamplers.NO_DUPLICATES, # Losses using &quot;in-batch negatives&quot; benefit from no duplicates
+# Optional tracking/debugging parameters:
+eval_strategy=&quot;steps&quot;,
+eval_steps=100,
+save_strategy=&quot;steps&quot;,
+save_steps=100,
+save_total_limit=2,
+logging_steps=100,
+run_name=&quot;mpnet-base-all-nli-triplet&quot;, # Used in W&amp;B if `wandb` is installed
+)
+Note that eval_strategy
+was introduced in transformers
+version 4.41.0
+. Prior versions should use evaluation_strategy
+instead.
+Evaluator
+You can provide the SentenceTransformerTrainer
+with an eval_dataset
+to get the evaluation loss during training, but it may be useful to get more concrete metrics during training, too. For this, you can use evaluators to assess the model&#39;s performance with useful metrics before, during, or after training. You can both an eval_dataset
+and an evaluator, one or the other, or neither. They evaluate based on the eval_strategy
+and eval_steps
+Training Arguments.
+Here are the implemented Evaluators that come with Sentence Transformers:
+| Evaluator | Required Data |
+|---|---|
+BinaryClassificationEvaluator |
+Pairs with class labels |
+EmbeddingSimilarityEvaluator |
+Pairs with similarity scores |
+InformationRetrievalEvaluator |
+Queries (qid =&gt; question), Corpus (cid =&gt; document), and relevant documents (qid =&gt; set[cid]) |
+MSEEvaluator |
+Source sentences to embed with a teacher model and target sentences to embed with the student model. Can be the same texts. |
+ParaphraseMiningEvaluator |
+Mapping of IDs to sentences &amp; pairs with IDs of duplicate sentences. |
+RerankingEvaluator |
+List of {&#39;query&#39;: &#39;..&#39;, &#39;positive&#39;: [...], &#39;negative&#39;: [...]} dictionaries. |
+TranslationEvaluator |
+Pairs of sentences in two separate languages. |
+TripletEvaluator |
+(anchor, positive, negative) pairs. |
+Additionally, you can use SequentialEvaluator
+to combine multiple evaluators into one, which can then be passed to the SentenceTransformerTrainer
+.
+If you don&#39;t have the necessary evaluation data but still want to track the model&#39;s performance on common benchmarks, you can use these evaluators with data from Hugging Face:
+EmbeddingSimilarityEvaluator with STSb
+The STS Benchmark (a.k.a. STSb) is a commonly used benchmarking dataset to measure the model&#39;s understanding of semantic textual similarity of short texts like &quot;A man is feeding a mouse to a snake.&quot;.
+Feel free to browse the sentence-transformers/stsb dataset on Hugging Face.
+from datasets import load_dataset
+from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator, SimilarityFunction
+# Load the STSB dataset
+eval_dataset = load_dataset(&quot;sentence-transformers/stsb&quot;, split=&quot;validation&quot;)
+# Initialize the evaluator
+dev_evaluator = EmbeddingSimilarityEvaluator(
+sentences1=eval_dataset[&quot;sentence1&quot;],
+sentences2=eval_dataset[&quot;sentence2&quot;],
+scores=eval_dataset[&quot;score&quot;],
+main_similarity=SimilarityFunction.COSINE,
+name=&quot;sts-dev&quot;,
+)
+# Run evaluation manually:
+# print(dev_evaluator(model))
+# Later, you can provide this evaluator to the trainer to get results during training
+TripletEvaluator with AllNLI
+AllNLI is a concatenation of the SNLI and MultiNLI datasets, both of which are datasets for Natural Language Inference. This task is traditionally for determining whether two texts are an entailment, contradiction, or neither. It has since been adopted for training embedding models, as the entailing and contradictory sentences make for useful (anchor, positive, negative)
+triplets: a common format for training embedding models.
+In this snippet, it is used to evaluate how frequently the model considers the anchor text and the entailing text to be more similar than the anchor text and the contradictory text. An example text is &quot;An older man is drinking orange juice at a restaurant.&quot;.
+Feel free to browse the sentence-transformers/all-nli dataset on Hugging Face.
+from datasets import load_dataset
+from sentence_transformers.evaluation import TripletEvaluator, SimilarityFunction
+# Load triplets from the AllNLI dataset
+max_samples = 1000
+eval_dataset = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;triplet&quot;, split=f&quot;dev[:{max_samples}]&quot;)
+# Initialize the evaluator
+dev_evaluator = TripletEvaluator(
+anchors=eval_dataset[&quot;anchor&quot;],
+positives=eval_dataset[&quot;positive&quot;],
+negatives=eval_dataset[&quot;negative&quot;],
+main_distance_function=SimilarityFunction.COSINE,
+name=f&quot;all-nli-{max_samples}-dev&quot;,
+)
+# Run evaluation manually:
+# print(dev_evaluator(model))
+# Later, you can provide this evaluator to the trainer to get results during training
+Trainer
+The SentenceTransformerTrainer
+brings together the model, dataset, loss function, and other components for training:
+from datasets import load_dataset
+from sentence_transformers import (
+SentenceTransformer,
+SentenceTransformerTrainer,
+SentenceTransformerTrainingArguments,
+SentenceTransformerModelCardData,
+)
+from sentence_transformers.losses import MultipleNegativesRankingLoss
+from sentence_transformers.training_args import BatchSamplers
+from sentence_transformers.evaluation import TripletEvaluator
+# 1. Load a model to finetune with 2. (Optional) model card data
+model = SentenceTransformer(
+&quot;microsoft/mpnet-base&quot;,
+model_card_data=SentenceTransformerModelCardData(
+language=&quot;en&quot;,
+license=&quot;apache-2.0&quot;,
+model_name=&quot;MPNet base trained on AllNLI triplets&quot;,
+)
+)
+# 3. Load a dataset to finetune on
+dataset = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;triplet&quot;)
+train_dataset = dataset[&quot;train&quot;].select(range(100_000))
+eval_dataset = dataset[&quot;dev&quot;]
+test_dataset = dataset[&quot;test&quot;]
+# 4. Define a loss function
+loss = MultipleNegativesRankingLoss(model)
+# 5. (Optional) Specify training arguments
+args = SentenceTransformerTrainingArguments(
+# Required parameter:
+output_dir=&quot;models/mpnet-base-all-nli-triplet&quot;,
+# Optional training parameters:
+num_train_epochs=1,
+per_device_train_batch_size=16,
+per_device_eval_batch_size=16,
+warmup_ratio=0.1,
+fp16=True, # Set to False if GPU can&#39;t handle FP16
+bf16=False, # Set to True if GPU supports BF16
+batch_sampler=BatchSamplers.NO_DUPLICATES, # MultipleNegativesRankingLoss benefits from no duplicates
+# Optional tracking/debugging parameters:
+eval_strategy=&quot;steps&quot;,
+eval_steps=100,
+save_strategy=&quot;steps&quot;,
+save_steps=100,
+save_total_limit=2,
+logging_steps=100,
+run_name=&quot;mpnet-base-all-nli-triplet&quot;, # Used in W&amp;B if `wandb` is installed
+)
+# 6. (Optional) Create an evaluator &amp; evaluate the base model
+dev_evaluator = TripletEvaluator(
+anchors=eval_dataset[&quot;anchor&quot;],
+positives=eval_dataset[&quot;positive&quot;],
+negatives=eval_dataset[&quot;negative&quot;],
+name=&quot;all-nli-dev&quot;,
+)
+dev_evaluator(model)
+# 7. Create a trainer &amp; train
+trainer = SentenceTransformerTrainer(
+model=model,
+args=args,
+train_dataset=train_dataset,
+eval_dataset=eval_dataset,
+loss=loss,
+evaluator=dev_evaluator,
+)
+trainer.train()
+# (Optional) Evaluate the trained model on the test set, after training completes
+test_evaluator = TripletEvaluator(
+anchors=test_dataset[&quot;anchor&quot;],
+positives=test_dataset[&quot;positive&quot;],
+negatives=test_dataset[&quot;negative&quot;],
+name=&quot;all-nli-test&quot;,
+)
+test_evaluator(model)
+# 8. Save the trained model
+model.save_pretrained(&quot;models/mpnet-base-all-nli-triplet/final&quot;)
+# 9. (Optional) Push it to the Hugging Face Hub
+model.push_to_hub(&quot;mpnet-base-all-nli-triplet&quot;)
+In this example I&#39;m finetuning from microsoft/mpnet-base
+, a base model that is not yet a Sentence Transformer model. This requires more training data than finetuning an existing Sentence Transformer model, like all-mpnet-base-v2
+.
+After running this script, the tomaarsen/mpnet-base-all-nli-triplet model was uploaded for me. The triplet accuracy using cosine similarity, i.e. what percentage of the time cosine_similarity(anchor, positive) &gt; cosine_similarity(anchor, negative)
+is 90.04% for the development set and 91.5% for the testing set! For reference, the microsoft/mpnet-base
+model scored only 68.32% on the dev set before training.
+All of this information is stored in the automatically generated model card, including the base model, language, license, evaluation results, training &amp; evaluation dataset info, hyperparameters, training logs, and more. Without any effort, your uploaded models should contain all the information that your potential users would need to determine whether your model is suitable for them.
+Callbacks
+The Sentence Transformers trainer supports various transformers.TrainerCallback
+subclasses, including:
+WandbCallback
+for logging training metrics to W&amp;B ifwandb
+is installedTensorBoardCallback
+for logging training metrics to TensorBoard iftensorboard
+is accessibleCodeCarbonCallback
+for tracking carbon emissions during training ifcodecarbon
+is installed
+These are automatically used without you having to specify anything, as long as the required dependency is installed.
+Refer to the Transformers Callbacks documentation for more information on these callbacks and how to create your own.
+Multi-Dataset Training
+Top-performing models are often trained using multiple datasets simultaneously. The SentenceTransformerTrainer
+simplifies this process by allowing you to train with multiple datasets without converting them to the same format. You can even apply different loss functions to each dataset. Here are the steps for multi-dataset training:
+- Use a dictionary of
+datasets.Dataset
+instances (or adatasets.DatasetDict
+) as thetrain_dataset
+andeval_dataset
+. - (Optional) Use a dictionary of loss functions mapping dataset names to losses if you want to use different losses for different datasets.
+Each training/evaluation batch will contain samples from only one of the datasets. The order in which batches are sampled from the multiple datasets is determined by the MultiDatasetBatchSamplers
+enum, which can be passed to the SentenceTransformersTrainingArguments
+via multi_dataset_batch_sampler
+. The valid options are:
+MultiDatasetBatchSamplers.ROUND_ROBIN
+: Samples from each dataset in a round-robin fashion until one is exhausted. This strategy may not use all samples from each dataset, but it ensures equal sampling from each dataset.MultiDatasetBatchSamplers.PROPORTIONAL
+(default): Samples from each dataset proportionally to its size. This strategy ensures that all samples from each dataset are used, and larger datasets are sampled from more frequently.
+Multi-task training has proven to be highly effective. For instance, Huang et al. 2024 employed MultipleNegativesRankingLoss
+, CoSENTLoss
+, and a variation of MultipleNegativesRankingLoss
+without in-batch negatives and only hard negatives to achieve state-of-the-art performance on Chinese. They also applied MatryoshkaLoss
+to enable the model to produce Matryoshka Embeddings.
+Here&#39;s an example of multi-dataset training:
+from datasets import load_dataset
+from sentence_transformers import SentenceTransformer, SentenceTransformerTrainer
+from sentence_transformers.losses import CoSENTLoss, MultipleNegativesRankingLoss, SoftmaxLoss
+# 1. Load a model to finetune
+model = SentenceTransformer(&quot;bert-base-uncased&quot;)
+# 2. Loadseveral Datasets to train with
+# (anchor, positive)
+all_nli_pair_train = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;pair&quot;, split=&quot;train[:10000]&quot;)
+# (premise, hypothesis) + label
+all_nli_pair_class_train = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;pair-class&quot;, split=&quot;train[:10000]&quot;)
+# (sentence1, sentence2) + score
+all_nli_pair_score_train = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;pair-score&quot;, split=&quot;train[:10000]&quot;)
+# (anchor, positive, negative)
+all_nli_triplet_train = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;triplet&quot;, split=&quot;train[:10000]&quot;)
+# (sentence1, sentence2) + score
+stsb_pair_score_train = load_dataset(&quot;sentence-transformers/stsb&quot;, split=&quot;train[:10000]&quot;)
+# (anchor, positive)
+quora_pair_train = load_dataset(&quot;sentence-transformers/quora-duplicates&quot;, &quot;pair&quot;, split=&quot;train[:10000]&quot;)
+# (query, answer)
+natural_questions_train = load_dataset(&quot;sentence-transformers/natural-questions&quot;, split=&quot;train[:10000]&quot;)
+# Combine all datasets into a dictionary with dataset names to datasets
+train_dataset = {
+&quot;all-nli-pair&quot;: all_nli_pair_train,
+&quot;all-nli-pair-class&quot;: all_nli_pair_class_train,
+&quot;all-nli-pair-score&quot;: all_nli_pair_score_train,
+&quot;all-nli-triplet&quot;: all_nli_triplet_train,
+&quot;stsb&quot;: stsb_pair_score_train,
+&quot;quora&quot;: quora_pair_train,
+&quot;natural-questions&quot;: natural_questions_train,
+}
+# 3. Load several Datasets to evaluate with
+# (anchor, positive, negative)
+all_nli_triplet_dev = load_dataset(&quot;sentence-transformers/all-nli&quot;, &quot;triplet&quot;, split=&quot;dev&quot;)
+# (sentence1, sentence2, score)
+stsb_pair_score_dev = load_dataset(&quot;sentence-transformers/stsb&quot;, split=&quot;validation&quot;)
+# (anchor, positive)
+quora_pair_dev = load_dataset(&quot;sentence-transformers/quora-duplicates&quot;, &quot;pair&quot;, split=&quot;train[10000:11000]&quot;)
+# (query, answer)
+natural_questions_dev = load_dataset(&quot;sentence-transformers/natural-questions&quot;, split=&quot;train[10000:11000]&quot;)
+# Use a dictionary for the evaluation dataset too, or just use one dataset or none at all
+eval_dataset = {
+&quot;all-nli-triplet&quot;: all_nli_triplet_dev,
+&quot;stsb&quot;: stsb_pair_score_dev,
+&quot;quora&quot;: quora_pair_dev,
+&quot;natural-questions&quot;: natural_questions_dev,
+}
+# 4. Load several loss functions to train with
+# (anchor, positive), (anchor, positive, negative)
+mnrl_loss = MultipleNegativesRankingLoss(model)
+# (sentence_A, sentence_B) + class
+softmax_loss = SoftmaxLoss(model)
+# (sentence_A, sentence_B) + score
+cosent_loss = CoSENTLoss(model)
+# Create a mapping with dataset names to loss functions, so the trainer knows which loss to apply where
+# Note: You can also just use one loss if all your training/evaluation datasets use the same loss
+losses = {
+&quot;all-nli-pair&quot;: mnrl_loss,
+&quot;all-nli-pair-class&quot;: softmax_loss,
+&quot;all-nli-pair-score&quot;: cosent_loss,
+&quot;all-nli-triplet&quot;: mnrl_loss,
+&quot;stsb&quot;: cosent_loss,
+&quot;quora&quot;: mnrl_loss,
+&quot;natural-questions&quot;: mnrl_loss,
+}
+# 5. Define a simple trainer, although it&#39;s recommended to use one with args &amp; evaluators
+trainer = SentenceTransformerTrainer(
+model=model,
+train_dataset=train_dataset,
+eval_dataset=eval_dataset,
+loss=losses,
+)
+trainer.train()
+# 6. Save the trained model and optionally push it to the Hugging Face Hub
+model.save_pretrained(&quot;bert-base-all-nli-stsb-quora-nq&quot;)
+model.push_to_hub(&quot;bert-base-all-nli-stsb-quora-nq&quot;)
+Deprecation
+Prior to the Sentence Transformer v3 release, all models would be trained using the SentenceTransformer.fit
+method. Rather than deprecating this method, starting from v3.0, this method will use the SentenceTransformerTrainer
+behind the scenes. This means that your old training code should still work, and should even be upgraded with the new features such as multi-gpu training, loss logging, etc. That said, the new training approach is much more powerful, so it is recommended to write new training scripts using the new approach.
+Additional Resources
+Training Examples
+The following pages contain training examples with explanations as well as links to code. We recommend that you browse through these to familiarize yourself with the training loop:
+- Semantic Textual Similarity
+- Natural Language Inference
+- Paraphrases
+- Quora Duplicate Questions
+- Matryoshka Embeddings
+- Adaptive Layer Models
+- Multilingual Models
+- Model Distillation
+- Augmented Sentence Transformers
+Documentation
+Additionally, the following pages may be useful to learn more about Sentence Transformers:
+- Installation
+- Quickstart
+- Usage
+- Pretrained Models
+- Training Overview (This blogpost is a distillation of the Training Overiew documentation)
+- Dataset Overview
+- Loss Overview
+- API Reference
+And lastly, here are some advanced pages that might interest you: </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

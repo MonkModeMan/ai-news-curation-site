@@ -1,0 +1,41 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Experiment with Gemini 2.0 Flash native image generation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Experiment with Gemini 2.0 Flash native image generation</h1> <p class="text-sm text-gray-500"> 2025/3/12 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/experiment-with-gemini-20-flash-native-image-generation/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> In December we first introduced native image output in Gemini 2.0 Flash to trusted testers. Today, we&#39;re making it available for developer experimentation across all regions currently supported by Google AI Studio. You can test this new capability using an experimental version of Gemini 2.0 Flash (gemini-2.0-flash-exp) in Google AI Studio and via the Gemini API.
+Gemini 2.0 Flash combines multimodal input, enhanced reasoning, and natural language understanding to create images.
+Here are some examples of where 2.0 Flash’s multimodal outputs shine:
+Use Gemini 2.0 Flash to tell a story and it will illustrate it with pictures, keeping the characters and settings consistent throughout. Give it feedback and the model will retell the story or change the style of its drawings.
+Gemini 2.0 Flash helps you edit images through many turns of a natural language dialogue, great for iterating towards a perfect image, or to explore different ideas together.
+Unlike many other image generation models, Gemini 2.0 Flash leverages world knowledge and enhanced reasoning to create the right image. This makes it perfect for creating detailed imagery that’s realistic–like illustrating a recipe. While it strives for accuracy, like all language models, its knowledge is broad and general, not absolute or complete.
+Most image generation models struggle to accurately render long sequences of text, often resulting in poorly formatted or illegible characters, or misspellings. Internal benchmarks show that 2.0 Flash has stronger rendering compared to leading competitive models, and great for creating advertisements, social posts, or even invitations.
+Get started with Gemini 2.0 Flash via the Gemini API. Read more about image generation in our docs.
+from google import genai
+from google.genai import types
+client = genai.Client(api_key=&quot;GEMINI_API_KEY&quot;)
+response = client.models.generate_content(
+model=&quot;gemini-2.0-flash-exp&quot;,
+contents=(
+&quot;Generate a story about a cute baby turtle in a 3d digital art style. &quot;
+&quot;For each scene, generate an image.&quot;
+),
+config=types.GenerateContentConfig(
+response_modalities=[&quot;Text&quot;, &quot;Image&quot;]
+),
+)
+Whether you are building AI agents, developing apps with beautiful visuals like illustrated interactive stories, or brainstorming visual ideas in conversation, Gemini 2.0 Flash allows you to add text and image generation with just a single model. We&#39;re eager to see what developers create with native image output and your feedback will help us finalize a production-ready version soon. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

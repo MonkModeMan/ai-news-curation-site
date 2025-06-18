@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Gradio-Lite: Serverless Gradio Running Entirely in Your Browser</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Gradio-Lite: Serverless Gradio Running Entirely in Your Browser</h1> <p class="text-sm text-gray-500"> 2023/10/19 – Hugging Face Blog  <a href="https://huggingface.co/blog/gradio-lite" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Gradio-Lite: Serverless Gradio Running Entirely in Your Browser
+Gradio is a popular Python library for creating interactive machine learning apps. Traditionally, Gradio applications have relied on server-side infrastructure to run, which can be a hurdle for developers who need to host their applications.
+Enter Gradio-lite (@gradio/lite
+): a library that leverages Pyodide to bring Gradio directly to your browser. In this blog post, we&#39;ll explore what @gradio/lite
+is, go over example code, and discuss the benefits it offers for running Gradio applications.
+What is @gradio/lite
+?
+@gradio/lite
+is a JavaScript library that enables you to run Gradio applications directly within your web browser. It achieves this by utilizing Pyodide, a Python runtime for WebAssembly, which allows Python code to be executed in the browser environment. With @gradio/lite
+, you can write regular Python code for your Gradio applications, and they will run seamlessly in the browser without the need for server-side infrastructure.
+Getting Started
+Let&#39;s build a &quot;Hello World&quot; Gradio app in @gradio/lite
+1. Import JS and CSS
+Start by creating a new HTML file, if you don&#39;t have one already. Importing the JavaScript and CSS corresponding to the @gradio/lite
+package by using the following code:
+&lt;html&gt;
+&lt;head&gt;
+&lt;script type=&quot;module&quot; crossorigin src=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.css&quot; /&gt;
+&lt;/head&gt;
+&lt;/html&gt;
+Note that you should generally use the latest version of @gradio/lite
+that is available. You can see the versions available here.
+2. Create the &lt;gradio-lite&gt;
+tags
+Somewhere in the body of your HTML page (wherever you&#39;d like the Gradio app to be rendered), create opening and closing &lt;gradio-lite&gt;
+tags.
+&lt;html&gt;
+&lt;head&gt;
+&lt;script type=&quot;module&quot; crossorigin src=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.css&quot; /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;gradio-lite&gt;
+&lt;/gradio-lite&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+Note: you can add the theme
+attribute to the &lt;gradio-lite&gt;
+tag to force the theme to be dark or light (by default, it respects the system theme). E.g.
+&lt;gradio-lite theme=&quot;dark&quot;&gt;
+...
+&lt;/gradio-lite&gt;
+3. Write your Gradio app inside of the tags
+Now, write your Gradio app as you would normally, in Python! Keep in mind that since this is Python, whitespace and indentations matter.
+&lt;html&gt;
+&lt;head&gt;
+&lt;script type=&quot;module&quot; crossorigin src=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.css&quot; /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;gradio-lite&gt;
+import gradio as gr
+def greet(name):
+return &quot;Hello, &quot; + name + &quot;!&quot;
+gr.Interface(greet, &quot;textbox&quot;, &quot;textbox&quot;).launch()
+&lt;/gradio-lite&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+And that&#39;s it! You should now be able to open your HTML page in the browser and see the Gradio app rendered! Note that it may take a little while for the Gradio app to load initially since Pyodide can take a while to install in your browser.
+Note on debugging: to see any errors in your Gradio-lite application, open the inspector in your web browser. All errors (including Python errors) will be printed there.
+More Examples: Adding Additional Files and Requirements
+What if you want to create a Gradio app that spans multiple files? Or that has custom Python requirements? Both are possible with @gradio/lite
+!
+Multiple Files
+Adding multiple files within a @gradio/lite
+app is very straightforward: use the &lt;gradio-file&gt;
+tag. You can have as many &lt;gradio-file&gt;
+tags as you want, but each one needs to have a name
+attribute and the entry point to your Gradio app should have the entrypoint
+attribute.
+Here&#39;s an example:
+&lt;gradio-lite&gt;
+&lt;gradio-file name=&quot;app.py&quot; entrypoint&gt;
+import gradio as gr
+from utils import add
+demo = gr.Interface(fn=add, inputs=[&quot;number&quot;, &quot;number&quot;], outputs=&quot;number&quot;)
+demo.launch()
+&lt;/gradio-file&gt;
+&lt;gradio-file name=&quot;utils.py&quot; &gt;
+def add(a, b):
+return a + b
+&lt;/gradio-file&gt;
+&lt;/gradio-lite&gt;
+Additional Requirements
+If your Gradio app has additional requirements, it is usually possible to install them in the browser using micropip. We&#39;ve created a wrapper to make this paticularly convenient: simply list your requirements in the same syntax as a requirements.txt
+and enclose them with &lt;gradio-requirements&gt;
+tags.
+Here, we install transformers_js_py
+to run a text classification model directly in the browser!
+&lt;gradio-lite&gt;
+&lt;gradio-requirements&gt;
+transformers_js_py
+&lt;/gradio-requirements&gt;
+&lt;gradio-file name=&quot;app.py&quot; entrypoint&gt;
+from transformers_js import import_transformers_js
+import gradio as gr
+transformers = await import_transformers_js()
+pipeline = transformers.pipeline
+pipe = await pipeline(&#39;sentiment-analysis&#39;)
+async def classify(text):
+return await pipe(text)
+demo = gr.Interface(classify, &quot;textbox&quot;, &quot;json&quot;)
+demo.launch()
+&lt;/gradio-file&gt;
+&lt;/gradio-lite&gt;
+Try it out: You can see this example running in this Hugging Face Static Space, which lets you host static (serverless) web applications for free. Visit the page and you&#39;ll be able to run a machine learning model without internet access!
+Benefits of Using @gradio/lite
+1. Serverless Deployment
+The primary advantage of @gradio/lite is that it eliminates the need for server infrastructure. This simplifies deployment, reduces server-related costs, and makes it easier to share your Gradio applications with others.
+2. Low Latency
+By running in the browser, @gradio/lite offers low-latency interactions for users. There&#39;s no need for data to travel to and from a server, resulting in faster responses and a smoother user experience.
+3. Privacy and Security
+Since all processing occurs within the user&#39;s browser, @gradio/lite
+enhances privacy and security. User data remains on their device, providing peace of mind regarding data handling.
+Limitations
+Currently, the biggest limitation in using
+@gradio/lite
+is that your Gradio apps will generally take more time (usually 5-15 seconds) to load initially in the browser. This is because the browser needs to load the Pyodide runtime before it can render Python code.Not every Python package is supported by Pyodide. While
+gradio
+and many other popular packages (includingnumpy
+,scikit-learn
+, andtransformers-js
+) can be installed in Pyodide, if your app has many dependencies, its worth checking whether the dependencies are included in Pyodide, or can be installed withmicropip
+.
+Try it out!
+You can immediately try out @gradio/lite
+by copying and pasting this code in a local index.html
+file and opening it with your browser:
+&lt;html&gt;
+&lt;head&gt;
+&lt;script type=&quot;module&quot; crossorigin src=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@gradio/lite/dist/lite.css&quot; /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;gradio-lite&gt;
+import gradio as gr
+def greet(name):
+return &quot;Hello, &quot; + name + &quot;!&quot;
+gr.Interface(greet, &quot;textbox&quot;, &quot;textbox&quot;).launch()
+&lt;/gradio-lite&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+We&#39;ve also created a playground on the Gradio website that allows you to interactively edit code and see the results immediately!
+Playground: https://www.gradio.app/playground </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

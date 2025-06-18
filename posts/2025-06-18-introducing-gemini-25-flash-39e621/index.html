@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing Gemini 2.5 Flash</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing Gemini 2.5 Flash</h1> <p class="text-sm text-gray-500"> 2025/4/17 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/introducing-gemini-2-5-flash/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Today we are rolling out an early version of Gemini 2.5 Flash in preview through the Gemini API via Google AI Studio and Vertex AI. Building upon the popular foundation of 2.0 Flash, this new version delivers a major upgrade in reasoning capabilities, while still prioritizing speed and cost. Gemini 2.5 Flash is our first fully hybrid reasoning model, giving developers the ability to turn thinking on or off. The model also allows developers to set thinking budgets to find the right tradeoff between quality, cost, and latency. Even with thinking off, developers can maintain the fast speeds of 2.0 Flash, and improve performance.
+Our Gemini 2.5 models are thinking models, capable of reasoning through their thoughts before responding. Instead of immediately generating an output, the model can perform a &quot;thinking&quot; process to better understand the prompt, break down complex tasks, and plan a response. On complex tasks that require multiple steps of reasoning (like solving math problems or analyzing research questions), the thinking process allows the model to arrive at more accurate and comprehensive answers. In fact, Gemini 2.5 Flash performs strongly on Hard Prompts in LMArena, second only to 2.5 Pro.
+2.5 Flash continues to lead as the model with the best price-to-performance ratio.
+We know that different use cases have different tradeoffs in quality, cost, and latency. To give developers flexibility, we’ve enabled setting a thinking budget that offers fine-grained control over the maximum number of tokens a model can generate while thinking. A higher budget allows the model to reason further to improve quality. Importantly, though, the budget sets a cap on how much 2.5 Flash can think, but the model does not use the full budget if the prompt does not require it.
+The model is trained to know how long to think for a given prompt, and therefore automatically decides how much to think based on the perceived task complexity.
+If you want to keep the lowest cost and latency while still improving performance over 2.0 Flash, set the thinking budget to 0. You can also choose to set a specific token budget for the thinking phase using a parameter in the API or the slider in Google AI Studio and in Vertex AI. The budget can range from 0 to 24576 tokens for 2.5 Flash.
+The following prompts demonstrate how much reasoning may be used in the 2.5 Flash’s default mode.
+Example 1: “Thank you” in Spanish
+Example 2: How many provinces does Canada have?
+Example 1: You roll two dice. What’s the probability they add up to 7?
+Example 2: My gym has pickup hours for basketball between 9-3pm on MWF and between 2-8pm on Tuesday and Saturday. If I work 9-6pm 5 days a week and want to play 5 hours of basketball on weekdays, create a schedule for me to make it all work.
+Example 1: A cantilever beam of length L=3m has a rectangular cross-section (width b=0.1m, height h=0.2m) and is made of steel (E=200 GPa). It is subjected to a uniformly distributed load w=5 kN/m along its entire length and a point load P=10 kN at its free end. Calculate the maximum bending stress (σ_max).
+Example 2: Write a function evaluate_cells(cells: Dict[str, str]) -&gt; Dict[str, float]
+that computes the values of spreadsheet cells.
+Each cell contains:
+&quot;3&quot;
+)&quot;=A1 + B1 * 2&quot;
+using +
+, -
+, *
+,/
+and other cells.Requirements:
+*/
+before +-
+).ValueError(&quot;Cycle detected at &lt;cell&gt;&quot;)
+.eval()
+. Use only built-in libraries.Gemini 2.5 Flash with thinking capabilities is now available in preview via the Gemini API in Google AI Studio and in Vertex AI, and in a dedicated dropdown in the Gemini app. We encourage you to experiment with the thinking_budget
+parameter and explore how controllable reasoning can help you solve more complex problems.
+from google import genai
+client = genai.Client(api_key=&quot;GEMINI_API_KEY&quot;)
+response = client.models.generate_content(
+model=&quot;gemini-2.5-flash-preview-04-17&quot;,
+contents=&quot;You roll two dice. What’s the probability they add up to 7?&quot;,
+config=genai.types.GenerateContentConfig(
+thinking_config=genai.types.ThinkingConfig(
+thinking_budget=1024
+)
+)
+)
+print(response.text)
+Find detailed API references and thinking guides in our developer docs or get started with code examples from the Gemini Cookbook.
+We will continue to improve Gemini 2.5 Flash, with more coming soon, before we make it generally available for full production use.
+*Model pricing is sourced from Artificial Analysis &amp; Company Documentation </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

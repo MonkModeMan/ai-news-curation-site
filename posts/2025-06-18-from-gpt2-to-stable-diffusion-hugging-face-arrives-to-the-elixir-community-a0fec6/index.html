@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>From GPT2 to Stable Diffusion: Hugging Face arrives to the Elixir community</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 From GPT2 to Stable Diffusion: Hugging Face arrives to the Elixir community</h1> <p class="text-sm text-gray-500"> 2022/12/9 – Hugging Face Blog  <a href="https://huggingface.co/blog/elixir-bumblebee" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> From GPT2 to Stable Diffusion: Hugging Face arrives to the Elixir community
+The Elixir community is glad to announce the arrival of several Neural Networks models, from GPT2 to Stable Diffusion, to Elixir. This is possible thanks to the just announced Bumblebee library, which is an implementation of Hugging Face Transformers in pure Elixir.
+To help anyone get started with those models, the team behind Livebook - a computational notebook platform for Elixir - created a collection of &quot;Smart cells&quot; that allows developers to scaffold different Neural Network tasks in only 3 clicks. You can watch my video announcement to learn more:
+Thanks to the concurrency and distribution support in the Erlang Virtual Machine, which Elixir runs on, developers can embed and serve these models as part of their existing Phoenix web applications, integrate into their data processing pipelines with Broadway, and deploy them alongside their Nerves embedded systems - without a need for 3rd-party dependencies. In all scenarios, Bumblebee models compile to both CPU and GPU.
+Background
+The efforts to bring Machine Learning to Elixir started almost 2 years ago with the Numerical Elixir (Nx) project. The Nx project implements multi-dimensional tensors alongside &quot;numerical definitions&quot;, a subset of Elixir which can be compiled to the CPU/GPU. Instead of reinventing the wheel, Nx uses bindings for Google XLA (EXLA) and Libtorch (Torchx) for CPU/GPU compilation.
+Several other projects were born from the Nx initiative. Axon brings functional composable Neural Networks to Elixir, taking inspiration from projects such as Flax and PyTorch Ignite. The Explorer project borrows from dplyr and Rust&#39;s Polars to provide expressive and performant dataframes to the Elixir community.
+Bumblebee and Tokenizers are our most recent releases. We are thankful to Hugging Face for enabling collaborative Machine Learning across communities and tools, which played an essential role in bringing the Elixir ecosystem up to speed.
+Next, we plan to focus on training and transfer learning of Neural Networks in Elixir, allowing developers to augment and specialize pre-trained models according to the needs of their businesses and applications. We also hope to publish more on our development of traditional Machine Learning algorithms.
+Your turn
+If you want to give Bumblebee a try, you can:
+Download Livebook v0.8 and automatically generate &quot;Neural Networks tasks&quot; from the &quot;+ Smart&quot; cell menu inside your notebooks. We are currently working on running Livebook on additional platforms and Spaces (stay tuned! 😉).
+We have also written single-file Phoenix applications as examples of Bumblebee models inside your Phoenix (+ LiveView) apps. Those should provide the necessary building blocks to integrate them as part of your production app.
+For a more hands on approach, read some of our notebooks.
+If you want to help us build the Machine Learning ecosystem for Elixir, check out the projects above, and give them a try. There are many interesting areas, from compiler development to model building. For instance, pull requests that bring more models and architectures to Bumblebee are certainly welcome. The future is concurrent, distributed, and fun! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

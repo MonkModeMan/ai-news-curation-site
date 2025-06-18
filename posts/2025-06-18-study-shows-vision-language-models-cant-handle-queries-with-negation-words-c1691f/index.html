@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Study shows vision-language models can’t handle queries with negation words</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Study shows vision-language models can’t handle queries with negation words</h1> <p class="text-sm text-gray-500"> 2025/5/14 – MIT  <a href="https://news.mit.edu/2025/study-shows-vision-language-models-cant-handle-negation-words-queries-0514" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Imagine a radiologist examining a chest X-ray from a new patient. She notices the patient has swelling in the tissue but does not have an enlarged heart. Looking to speed up diagnosis, she might use a vision-language machine-learning model to search for reports from similar patients.
+But if the model mistakenly identifies reports with both conditions, the most likely diagnosis could be quite different: If a patient has tissue swelling and an enlarged heart, the condition is very likely to be cardiac related, but with no enlarged heart there could be several underlying causes.
+In a new study, MIT researchers have found that vision-language models are extremely likely to make such a mistake in real-world situations because they don’t understand negation — words like “no” and “doesn’t” that specify what is false or absent.
+“Those negation words can have a very significant impact, and if we are just using these models blindly, we may run into catastrophic consequences,” says Kumail Alhamoud, an MIT graduate student and lead author of this study.
+The researchers tested the ability of vision-language models to identify negation in image captions. The models often performed as well as a random guess. Building on those findings, the team created a dataset of images with corresponding captions that include negation words describing missing objects.
+They show that retraining a vision-language model with this dataset leads to performance improvements when a model is asked to retrieve images that do not contain certain objects. It also boosts accuracy on multiple choice question answering with negated captions.
+But the researchers caution that more work is needed to address the root causes of this problem. They hope their research alerts potential users to a previously unnoticed shortcoming that could have serious implications in high-stakes settings where these models are currently being used, from determining which patients receive certain treatments to identifying product defects in manufacturing plants.
+“This is a technical paper, but there are bigger issues to consider. If something as fundamental as negation is broken, we shouldn’t be using large vision/language models in many of the ways we are using them now — without intensive evaluation,” says senior author Marzyeh Ghassemi, an associate professor in the Department of Electrical Engineering and Computer Science (EECS) and a member of the Institute of Medical Engineering Sciences and the Laboratory for Information and Decision Systems.
+Ghassemi and Alhamoud are joined on the paper by Shaden Alshammari, an MIT graduate student; Yonglong Tian of OpenAI; Guohao Li, a former postdoc at Oxford University; Philip H.S. Torr, a professor at Oxford; and Yoon Kim, an assistant professor of EECS and a member of the Computer Science and Artificial Intelligence Laboratory (CSAIL) at MIT. The research will be presented at Conference on Computer Vision and Pattern Recognition.
+Neglecting negation
+Vision-language models (VLM) are trained using huge collections of images and corresponding captions, which they learn to encode as sets of numbers, called vector representations. The models use these vectors to distinguish between different images.
+A VLM utilizes two separate encoders, one for text and one for images, and the encoders learn to output similar vectors for an image and its corresponding text caption.
+“The captions express what is in the images — they are a positive label. And that is actually the whole problem. No one looks at an image of a dog jumping over a fence and captions it by saying ‘a dog jumping over a fence, with no helicopters,’” Ghassemi says.
+Because the image-caption datasets don’t contain examples of negation, VLMs never learn to identify it.
+To dig deeper into this problem, the researchers designed two benchmark tasks that test the ability of VLMs to understand negation.
+For the first, they used a large language model (LLM) to re-caption images in an existing dataset by asking the LLM to think about related objects not in an image and write them into the caption. Then they tested models by prompting them with negation words to retrieve images that contain certain objects, but not others.
+For the second task, they designed multiple choice questions that ask a VLM to select the most appropriate caption from a list of closely related options. These captions differ only by adding a reference to an object that doesn’t appear in the image or negating an object that does appear in the image.
+The models often failed at both tasks, with image retrieval performance dropping by nearly 25 percent with negated captions. When it came to answering multiple choice questions, the best models only achieved about 39 percent accuracy, with several models performing at or even below random chance.
+One reason for this failure is a shortcut the researchers call affirmation bias — VLMs ignore negation words and focus on objects in the images instead.
+“This does not just happen for words like ‘no’ and ‘not.’ Regardless of how you express negation or exclusion, the models will simply ignore it,” Alhamoud says.
+This was consistent across every VLM they tested.
+“A solvable problem”
+Since VLMs aren’t typically trained on image captions with negation, the researchers developed datasets with negation words as a first step toward solving the problem.
+Using a dataset with 10 million image-text caption pairs, they prompted an LLM to propose related captions that specify what is excluded from the images, yielding new captions with negation words.
+They had to be especially careful that these synthetic captions still read naturally, or it could cause a VLM to fail in the real world when faced with more complex captions written by humans.
+They found that finetuning VLMs with their dataset led to performance gains across the board. It improved models’ image retrieval abilities by about 10 percent, while also boosting performance in the multiple-choice question answering task by about 30 percent.
+“But our solution is not perfect. We are just recaptioning datasets, a form of data augmentation. We haven’t even touched how these models work, but we hope this is a signal that this is a solvable problem and others can take our solution and improve it,” Alhamoud says.
+At the same time, he hopes their work encourages more users to think about the problem they want to use a VLM to solve and design some examples to test it before deployment.
+In the future, the researchers could expand upon this work by teaching VLMs to process text and images separately, which may improve their ability to understand negation. In addition, they could develop additional datasets that include image-caption pairs for specific applications, such as health care. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

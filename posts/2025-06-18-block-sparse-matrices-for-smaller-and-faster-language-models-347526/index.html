@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Block Sparse Matrices for Smaller and Faster Language Models</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Block Sparse Matrices for Smaller and Faster Language Models</h1> <p class="text-sm text-gray-500"> 2020/9/10 – Hugging Face Blog  <a href="https://huggingface.co/blog/pytorch_block_sparse" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Block Sparse Matrices for Smaller and Faster Language Models
+Saving space and time, one zero at a time
+In previous blog posts we introduced sparse matrices and what they could do to improve neural networks.
+The basic assumption is that full dense layers are often overkill and can be pruned without a significant loss in precision. In some cases sparse linear layers can even improve precision or/and generalization.
+The main issue is that currently available code that supports sparse algebra computation is severely lacking efficiency. We are also still waiting for official PyTorch support.
+That&#39;s why we ran out of patience and took some time this summer to address this &quot;lacuna&quot;. Today, we are excited to release the extension pytorch_block_sparse.
+By itself, or even better combined with other methods like distillation and quantization, this library enables networks which are both smaller and faster, something Hugging Face considers crucial to let anybody use neural networks in production at low cost, and to improve the experience for the end user.
+Usage
+The provided BlockSparseLinear
+module is a drop in replacement for torch.nn.Linear
+, and it is trivial to use
+it in your models:
+# from torch.nn import Linear
+from pytorch_block_sparse import BlockSparseLinear
+...
+# self.fc = nn.Linear(1024, 256)
+self.fc = BlockSparseLinear(1024, 256, density=0.1)
+The extension also provides a BlockSparseModelPatcher
+that allows to modify an existing model &quot;on the fly&quot;,
+which is shown in this example notebook.
+Such a model can then be trained as usual, without any change in your model source code.
+NVIDIA CUTLASS
+This extension is based on the cutlass tilesparse proof of concept by Yulhwa Kim.
+It is using C++ CUDA templates for block-sparse matrix multiplication based on CUTLASS.
+CUTLASS is a collection of CUDA C++ templates for implementing high-performance CUDA kernels. With CUTLASS, approching cuBLAS performance on custom kernels is possible without resorting to assembly language code.
+The latest versions include all the Ampere Tensor Core primitives, providing x10 or more speedups with a limited loss of precision. Next versions of pytorch_block_sparse will make use of these primitives, as block sparsity is 100% compatible with Tensor Cores requirements.
+Performance
+At the current stage of the library, the performances for sparse matrices are roughly two times slower than their cuBLAS optimized dense counterpart, and we are confident that we can improve this in the future.
+This is a huge improvement on PyTorch sparse matrices: their current implementation is an order of magnitude slower than the dense one.
+But the more important point is that the performance gain of using sparse matrices grows with the sparsity, so a 75% sparse matrix is roughly 2x faster than the dense equivalent.
+The memory savings are even more significant: for 75% sparsity, memory consumption is reduced by 4x as you would expect.
+Future work
+Being able to efficiently train block-sparse linear layers was just the first step. The sparsity pattern is currenly fixed at initialization, and of course optimizing it during learning will yield large improvements.
+So in future versions, you can expect tools to measure the &quot;usefulness&quot; of parameters to be able to optimize the sparsity pattern. NVIDIA Ampere 50% sparse pattern within blocks will probably yield another significant performance gain, just as upgrading to more recent versions of CUTLASS does.
+So, stay tuned for more sparsity goodness in a near future! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

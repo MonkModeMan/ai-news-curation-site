@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Don&#39;t repeat yourself - 🤗 Transformers Design Philosophy</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Don&#39;t repeat yourself - 🤗 Transformers Design Philosophy</h1> <p class="text-sm text-gray-500"> 2022/4/5 – Hugging Face Blog  <a href="https://huggingface.co/blog/transformers-design-philosophy" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Don&#39;t Repeat Yourself*
+Designing open-source libraries for modern machine learning
+🤗 Transformers Design Philosophy
+&quot;Don&#39;t repeat yourself&quot;, or DRY, is a well-known principle of software development. The principle originates from &quot;The pragmatic programmer&quot;, one of the most read books on code design. The principle&#39;s simple message makes obvious sense: Don&#39;t rewrite a logic that already exists somewhere else. This ensures the code remains in sync, making it easier to maintain and more robust. Any change to this logical pattern will uniformly affect all of its dependencies.
+At first glance, the design of Hugging Face&#39;s Transformers library couldn&#39;t be more contrary to the DRY principle. Code for the attention mechanism is more or less copied over 50 times into different model files. Sometimes code of the whole BERT model is copied into other model files. We often force new model contributions identical to existing models - besides a small logical tweak - to copy all of the existing code. Why do we do this? Are we just too lazy or overwhelmed to centralize all logical pieces into one place?
+No, we are not lazy - it&#39;s a very conscious decision not to apply the DRY design principle to the Transformers library. Instead, we decided to adopt a different design principle which we like to call the single model file policy. The single model file policy states that all code necessary for the forward pass of a model is in one and only one file - called the model file. If a reader wants to understand how BERT works for inference, she should only have to look into BERT&#39;s modeling_bert.py
+file.
+We usually reject any attempt to abstract identical sub-components of different models into a new centralized place. We don&#39;t want to have a attention_layer.py
+that includes all possible attention mechanisms. Again why do we do this?
+In short the reasons are:
+- 1. Transformers is built by and for the open-source community.
+- 2. Our product are models and our customers are users reading or tweaking model code.
+- 3. The field of machine learning evolves extremely fast.
+- 4. Machine Learning models are static.
+1. Built by and for the open-source community
+Transformers is built to actively incentivize external contributions. A contribution is often either a bug fix or a new model contribution. If a bug is found in one of the model files, we want to make it as easy as possible for the finder to fix it. There is little that is more demotivating than fixing a bug only to see that it caused 100 failures of other models.
+Because model code is independent from all other models, it&#39;s fairly easy for someone that only understands the one model she is working with to fix it. Similarly, it&#39;s easier to add new modeling code and review the corresponding PR if only a single new model file is added. The contributor does not have to figure out how to add new functionality to a centralized attention mechanism without breaking existing models. The reviewer can easily verify that none of the existing models are broken.
+2. Modeling code is our product
+We assume that a significant amount of users of the Transformers library not only read the documentation, but also look into the actual modeling code and potentially modify it. This hypothesis is backed by the Transformers library being forked over 10,000 times and the Transformers paper being cited over a thousand times. Therefore it is of utmost importance that someone reading Transformers modeling code for the first time can easily understand and potentially adapt it. Providing all the necessary logical components in order in a single modeling file helps a lot to achieve improved readability and adaptability. Additionally, we care a great deal about sensible variable/method naming and prefer expressive/readable code over character-efficient code.
+3. Machine Learning is evolving at a neck-breaking speed
+Research in the field of machine learning, and especially neural networks, evolves extremely fast. A model that was state-of-the-art a year ago might be outdated today. We don&#39;t know which attention mechanism, position embedding, or architecture will be the best in a year. Therefore, we cannot define standard logical patterns that apply to all models.
+As an example, two years ago, one might have defined BERT&#39;s self attention layer as the standard attention layer used by all Transformers models. Logically, a &quot;standard&quot; attention function could have been moved into a central attention.py
+file. But then came attention layers that added relative positional embeddings in each attention layer (T5), multiple different forms of chunked attention (Reformer, Longformer, BigBird), and separate attention mechanism for position and word embeddings (DeBERTa), etc... Every time we would have to have asked ourselves whether the &quot;standard&quot; attention function should be adapted or whether it would have been better to add a new attention function to attention.py
+. But then how do we name it? attention_with_positional_embd
+, reformer_attention
+, deberta_attention
+?
+It&#39;s dangerous to give logical components of machine learning models general names because the perception of what this component stands for might change or become outdated very quickly. E.g., does chunked attention corresponds to GPTNeo&#39;s, Reformer&#39;s, or BigBird&#39;s chunked attention? Is the attention layer a self-attention layer, a cross-attentional layer, or does it include both? However, if we name attention layers by their model&#39;s name, we should directly put the attention function in the corresponding modeling file.
+4. Machine Learning models are static
+The Transformers library is a unified and polished collection of machine learning models that different research teams have created. Every machine learning model is usually accompanied by a paper and its official GitHub repository. Once a machine learning model is published, it is rarely adapted or changed afterward.
+Instead, research teams tend to publish a new model built upon previous models but rarely make significant changes to already published code. This is an important realization when deciding on the design principles of the Transformers library. It means that once a model architecture has been added to Transformers, the fundamental components of the model don&#39;t change anymore. Bugs are often found and fixed, methods and variables might be renamed, and the output or input format of the model might be slightly changed, but the model&#39;s core components don&#39;t change anymore. Consequently, the need to apply global changes to all models in Transformers is significantly reduced, making it less important that every logical pattern only exists once since it&#39;s rarely changed.
+A second realization is that models do not depend on each other in a bidirectional way. More recent published models might depend on existing models, but it&#39;s quite obvious that an existing model cannot logically depend on its successor. E.g. T5 is partly built upon BERT and therefore T5&#39;s modeling code might logically depend on BERT&#39;s modeling code, but BERT cannot logically depend in any way on T5. Thus, it would not be logically sound to refactor BERT&#39;s attention function to also work with T5&#39;s attention function - someone reading through BERT&#39;s attention layer should not have to know anything about T5. Again, this advocates against centralizing components such as the attention layer into modules that all models can access.
+On the other hand, the modeling code of successor models can very well logically depend on its predecessor model. E.g., DeBERTa-v2 modeling code does logically depend to some extent on DeBERTa&#39;s modeling code. Maintainability is significantly improved by ensuring the modeling code of DeBERTa-v2 stays in sync with DeBERTa&#39;s. Fixing a bug in DeBERTa should ideally also fix the same bug in DeBERTa-v2. How can we maintain the single model file policy while ensuring that successor models stay in sync with their predecessor model?
+Now, we explain why we put the asterisk after &quot;Repeat Yourself&quot;. We don&#39;t blindly copy-paste all existing modeling code even if it looks this way. One of Transformers&#39; core maintainers, Sylvain Gugger, found a great mechanism that respects both the single file policy and keeps maintainability cost in bounds. This mechanism, loosely called &quot;the copying mechanism&quot;, allows us to mark logical components, such as an attention layer function, with a # Copied from &lt;predecessor_model&gt;.&lt;function&gt;
+statement, which enforces the marked code to be identical to the &lt;function&gt;
+of the &lt;predecessor_model&gt;
+. E.g., this line of over DeBERTa-v2&#39;s class enforces the whole class to be identical to DeBERTa&#39;s class except for the prefix DeBERTav2
+.
+This way, the copying mechanism keeps modeling code very easy to understand while significantly reducing maintenance. If some code is changed in a function of a predecessor model that is referred to by a function of its successor model, there are tools in place that automatically correct the successor model&#39;s function.
+Drawbacks
+Clearly, there are also drawbacks to the single file policy two of which we quickly want to mention here.
+A major goal of Transformers is to provide a unified API for both inference and training for all models so that a user can quickly switch between different models in her setup. However, ensuring a unified API across models is much more difficult if modeling files are not allowed to use abstracted logical patterns. We solve this problem by running a lot of tests (ca. 20,000 tests are run daily at the time of writing this blog post) to ensure that models follow a consistent API. In this case, the single file policy requires us to be very rigorous when reviewing model and test additions.
+Second, there is a lot of research on just a single component of a Machine Learning model. E.g., research
+teams investigate new forms of an attention mechanism that would apply to all existing pre-trained models as
+has been done in the Rethinking Attention with Performers. How should
+we incorporate such research into the Transformers library? It is indeed problematic. Should we change
+all existing models? This would go against points 3. and 4. as written above. Should we add 100+ new modeling
+files each prefixed with Performer...
+? This seems absurd. In such a case there is sadly no good solution
+and we opt for not integrating the paper into Transformers in this case. If the paper would have gotten
+much more traction and included strong pre-trained checkpoints, we would have probably added new modeling
+files of the most important models such as modeling_performer_bert.py
+available.
+Conclusion
+All in all, at 🤗 Hugging Face we are convinced that the single file policy is the right coding philosophy for Transformers.
+What do you think? If you read until here, we would be more than interested in hearing your opinion! If you would like to leave a comment, please visit the corresponding forum post here. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

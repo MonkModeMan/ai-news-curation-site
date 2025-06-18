@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Going multimodal: How Prezi is leveraging the Hub and the Expert Support Program to accelerate their ML roadmap</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Going multimodal: How Prezi is leveraging the Hub and the Expert Support Program to accelerate their ML roadmap</h1> <p class="text-sm text-gray-500"> 2024/6/19 – Hugging Face Blog  <a href="https://huggingface.co/blog/prezi-case-study" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Going multimodal: How Prezi is leveraging the Hub and the Expert Support Program to accelerate their ML roadmap
+Everybody knows that a great visual is worth a thousand words. The team at Prezi, a visual communications software company, is putting this insight into practice with their Prezi presentations that combine images and text in highly dynamic presentations.
+Prezi has joined the Hugging Face Expert Support Program to fully leverage modern machine learning&#39;s potential. Over the past months, Hugging Face has supported Prezi in integrating smaller, more efficient open-source models into their ML workflows. This cooperation started at a perfect time, as multimodal models are becoming increasingly capable.
+We recently sat down with Máté Börcsök, a backend engineer at Prezi, to talk about their experience in the Expert Support Program. In this short video, Máté walks us through some of their machine learning work and shares their experience collaborating with our team via the Expert Support Program.
+If you&#39;d like to accelerate your machine learning roadmap with the help of our experts, as Máté and his team did, visit hf.co/support to learn more about our Expert Support Program and request a quote.
+Transcript with additional details:
+Introduction
+My name is Máté, and I am a backend engineer at Prezi, an online presentation tool that brings your ideas to life.
+How does the HF Expert Support Program help you build AI?
+Our flagship AI product at Prezi is Prezi AI, which helps our users create better Prezi presentations faster. Users start by providing a prompt and description of the presentation they want to create. The system then automatically creates a draft presentation for them to get started. It’s a complex system that calls different services and builds up the presentation’s structure using closed models and various asset provider services.
+When we joined the program, we already had a version of this system, and our expert reviewed the flow and suggested improvements. Our pipeline includes a search system to find suitable assets (images and texts) for each unique presentation. In this context, an important piece of advice was, for example, to add an open-source re-ranker model to the system, which can find the best images or texts for your presentation cheaper, faster, and better than an LLM.
+Our use cases are inherently multi-modal as our presentations combine images and text. There are a lot of models released every week, and our expert helps us cut through the hype and understand which models are useful for us and which are not. This helps us save a lot of time, as we are using a combination of vision models, text models, and vision-language models (VLMs) to solve our unique challenges. Multimodal machine learning is challenging, and the guidance is really appreciated. We are not Machine Learning Engineers, and we are learning this together on the way.
+What’s your favorite feature of Inference Endpoints?
+I highly recommend you check out the Endpoint Model Catalog. It is a curated list of models that work well with Inference Endpoints and require zero configuration. I love that you can set it up so that the Endpoint goes to sleep after a few minutes, so it won’t burn money. It also supports single and quad A100 instances required for some models. Keeping the models updated is also straightforward. Inference Endpoints let us deploy the latest version with a single click or roll back to any older version using the Git hash. None of these features are easily available on AWS, so it was very convenient for us to use them. Even if a model is not in the catalog yet, it’s relatively easy to make them work. At least it was easy for me, with our expert supporting us.
+What teams would benefit most from Expert Support?
+The Hugging Face partnership opened the doors of machine learning for us. Our dedicated expert gives us access to a community of machine learning experts who can give feedback on our wildest questions. As I said earlier, we are not Machine Learning Engineers. Our expert guides us to work on the right things, sharing best practices and state-of-the-art models for embedding, re-ranking, and object detection and showing us how to fine-tune new vision language models and collect and curate data. These are mostly things we can do ourselves, but his guidance gives a huge speedup and keeps us focused on meaningful tasks for our users.
+With the he Expert Support Program, we&#39;ve put together a world-class team to help customers build better ML solutions, faster. Our experts answer questions and find solutions as needed in your machine learning journey from research to production. Visit hf.co/support to learn more and request a quote. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

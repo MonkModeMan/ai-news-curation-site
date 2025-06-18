@@ -1,0 +1,100 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>AI Apps in a Flash with Gradio&#39;s Reload Mode</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 AI Apps in a Flash with Gradio&#39;s Reload Mode</h1> <p class="text-sm text-gray-500"> 2024/4/16 – Hugging Face Blog  <a href="https://huggingface.co/blog/gradio-reload" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> AI Apps in a Flash with Gradio&#39;s Reload Mode
+In this post, I will show you how you can build a functional AI application quickly with Gradio&#39;s reload mode. But before we get to that, I want to explain what reload mode does and why Gradio implements its own auto-reloading logic. If you are already familiar with Gradio and want to get to building, please skip to the third section.
+What Does Reload Mode Do?
+To put it simply, it pulls in the latest changes from your source files without restarting the Gradio server. If that does not make sense yet, please continue reading.
+Gradio is a popular Python library for creating interactive machine learning apps. Gradio developers declare their UI layout entirely in Python and add some Python logic that triggers whenever a UI event happens. It&#39;s easy to learn if you know basic Python. Check out this quickstart if you are not familiar with Gradio yet.
+Gradio applications are launched like any other Python script, just run python app.py
+(the file with the Gradio code can be called anything). This will start an HTTP server that renders your app&#39;s UI and responds to user actions. If you want to make changes to your app, you stop the server (typically with Ctrl + C
+), edit your source file, and then re-run the script.
+Having to stop and relaunch the server can introduce a lot of latency while you are developing your app. It would be better if there was a way to pull in the latest code changes automatically so you can test new ideas instantly.
+That&#39;s exactly what Gradio&#39;s reload mode does. Simply run gradio app.py
+instead of python app.py
+to launch your app in reload mode!
+Why Did Gradio Build Its Own Reloader?
+Gradio applications are run with uvicorn, an asynchronous server for Python web frameworks. Uvicorn already offers auto-reloading but Gradio implements its own logic for the following reasons:
+- Faster Reloading: Uvicorn&#39;s auto-reload will shut down the server and spin it back up. This is faster than doing it by hand, but it&#39;s too slow for developing a Gradio app. Gradio developers build their UI in Python so they should see how ther UI looks as soon as a change is made. This is standard in the Javascript ecosystem but it&#39;s new to Python.
+- Selective Reloading: Gradio applications are AI applications. This means they typically load an AI model into memory or connect to a datastore like a vector database. Relaunching the server during development will mean reloading that model or reconnecting to that database, which introduces too much latency between development cycles. To fix this issue, Gradio introduces an
+if gr.NO_RELOAD:
+code-block that you can use to mark code that should not be reloaded. This is only possible because Gradio implements its own reloading logic.
+I will now show you how you can use Gradio reload mode to quickly build an AI App.
+Building a Document Analyzer Application
+Our application will allow users to upload pictures of documents and ask questions about them. They will receive answers in natural language. We will use the free Hugging Face Inference API so you should be able to follow along from your computer. No GPU required!
+To get started, let&#39;s create a barebones gr.Interface
+. Enter the following code in a file called app.py
+and launch it in reload mode with gradio app.py
+:
+import gradio as gr
+demo = gr.Interface(lambda x: x, &quot;text&quot;, &quot;text&quot;)
+if __name__ == &quot;__main__&quot;:
+demo.launch()
+This creates the following simple UI.
+Since I want to let users upload image files along with their questions, I will switch the input component to be a gr.MultimodalTextbox()
+. Notice how the UI updates instantly!
+This UI works but, I think it would be better if the input textbox was below the output textbox. I can do this with the Blocks
+API. I&#39;m also customizing the input textbox by adding a placeholder text to guide users.
+Now that I&#39;m satisfied with the UI, I will start implementing the logic of the chat_fn
+.
+Since I&#39;ll be using Hugging Face&#39;s Inference API, I will import the InferenceClient
+from the huggingface_hub
+package (it comes pre-installed with Gradio). I&#39;ll be using the impira/layouylm-document-qa
+model to answer the user&#39;s question. I will then use the HuggingFaceH4/zephyr-7b-beta LLM to provide a response in natural language.
+from huggingface_hub import InferenceClient
+client = InferenceClient()
+def chat_fn(multimodal_message):
+question = multimodal_message[&quot;text&quot;]
+image = multimodal_message[&quot;files&quot;][0]
+answer = client.document_question_answering(image=image, question=question, model=&quot;impira/layoutlm-document-qa&quot;)
+answer = [{&quot;answer&quot;: a.answer, &quot;confidence&quot;: a.score} for a in answer]
+user_message = {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: f&quot;Question: {question}, answer: {answer}&quot;}
+message = &quot;&quot;
+for token in client.chat_completion(messages=[user_message],
+max_tokens=200,
+stream=True,
+model=&quot;HuggingFaceH4/zephyr-7b-beta&quot;):
+if token.choices[0].finish_reason is not None:
+continue
+message += token.choices[0].delta.content
+yield message
+Here is our demo in action!
+I will also provide a system message so that the LLM keeps answers short and doesn&#39;t include the raw confidence scores. To avoid re-instantiating the InferenceClient
+on every change, I will place it inside a no reload code block.
+if gr.NO_RELOAD:
+client = InferenceClient()
+system_message = {
+&quot;role&quot;: &quot;system&quot;,
+&quot;content&quot;: &quot;&quot;&quot;
+You are a helpful assistant.
+You will be given a question and a set of answers along with a confidence score between 0 and 1 for each answer.
+You job is to turn this information into a short, coherent response.
+For example:
+Question: &quot;Who is being invoiced?&quot;, answer: {&quot;answer&quot;: &quot;John Doe&quot;, &quot;confidence&quot;: 0.98}
+You should respond with something like:
+With a high degree of confidence, I can say John Doe is being invoiced.
+Question: &quot;What is the invoice total?&quot;, answer: [{&quot;answer&quot;: &quot;154.08&quot;, &quot;confidence&quot;: 0.75}, {&quot;answer&quot;: &quot;155&quot;, &quot;confidence&quot;: 0.25}
+You should respond with something like:
+I believe the invoice total is $154.08 but it can also be $155.
+&quot;&quot;&quot;}
+Here is our demo in action now! The system message really helped keep the bot&#39;s answers short and free of long decimals.
+As a final improvement, I will add a markdown header to the page:
+Conclusion
+In this post, I developed a working AI application with Gradio and the Hugging Face Inference API. When I started developing this, I didn&#39;t know what the final product would look like so having the UI and server logic reload instanty let me iterate on different ideas very quickly. It took me about an hour to develop this entire app!
+If you&#39;d like to see the entire code for this demo, please check out this space! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

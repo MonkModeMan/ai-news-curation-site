@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Hugging Face and FriendliAI partner to supercharge model deployment on the Hub</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Hugging Face and FriendliAI partner to supercharge model deployment on the Hub</h1> <p class="text-sm text-gray-500"> 2025/1/22 – Hugging Face Blog  <a href="https://huggingface.co/blog/friendliai-partnership" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Hugging Face and FriendliAI partner to supercharge model deployment on the Hub
+FriendliAI’s inference infrastructure is now integrated into the Hugging Face Hub as an option in the “Deploy this model” button, simplifying and accelerating generative AI model serving.
+A Collaboration to Advance AI Innovation
+Hugging Face empowers developers, researchers, and businesses to innovate in AI. Our common priority is building impactful partnerships that simplify workflows and provide cutting-edge tools for the AI community.
+Today, we are excited to announce a partnership between HF and FriendliAI, a leader in accelerated generative AI inference, to enhance how developers deploy and manage AI models. This integration introduces FriendliAI Endpoints as a deployment option within the Hugging Face Hub, offering developers direct access to high-performance, cost-effective inference infrastructure.
+FriendliAI is ranked as the fastest GPU-based generative AI inference provider by Artificial Analysis, with groundbreaking technologies including continuous batching, native quantization, and best-in-class autoscaling. With this technology, FriendliAI continues to advance the standards for AI inference serving performance, delivering faster processing speeds, reduced latency, and substantial cost savings for deploying generative AI models at scale. Through this partnership, Hugging Face users and FriendliAI customers can effortlessly deploy open-source or custom generative AI models with unparalleled efficiency and reliability.
+Simplifying Model Deployment
+Last year, FriendliAI introduced a Hugging Face integration, enabling users to seamlessly deploy Hugging Face models directly within the Friendli Suite platform. Through this integration, users gained access to thousands of supported open-source models on Hugging Face, as well as the capability to deploy private models effortlessly. The list of model architectures currently supported by FriendliAI can be found here.
+Today, we’re taking this integration further by enabling the same capability directly within the Hugging Face Hub, offering 1-click deployment for a seamless user experience. You can deploy models directly from the model card on the Hugging Face Hub using a Friendli Suite account.
+Selecting Friendli Endpoints will take you to FriendliAI’s model deployment page. Here, you can deploy the model on NVIDIA H100 GPUs while simultaneously interacting with optimized open-source models. The deployment page features an intuitive interface for setting up Friendli Dedicated Endpoints, the managed service for generative AI inference. Additionally, while your deployment is processing, you can chat with open-source models directly on the page, making it easy to explore and test their capabilities.
+Deploy models with NVIDIA H100 in Friendli Dedicated Endpoints
+With FriendliAI’s advanced GPU-optimized inference engine, Dedicated Endpoints delivers fast and cost-effective inference as a managed service. Developers can effortlessly deploy open-source or custom models on NVIDIA H100 GPUs using Friendli Dedicated Endpoints by clicking “Deploy now” on the model deployment page.
+H100 GPUs are powerful but can be expensive to operate at scale. With FriendliAI’s optimized service, you can reduce the number of GPUs needed while maintaining peak performance, significantly lowering costs. Beyond cost efficiency, Dedicated Endpoints also simplifies the complexities of managing infrastructure.
+Inference Open-Source Models with Friendli Serverless Endpoints
+Friendli Serverless Endpoints is the perfect solution for developers who want to efficiently inference open-source models. This service provides user-friendly APIs for models optimized by FriendliAI, ensuring high performance at a low cost. You can chat with these powerful open-source models directly on the model deployment page.
+What’s Next
+We’re thrilled to deepen the FriendliAI&lt;&gt;HF collaboration, enhancing accessibility to open-source AI for developers worldwide. FriendliAI’s high-speed, cost-efficient inference solution eliminates the complexities of infrastructure management, empowering users to focus on innovation. Together with FriendliAI, we remain committed to transforming how AI is developed, driving groundbreaking innovation that shapes the next era of AI.
+You can also give us a Follow on our organization page to be updated about future news 🔥 </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Text2SQL using Hugging Face Dataset Viewer API and Motherduck DuckDB-NSQL-7B</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Text2SQL using Hugging Face Dataset Viewer API and Motherduck DuckDB-NSQL-7B</h1> <p class="text-sm text-gray-500"> 2024/4/4 – Hugging Face Blog  <a href="https://huggingface.co/blog/duckdb-nsql-7b" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Text2SQL using Hugging Face Dataset Viewer API and Motherduck DuckDB-NSQL-7B
+Today, integrating AI-powered features, particularly leveraging Large Language Models (LLMs), has become increasingly prevalent across various tasks such as text generation, classification, image-to-text, image-to-image transformations, etc.
+Developers are increasingly recognizing these applications&#39; potential benefits, particularly in enhancing core tasks such as scriptwriting, web development, and, now, interfacing with data. Historically, crafting insightful SQL queries for data analysis was primarily the domain of data analysts, SQL developers, data engineers, or professionals in related fields, all navigating the nuances of SQL dialect syntax. However, with the advent of AI-powered solutions, the landscape is evolving. These advanced models offer new avenues for interacting with data, potentially streamlining processes and uncovering insights with greater efficiency and depth.
+What if you could unlock fascinating insights from your dataset without diving deep into coding? To glean valuable information, one would need to craft a specialized SELECT
+statement, considering which columns to display, the source table, filtering conditions for selected rows, aggregation methods, and sorting preferences. This traditional approach involves a sequence of commands: SELECT
+, FROM
+, WHERE
+, GROUP
+, and ORDER
+.
+But what if you’re not a seasoned developer and still want to harness the power of your data? In such cases, seeking assistance from SQL specialists becomes necessary, highlighting a gap in accessibility and usability.
+This is where groundbreaking advancements in AI and LLM technology step in to bridge the divide. Imagine conversing with your data effortlessly, simply stating your information needs in plain language and having the model translate your request into a query.
+In recent months, significant strides have been made in this arena. MotherDuck and Numbers Station unveiled their latest innovation: DuckDB-NSQL-7B, a state-of-the-art LLM designed specifically for DuckDB SQL. What is this model’s mission? To empower users with the ability to unlock insights from their data effortlessly.
+Initially fine-tuned from Meta’s original Llama-2–7b model using a broad dataset covering general SQL queries, DuckDB-NSQL-7B underwent further refinement with DuckDB text-to-SQL pairs. Notably, its capabilities extend beyond crafting SELECT
+statements; it can generate a wide range of valid DuckDB SQL statements, including official documentation and extensions, making it a versatile tool for data exploration and analysis.
+In this article, we will learn how to deal with text2sql tasks using the DuckDB-NSQL-7B model, the Hugging Face dataset viewer API for parquet files and duckdb for data retrieval.
+text2sql flow
+How to use the model
+- Using Hugging Face
+transformers
+pipeline
+from transformers import pipeline
+pipe = pipeline(&quot;text-generation&quot;, model=&quot;motherduckdb/DuckDB-NSQL-7B-v0.1&quot;)
+- Using transformers tokenizer and model
+from transformers import AutoTokenizer, AutoModelForCausalLM
+tokenizer = AutoTokenizer.from_pretrained(&quot;motherduckdb/DuckDB-NSQL-7B-v0.1&quot;)
+model = AutoModelForCausalLM.from_pretrained(&quot;motherduckdb/DuckDB-NSQL-7B-v0.1&quot;)
+- Using
+llama.cpp
+to load the model inGGUF
+from llama_cpp import Llama
+llama = Llama(
+model_path=&quot;DuckDB-NSQL-7B-v0.1-q8_0.gguf&quot;, # Path to local model
+n_gpu_layers=-1,
+)
+The main goal of llama.cpp
+is to enable LLM inference with minimal setup and state-of-the-art performance on a wide variety of hardware - locally and in the cloud. We will use this approach.
+Hugging Face Dataset Viewer API for more than 120K datasets
+Data is a crucial component in any Machine Learning endeavor. Hugging Face is a valuable resource, offering access to over 120,000 free and open datasets spanning various formats, including CSV, Parquet, JSON, audio, and image files.
+Each dataset hosted by Hugging Face comes equipped with a comprehensive dataset viewer. This viewer provides users essential functionalities such as statistical insights, data size assessment, full-text search capabilities, and efficient filtering options. This feature-rich interface empowers users to easily explore and evaluate datasets, facilitating informed decision-making throughout the machine learning workflow.
+For this demo, we will be using the world-cities-geo dataset.
+Dataset viewer of world-cities-geo dataset
+Behind the scenes, each dataset in the Hub is processed by the Hugging Face dataset viewer API, which gets useful information and serves functionalities like:
+- List the dataset splits, column names and data types
+- Get the dataset size (in number of rows or bytes)
+- Download and view rows at any index in the dataset
+- Search a word in the dataset
+- Filter rows based on a query string
+- Get insightful statistics about the data
+- Access the dataset as parquet files to use in your favorite processing or analytics framework
+In this demo, we will use the last functionality, auto-converted parquet files.
+Generate SQL queries from text instructions
+First, download the quantized models version of DuckDB-NSQL-7B-v0.1
+Downloading the model
+Alternatively, you can execute the following code:
+huggingface-cli download motherduckdb/DuckDB-NSQL-7B-v0.1-GGUF DuckDB-NSQL-7B-v0.1-q8_0.gguf --local-dir . --local-dir-use-symlinks False
+Now, lets install the needed dependencies:
+pip install llama-cpp-python
+pip install duckdb
+For the text-to-SQL model, we will use a prompt with the following structure:
+### Instruction:
+Your task is to generate valid duckdb SQL to answer the following question.
+### Input:
+Here is the database schema that the SQL query will run on:
+{ddl_create}
+### Question:
+{query_input}
+### Response (use duckdb shorthand if possible):
+- ddl_create will be the dataset schema as a SQL
+CREATE
+command - query_input will be the user instructions, expressed with natural language
+So, we need to tell to the model about the schema of the Hugging Face dataset. For that, we are going to get the first parquet file for jamescalam/world-cities-geo dataset:
+GET https://huggingface.co/api/datasets/jamescalam/world-cities-geo/parquet
+{
+&quot;default&quot;:{
+&quot;train&quot;:[
+&quot;https://huggingface.co/api/datasets/jamescalam/world-cities-geo/parquet/default/train/0.parquet&quot;
+]
+}
+}
+The parquet file is hosted in Hugging Face viewer under refs/convert/parquet
+revision:
+Parquet file
+- Simulate a DuckDB table creation from the first row of the parquet file
+import duckdb
+con = duckdb.connect()
+con.execute(f&quot;CREATE TABLE data as SELECT * FROM &#39;{first_parquet_url}&#39; LIMIT 1;&quot;)
+result = con.sql(&quot;SELECT sql FROM duckdb_tables() where table_name =&#39;data&#39;;&quot;).df()
+ddl_create = result.iloc[0,0]
+con.close()
+The CREATE
+schema DDL is:
+CREATE TABLE &quot;data&quot;(
+city VARCHAR,
+country VARCHAR,
+region VARCHAR,
+continent VARCHAR,
+latitude DOUBLE,
+longitude DOUBLE,
+x DOUBLE,
+y DOUBLE,
+z DOUBLE
+);
+And, as you can see, it matches the columns in the dataset viewer:
+Dataset columns
+- Now, we can construct the prompt with the ddl_create and the query input
+prompt = &quot;&quot;&quot;### Instruction:
+Your task is to generate valid duckdb SQL to answer the following question.
+### Input:
+Here is the database schema that the SQL query will run on:
+{ddl_create}
+### Question:
+{query_input}
+### Response (use duckdb shorthand if possible):
+&quot;&quot;&quot;
+If the user wants to know the Cities from Albania country, the prompt will look like this:
+query = &quot;Cities from Albania country&quot;
+prompt = prompt.format(ddl_create=ddl_create, query_input=query)
+So the expanded prompt that will be sent to the LLM looks like this:
+### Instruction:
+Your task is to generate valid duckdb SQL to answer the following question.
+### Input:
+Here is the database schema that the SQL query will run on:
+CREATE TABLE &quot;data&quot;(city VARCHAR, country VARCHAR, region VARCHAR, continent VARCHAR, latitude DOUBLE, longitude DOUBLE, x DOUBLE, y DOUBLE, z DOUBLE);
+### Question:
+Cities from Albania country
+### Response (use duckdb shorthand if possible):
+- It is time to send the prompt to the model
+from llama_cpp import Llama
+llm = Llama(
+model_path=&quot;DuckDB-NSQL-7B-v0.1-q8_0.gguf&quot;,
+n_ctx=2048,
+n_gpu_layers=50
+)
+pred = llm(prompt, temperature=0.1, max_tokens=1000)
+sql_output = pred[&quot;choices&quot;][0][&quot;text&quot;]
+The output SQL command will point to a data
+table, but since we don&#39;t have a real table but just a reference to the parquet file, we will replace all data
+occurrences by the first_parquet_url
+:
+sql_output = sql_output.replace(&quot;FROM data&quot;, f&quot;FROM &#39;{first_parquet_url}&#39;&quot;)
+And the final output will be:
+SELECT city FROM &#39;https://huggingface.co/api/datasets/jamescalam/world-cities-geo/parquet/default/train/0.parquet&#39; WHERE country = &#39;Albania&#39;
+- Now, it is time to finally execute our generated SQL directly in the dataset, so, lets use once again DuckDB powers:
+con = duckdb.connect()
+try:
+query_result = con.sql(sql_output).df()
+except Exception as error:
+print(f&quot;❌ Could not execute SQL query {error=}&quot;)
+finally:
+con.close()
+And here we have the results (100 rows):
+Execution result (100 rows)
+Let&#39;s compare this result with the dataset viewer using the &quot;search function&quot; for Albania country, it should be the same:
+Search result for Albania country
+You can also get the same result calling directly to the search or filter API:
+- Using /search API
+import requests
+API_URL = &quot;https://datasets-server.huggingface.co/search?dataset=jamescalam/world-cities-geo&amp;config=default&amp;split=train&amp;query=Albania&quot;
+def query():
+response = requests.get(API_URL)
+return response.json()
+data = query()
+- Using filter API
+import requests
+API_URL = &quot;https://datasets-server.huggingface.co/filter?dataset=jamescalam/world-cities-geo&amp;config=default&amp;split=train&amp;where=country=&#39;Albania&#39;&quot;
+def query():
+response = requests.get(API_URL)
+return response.json()
+data = query()
+Our final demo will be a Hugging Face space that looks like this:
+You can see the notebook with the code here.
+And the Hugging Face Space here </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

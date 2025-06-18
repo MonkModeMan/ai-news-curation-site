@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing Gradio&#39;s new Dataframe!</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing Gradio&#39;s new Dataframe!</h1> <p class="text-sm text-gray-500"> 2025/3/24 – Hugging Face Blog  <a href="https://huggingface.co/blog/gradio-dataframe-upgrade" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing Gradio&#39;s new Dataframe!
+Gradio’s
+gr.Dataframe
+component is one of our most popular components, we&#39;ve seen it used in a variety of awesome apps, like leaderboards, dashboards, and interactive visualisations. Although we hadn&#39;t made any changes to the dataframe in quite some time, our backlog of issues had been growing, and some improvements had been in demand for a while.
+Well — we’re now super excited to release a host of new updates to Gradio’s dataframe component. Over the last 6 weeks, we’ve closed over 70 dataframe issues - including bugs, improvements and enhancements.
+1. Multi-Cell Selection
+You can select multiple cells at once! Copy or delete values across your selection with ease.
+2. Row Numbers &amp; Column Pinning
+Add row number columns and keep critical columns in view while navigating wide datasets using the pinned_columns
+parameter. No more losing track of what you&#39;re looking at!
+3. Copy Button and Full Screen Button
+Easily copy cell values into a comma-separated format with our new copy button. Need a better view? The full screen button gives you interactivity without distractions and can be enabled with the show_full_screen
+parameter.
+4. Scroll to Top Button
+Look at all that data! Now we can just scroll to the top.
+5. Accessibility Upgrade and Enhanced Styling
+Improved keyboard navigation makes gr.Dataframe more accessible than ever. You can also take control of your dataframe’s look with a dedicated styler parameter and enhance the user experience of your app.
+6. Row and Column Selection
+Access entire row data in select events for more intuitive interactivity and data manipulation.
+7. Static Columns
+Customise the interactivity of your dataframe by specifying non-editable columns using the static_columns
+parameter.
+8. Search functionality
+Quickly find the data you need with our powerful search feature by setting the show_search
+parameter to &quot;search&quot;
+.
+9. Filter functionality
+Narrow down your dataset to focus on exactly what you need with flexible filtering options with show_search
+set to &quot;filter&quot;
+.
+10. Improved cell selection
+Experience smoother, more intuitive cell selection that behaves the way you expect.
+What’s next?
+With over 70 issues closed, we’ve made huge improvements, but there’s always more for us to work on. Looking ahead, we still have more ideas to implement and we’re excited to keep refining accessibility, performance, and integration. Look out for some cool demos on our socials using the dataframe on Gradio’s X.
+Try it yourself!
+The updated dataframe is live in the latest Gradio release. Update your installation with pip install --upgrade gradio
+.
+import gradio as gr
+df_headers = [&quot;Name&quot;, &quot;Population&quot;, &quot;Size (min cm)&quot;, &quot;Size (max cm)&quot;, &quot;Weight (min kg)&quot;, &quot;Weight (max kg)&quot;, &quot;Lifespan (min years)&quot;, &quot;Lifespan (max years)&quot;]
+df_data = [
+[&quot;Irish Red Fox&quot;, 185000, 48, 92, 4.2, 6.8, 3, 5],
+[&quot;Irish Badger&quot;, 95000, 62, 88, 8.5, 13.5, 6, 8],
+[&quot;Irish Otter&quot;, 13500, 58, 98, 5.5, 11.5, 9, 13]
+]
+with gr.Blocks() as demo:
+df = gr.Dataframe(
+label=&quot;Irish Wildlife&quot;,
+value=df_data,
+headers=df_headers,
+interactive=True,
+show_search=&quot;search&quot;,
+show_copy_button=True,
+show_fullscreen_button=True,
+show_row_numbers=True,
+pinned_columns=1,
+static_columns=[0],
+column_widths=[&quot;300px&quot;]
+)
+demo.launch()
+Check out the Gradio documentation for examples and tutorials to get started with these new features. We’re eager to see what you create! Got thoughts or suggestions? Share them by raising an issue in our GitHub repo.
+Happy building! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

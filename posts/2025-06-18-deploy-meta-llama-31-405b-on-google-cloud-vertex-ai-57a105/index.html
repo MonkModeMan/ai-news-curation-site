@@ -1,0 +1,247 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Deploy Meta Llama 3.1 405B on Google Cloud Vertex AI</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Deploy Meta Llama 3.1 405B on Google Cloud Vertex AI</h1> <p class="text-sm text-gray-500"> 2024/8/19 – Hugging Face Blog  <a href="https://huggingface.co/blog/llama31-on-vertex-ai" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Deploy Meta Llama 3.1 405B on Google Cloud Vertex AI
+Meta Llama 3.1 is the latest open LLM from Meta, released in July 2024. Meta Llama 3.1 comes in three sizes: 8B for efficient deployment and development on consumer-size GPU, 70B for large-scale AI native applications, and 405B for synthetic data, LLM as a Judge or distillation; among other use cases. Some of its key features include: a large context length of 128K tokens (vs original 8K), multilingual capabilities, tool usage capabilities, and a more permissive license.
+In this blog you will learn how to programmatically deploy meta-llama/Meta-Llama-3.1-405B-Instruct-FP8
+, the FP8 quantized variant of meta-llama/Meta-Llama-3.1-405B-Instruct
+, in a Google Cloud A3 node with 8 x H100 NVIDIA GPUs on Vertex AI with Text Generation Inference (TGI) using the Hugging Face purpose-built Deep Learning Containers (DLCs) for Google Cloud.
+Alternatively, you can deploy meta-llama/Meta-Llama-3.1-405B-Instruct-FP8
+without writing any code directly from the Hub or from Vertex Model Garden!
+This blog will cover:
+- Requirements for Meta Llama 3.1 Models on Google Cloud
+- Setup Google Cloud for Vertex AI
+- Register the Meta Llama 3.1 405B Model on Vertex AI
+- Deploy Meta Llama 3.1 405B on Vertex AI
+- Run online predictions with Meta Llama 3.1 405B
+- Clean up resources
+Lets get started! 🚀 Alternatively, you can follow along from this Jupyter Notebook.
+Introduction to Vertex AI
+Vertex AI is a machine learning (ML) platform that lets you train and deploy ML models and AI applications, and customize Large Language Models (LLMs) for use in your AI-powered applications. Vertex AI combines data engineering, data science, and ML engineering workflows, enabling your teams to collaborate using a common toolset and scale your applications using the benefits of Google Cloud.
+This blog will be focused on deploying an already fine-tuned model from the Hugging Face Hub using a pre-built container to get real-time online predictions. Thus, we&#39;ll demonstrate the use of Vertex AI for inference.
+More information at Vertex AI - Documentation - Introduction to Vertex AI.
+1. Requirements for Meta Llama 3.1 Models on Google Cloud
+Meta Llama 3.1 brings exciting advancements. However, running these models requires careful consideration of your hardware resources. For inference, the memory requirements depend on the model size and the precision of the weights. Here&#39;s a table showing the approximate memory needed for different configurations:
+| Model Size | FP16 | FP8 | INT4 |
+| 8B | 16 GB | 8 GB | 4 GB |
+| 70B | 140 GB | 70 GB | 35 GB |
+| 405B | 810 GB | 405 GB | 203 GB |
+Note: The above-quoted numbers indicate the GPU VRAM required just to load the model checkpoint. They don’t include torch reserved space for kernels or CUDA graphs.
+As an example, an H100 node (8 H100s with 80GB each) has a total of ~640GB of VRAM, so the 405B model would need to be run in a multi-node setup or run at a lower precision (e.g. FP8), which would be the recommended approach. Read more about it in the Hugging Face Blog for Meta Llama 3.1.
+The A3 accelerator-optimized machine series in Google Cloud comes with 8 H100s 80GB NVIDIA GPUs, 208 vCPUs, and 1872 GB of memory. This machine series is optimized for compute and memory intensive, network bound ML training, and HPC workloads. Read more about the A3 machines availability announcement at Announcing A3 supercomputers with NVIDIA H100 GPUs, purpose-built for AI and about the A3 machine series at Compute Engine - Accelerator-optimized machine family.
+Even if the A3 machines are available within Google Cloud, you will still need to request a custom quota increase in Google Cloud, as those need a specific approval. Note that the A3 machines are only available in some zones, so make sure to check the availability of both A3 High or even A3 Mega per zone at Compute Engine - GPU regions and zones.
+In this case, to request a quota increase to use the A3 High GPU machine type you will need to increase the following quotas:
+Service: Vertex AI API
+andName: Custom model serving Nvidia H100 80GB GPUs per region
+set to 8Service: Vertex AI API
+andName: Custom model serving A3 CPUs per region
+set to 208
+Read more on how to request a quota increase at Google Cloud Documentation - View and manage quotas.
+2. Setup Google Cloud for Vertex AI
+Before proceeding, we will set the following environment variables for convenience:
+%env PROJECT_ID=your-project-id
+%env LOCATION=your-region
+First you need to install gcloud
+in your machine following the instructions at Cloud SDK - Install the gcloud CLI; and log in into your Google Cloud account, setting your project and preferred Google Compute Engine region.
+gcloud auth login
+gcloud config set project $PROJECT_ID
+gcloud config set compute/region $LOCATION
+Once the Google Cloud SDK is installed, you need to enable the Google Cloud APIs required to use Vertex AI from a Deep Learning Container (DLC) within their Artifact Registry for Docker.
+gcloud services enable aiplatform.googleapis.com
+gcloud services enable compute.googleapis.com
+gcloud services enable container.googleapis.com
+gcloud services enable containerregistry.googleapis.com
+gcloud services enable containerfilesystem.googleapis.com
+Then you will also need to install google-cloud-aiplatform
+, required to programmatically interact with Google Cloud Vertex AI from Python.
+pip install --upgrade --quiet google-cloud-aiplatform
+To then initialize it via Python as follows:
+import os
+from google.cloud import aiplatform
+aiplatform.init(project=os.getenv(&quot;PROJECT_ID&quot;), location=os.getenv(&quot;LOCATION&quot;))
+Finally, as the Meta Llama 3.1 models are gated under the meta-llama
+organization in the Hugging Face Hub, you will need to request access to it and wait for approval, which shouldn&#39;t take longer than 24 hours. Then, you need to install the huggingface_hub
+Python SDK to use the huggingface-cli
+to log in into the Hugging Face Hub to download those models.
+pip install --upgrade --quiet huggingface_hub
+Alternatively, you can also skip the huggingface_hub
+installation and just generate a Hugging Face Fine-grained Token with read-only permissions for meta-llama/Meta-Llama-3.1-405B-Instruct-FP8
+or any other model under the meta-llama
+organization, to be selected under e.g. Repository permissions -&gt; meta-llama/Meta-Llama-3.1-405B-Instruct-FP8 -&gt; Read access to contents of selected repos
+. And either set that token within the HF_TOKEN
+environment variable or just provide it manually to the notebook_login
+method as follows:
+from huggingface_hub import notebook_login
+notebook_login()
+3. Register the Meta Llama 3.1 405B Model on Vertex AI
+To register the Meta Llama 3.1 405B model on Vertex AI, you will need to use the google-cloud-aiplatform
+Python SDK. But before proceeding, you need to first define which DLC you are going to use, which in this case will be the latest Hugging Face TGI DLC for GPU.
+As of the current date (August 2024), the latest available Hugging Face TGI DLC, i.e. us-docker.pkg.dev/deeplearning-platform-release/gcr.io/huggingface-text-generation-inference-cu121.2-2.ubuntu2204.py310 uses TGI v2.2. This version comes with support for the Meta Llama 3.1 architecture, which needs a different RoPE scaling method than its predecessor, Meta Llama 3.
+To check which Hugging Face DLCs are available in Google Cloud you can either navigate to Google Cloud Artifact Registry and filter by &quot;huggingface-text-generation-inference&quot;, or use the following gcloud
+command:
+gcloud container images list --repository=&quot;us-docker.pkg.dev/deeplearning-platform-release/gcr.io&quot; | grep &quot;huggingface-text-generation-inference&quot;
+Then you need to define the configuration for the container, which are the environment variables that the text-generation-launcher
+expects as arguments (as per the official documentation), which in this case are the following:
+MODEL_ID
+the model ID on the Hugging Face Hub, i.e.meta-llama/Meta-Llama-3.1-405B-Instruct-FP8
+.HUGGING_FACE_HUB_TOKEN
+the read-access token over the gated repositorymeta-llama/Meta-Llama-3.1-405B-Instruct-FP8
+, required to download the weights from the Hugging Face Hub.NUM_SHARD
+the number of shards to use i.e. the number of GPUs to use, in this case set to 8 as an A3 instance with 8 x H100 NVIDIA GPUs will be used.
+Additionally, as a recommendation you should also define HF_HUB_ENABLE_HF_TRANSFER=1
+to enable a faster download speed via the hf_transfer
+utility, as Meta Llama 3.1 405B is around 400 GiB and downloading the weights may take longer otherwise.
+Then you can already register the model within Vertex AI&#39;s Model Registry via the google-cloud-aiplatform
+Python SDK as follows:
+from huggingface_hub import get_token
+model = aiplatform.Model.upload(
+display_name=&quot;meta-llama--Meta-Llama-3.1-405B-Instruct-FP8&quot;,
+serving_container_image_uri=&quot;us-docker.pkg.dev/deeplearning-platform-release/gcr.io/huggingface-text-generation-inference-cu121.2-2.ubuntu2204.py310&quot;,
+serving_container_environment_variables={
+&quot;MODEL_ID&quot;: &quot;meta-llama/Meta-Llama-3.1-405B-Instruct-FP8&quot;,
+&quot;HUGGING_FACE_HUB_TOKEN&quot;: get_token(),
+&quot;HF_HUB_ENABLE_HF_TRANSFER&quot;: &quot;1&quot;,
+&quot;NUM_SHARD&quot;: &quot;8&quot;,
+},
+)
+model.wait()
+4. Deploy Meta Llama 3.1 405B on Vertex AI
+Once Meta Llama 3.1 405B is registered on Vertex AI Model Registry, then you can create a Vertex AI Endpoint and deploy the model to the endpoint, with the Hugging Face DLC for TGI as the serving container.
+As mentioned before, since Meta Llama 3.1 405B in FP8 takes ~400 GiB of disk space, that means we need at least 400 GiB of GPU VRAM to load the model, and the GPUs within the node need to support the FP8 data type. In this case, an A3 instance with 8 x NVIDIA H100 80GB with a total of ~640 GiB of VRAM will be used to load the model while also leaving some free VRAM for the KV Cache and the CUDA Graphs.
+endpoint = aiplatform.Endpoint.create(display_name=&quot;Meta-Llama-3.1-405B-FP8-Endpoint&quot;)
+deployed_model = model.deploy(
+endpoint=endpoint,
+machine_type=&quot;a3-highgpu-8g&quot;,
+accelerator_type=&quot;NVIDIA_H100_80GB&quot;,
+accelerator_count=8,
+)
+Note that the Meta Llama 3.1 405B deployment on Vertex AI may take around 25-30 minutes to deploy, as it needs to allocate the resources on Google Cloud, download the weights from the Hugging Face Hub (~10 minutes), and load them for inference in TGI (~2 minutes).
+Congrats, you already deployed Meta Llama 3.1 405B in your Google Cloud account! 🔥 Now is time to put the model to the test.
+5. Run online predictions with Meta Llama 3.1 405B
+Vertex AI will expose an online prediction endpoint within the /predict
+route that is serving the text generation from Text Generation Inference (TGI) DLC, making sure that the I/O data is compliant with Vertex AI payloads (read more about Vertex AI I/O payloads in Vertex AI Documentation - Get online predictions from a custom trained model).
+As /generate
+is the endpoint that is being exposed, you will need to format the messages with the chat template before sending the request to Vertex AI, so it&#39;s recommended to install 🤗transformers
+to use the apply_chat_template
+method from the PreTrainedTokenizerFast
+tokenizer instance.
+pip install --upgrade --quiet transformers
+And then apply the chat template to a conversation using the tokenizer as follows:
+import os
+from huggingface_hub import get_token
+from transformers import AutoTokenizer
+tokenizer = AutoTokenizer.from_pretrained(
+&quot;meta-llama/Meta-Llama-3.1-405B-Instruct-FP8&quot;,
+token=get_token(),
+)
+messages = [
+{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;You are an assistant that responds as a pirate.&quot;},
+{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What&#39;s the Theory of Relativity?&quot;},
+]
+inputs = tokenizer.apply_chat_template(
+messages,
+tokenize=False,
+add_generation_prompt=True,
+)
+Now you have a string out of the initial conversation messages, formatted using the default chat template for Meta Llama 3.1:
+&lt;|begin_of_text|&gt;&lt;|start_header_id|&gt;system&lt;|end_header_id|&gt;\n\nYou are an assistant that responds as a pirate.&lt;|eot_id|&gt;&lt;|start_header_id|&gt;user&lt;|end_header_id|&gt;\n\nWhat&#39;s the Theory of Relativity?&lt;|eot_id|&gt;&lt;|start_header_id|&gt;assistant&lt;|end_header_id|&gt;\n\n
+Which is what you will be sending within the payload to the deployed Vertex AI Endpoint, as well as the generation arguments as in Consuming Text Generation Inference (TGI) -&gt; Generate.
+5.1 Via Python
+5.1.1 Within the same session
+If you are willing to run the online prediction within the current session i.e. the same one as the one used to deploy the model, you can send requests programmatically via the aiplatform.Endpoint
+returned as of the aiplatform.Model.deploy
+method as in the following snippet.
+output = deployed_model.predict(
+instances=[
+{
+&quot;inputs&quot;: inputs,
+&quot;parameters&quot;: {
+&quot;max_new_tokens&quot;: 128,
+&quot;do_sample&quot;: True,
+&quot;top_p&quot;: 0.95,
+&quot;temperature&quot;: 0.7,
+},
+},
+]
+)
+Producing the following output
+:
+Prediction(predictions=[&quot;Yer want ta know about them fancy science things, eh? Alright then, matey, settle yerself down with a pint o&#39; grog and listen close. I be tellin&#39; ye about the Theory o&#39; Relativity, as proposed by that swashbucklin&#39; genius, Albert Einstein.\n\nNow, ye see, Einstein said that time and space be connected like the sea and the wind. Ye can&#39;t have one without the other, savvy? And he proposed that how ye see time and space depends on how fast ye be movin&#39; and where ye be standin&#39;. That be called relativity, me&quot;], deployed_model_id=&#39;&#39;, metadata=None, model_version_id=&#39;1&#39;, model_resource_name=&#39;projects//locations//models/&#39;, explanations=None)
+5.1.2 From a different session
+If the Vertex AI Endpoint was deployed in a different session and you just want to use it, but don&#39;t have access to the deployed_model
+variable returned by the aiplatform.Model.deploy
+method, then you can also run the following snippet to instantiate the deployed aiplatform.Endpoint
+via its resource name that can be found either within the Vertex AI Online Prediction UI, from the aiplatform.Endpoint
+instantiated above, or just replacing the values in projects/{PROJECT_ID}/locations/{LOCATION}/endpoints/{ENDPOINT_ID}
+.
+import os
+from google.cloud import aiplatform
+aiplatform.init(project=os.getenv(&quot;PROJECT_ID&quot;), location=os.getenv(&quot;LOCATION&quot;))
+endpoint = aiplatform.Endpoint(f&quot;projects/{os.getenv(&#39;PROJECT_ID&#39;)}/locations/{os.getenv(&#39;LOCATION&#39;)}/endpoints/{ENDPOINT_ID}&quot;)
+output = endpoint.predict(
+instances=[
+{
+&quot;inputs&quot;: inputs,
+&quot;parameters&quot;: {
+&quot;max_new_tokens&quot;: 128,
+&quot;do_sample&quot;: True,
+&quot;top_p&quot;: 0.95,
+&quot;temperature&quot;: 0.7,
+},
+},
+],
+)
+Producing the following output
+:
+Prediction(predictions=[&quot;Yer lookin&#39; fer a treasure trove o&#39; knowledge about them fancy physics, eh? Alright then, matey, settle yerself down with a pint o&#39; grog and listen close, as I spin ye the yarn o&#39; Einstein&#39;s Theory o&#39; Relativity.\n\nIt be a tale o&#39; two parts, me hearty: Special Relativity and General Relativity. Now, I know what ye be thinkin&#39;: what in blazes be the difference? Well, matey, let me break it down fer ye.\n\nSpecial Relativity be the idea that time and space be connected like the sea and the sky.&quot;], deployed_model_id=&#39;&#39;, metadata=None, model_version_id=&#39;1&#39;, model_resource_name=&#39;projects//locations//models/&#39;, explanations=None)
+5.2 Via the Vertex AI Online Prediction UI
+Alternatively, for testing purposes you can also use the Vertex AI Online Prediction UI, that provides a field that expects the JSON payload formatted according to the Vertex AI specification (as in the examples above) being:
+{
+&quot;instances&quot;: [
+{
+&quot;inputs&quot;: &quot;&lt;|begin_of_text|&gt;&lt;|start_header_id|&gt;system&lt;|end_header_id|&gt;\n\nYou are an assistant that responds as a pirate.&lt;|eot_id|&gt;&lt;|start_header_id|&gt;user&lt;|end_header_id|&gt;\n\nWhat&#39;s the Theory of Relativity?&lt;|eot_id|&gt;&lt;|start_header_id|&gt;assistant&lt;|end_header_id|&gt;\n\n&quot;,
+&quot;parameters&quot;: {
+&quot;max_new_tokens&quot;: 128,
+&quot;do_sample&quot;: true,
+&quot;top_p&quot;: 0.95,
+&quot;temperature&quot;: 0.7
+}
+}
+]
+}
+So that the output is generated and printed within the UI too.
+6. Clean up resources
+When you&#39;re done, you can release the resources that you&#39;ve created as follows, to avoid unnecessary costs.
+deployed_model.undeploy_all
+to undeploy the model from all the endpoints.deployed_model.delete
+to delete the endpoint/s where the model was deployed gracefully, after theundeploy_all
+method.model.delete
+to delete the model from the registry.
+deployed_model.undeploy_all()
+deployed_model.delete()
+model.delete()
+Alternatively, you can also remove those from the Google Cloud Console following the steps:
+- Go to Vertex AI in Google Cloud
+- Go to Deploy and use -&gt; Online prediction
+- Click on the endpoint and then on the deployed model/s to &quot;Undeploy model from endpoint&quot;
+- Then go back to the endpoint list and remove the endpoint
+- Finally, go to Deploy and use -&gt; Model Registry, and remove the model
+Conclusion
+That&#39;s it! You have already registered and deployed Meta Llama 3.1 405B Instruct FP8 on Google Cloud Vertex AI, then ran online prediction both programmatically and via the Google Cloud Console, and finally cleaned up the resources used to avoid unnecessary costs.
+Thanks to the Hugging Face DLCs for Text Generation Inference (TGI), and Google Cloud Vertex AI, deploying a high-performance text generation container for serving Large Language Models (LLMs) has never been easier. And we’re not going to stop here – stay tuned as we enable more experiences to build AI with open models on Google Cloud! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

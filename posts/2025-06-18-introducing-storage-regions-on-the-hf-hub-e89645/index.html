@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing Storage Regions on the HF Hub</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing Storage Regions on the HF Hub</h1> <p class="text-sm text-gray-500"> 2023/11/3 – Hugging Face Blog  <a href="https://huggingface.co/blog/regions" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing Storage Regions on the Hub
+As part of our Enterprise Hub plan, we recently released support for Storage Regions.
+Regions let you decide where your org&#39;s models and datasets will be stored. This has two main benefits, which we&#39;ll briefly go over in this blog post:
+- Regulatory and legal compliance, and more generally, better digital sovereignty
+- Performance (improved download and upload speeds and latency)
+Currently we support the following regions:
+- US 🇺🇸
+- EU 🇪🇺
+- coming soon: Asia-Pacific 🌏
+But first, let&#39;s see how to setup this feature in your organization&#39;s settings 🔥
+Org settings
+If your organization is not an Enterprise Hub org yet, you will see the following screen:
+As soon as you subscribe, you will be able to see the Regions settings page:
+On that page you can see:
+- an audit of where your orgs&#39; repos are currently located
+- dropdowns to select where your repos will be created
+Repository Tag
+Any repo (model or dataset) stored in a non-default location will display its Region directly as a tag. That way your organization&#39;s members can see at a glance where repos are located.
+Regulatory and legal compliance
+In many regulated industries, you may have a requirement to store your data in a specific area.
+For companies in the EU, that means you can use the Hub to build ML in a GDPR compliant way: with datasets, models and inference endpoints all stored within EU data centers.
+If you are an Enterprise Hub customer and have further questions about this, please get in touch!
+Performance
+Storing your models or your datasets closer to your team and infrastructure also means significantly improved performance, for both uploads and downloads.
+This makes a big difference considering model weights and dataset files are usually very large.
+As an example, if you are located in Europe and store your repositories in the EU region, you can expect to see ~4-5x faster upload and download speeds vs. if they were stored in the US. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Hugging Face partners with TruffleHog to Scan for Secrets</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Hugging Face partners with TruffleHog to Scan for Secrets</h1> <p class="text-sm text-gray-500"> 2024/9/4 – Hugging Face Blog  <a href="https://huggingface.co/blog/trufflesecurity-partnership" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Hugging Face partners with TruffleHog to Scan for Secrets
+We&#39;re excited to announce our partnership and integration with Truffle Security, bringing TruffleHog&#39;s powerful secret scanning features to our platform as part of our ongoing commitment to security.
+TruffleHog is an open-source tool that detects and verifies secret leaks in code. With a wide range of detectors for popular SaaS and cloud providers, it scans files and repositories for sensitive information like credentials, tokens, and encryption keys.
+Accidentally committing secrets to code repositories can have serious consequences. By scanning repositories for secrets, TruffleHog helps developers catch and remove this sensitive information before it becomes a problem, protecting data and preventing costly security incidents.
+To combat secret leakage in public and private repositories, we worked with the TruffleHog team on two different initiatives: Enhancing our automated scanning pipeline with TruffleHog Creating a native Hugging Face scanner in TruffleHog
+Enhancing our automated scanning pipeline with TruffleHog
+At Hugging Face, we are committed to protecting our users&#39; sensitive information. This is why we&#39;ve implemented an automated security scanning pipeline that scans all repos and commits. We have extended our automated scanning pipeline to include TruffleHog, which means there are now three types of scans:
+- malware scanning: scans for known malware signatures with ClamAV
+- pickle scanning: scans pickle files for malicious executable code with picklescan
+- secret scanning: scans for passwords, tokens and API keys with TruffleHog
+We run the trufflehog filesystem
+command on every new or modified file on each push to a repository, scanning for potential secrets. If and when a verified secret is detected, we notify the user via email, empowering them to take corrective action.
+Verified secrets are the ones that have been confirmed to work for authentication against their respective providers. Note, however, that unverified secrets are not necessarily harmless or invalid: verification can fail due to technical reasons, such as in the case of down time from the provider.
+It will always be valuable to run trufflehog on your repositories yourself, even when we do it for you. For instance, you could have rotated the secrets that were leaked and want to make sure they come up as “unverified”, or you’d like to manually check if unverified secrets still pose a threat.
+We will eventually migrate to the trufflehog huggingface
+command, the native Hugging Face scanner, once support for LFS lands.
+TruffleHog Native Hugging Face Scanner
+The goal for creating a native Hugging Face scanner in TruffleHog is to empower our users (and the security teams protecting them) to proactively scan their own account data for leaked secrets.
+TruffleHog’s new open-source Hugging Face integration can scan models, datasets and Spaces, as well as any relevant PRs or Discussions. The only limitation is TruffleHog will not currently scan files stored in LFS. Their team is looking to address this for all of their git
+sources soon.
+To scan all of your, or your organization’s Hugging Face models, datasets, and Spaces for secrets using TruffleHog, run the following command(s):
+# For your user
+trufflehog huggingface --user &lt;username&gt;
+# For your organization
+trufflehog huggingface --org &lt;orgname&gt;
+# Or both
+trufflehog huggingface --user &lt;username&gt; --org &lt;orgname&gt;
+You can optionally include the (--include-discussions
+) and PRs (--include-prs
+) flags to scan Hugging Face discussion and PR comments.
+If you’d like to scan just one model, dataset or Space, TruffleHog has specific flags for each of those.
+# Scan one model
+trufflehog huggingface --model &lt;model_id&gt;
+# Scan one dataset
+trufflehog huggingface --dataset &lt;dataset_id&gt;
+# Scan one Space
+trufflehog huggingface --space &lt;space_id&gt;
+If you need to pass in an authentication token, you can do so using the --token flag or by setting a HUGGINGFACE_TOKEN environment variable.
+Here is an example of TruffleHog’s output when run on mcpotato/42-eicar-street:
+trufflehog huggingface --model mcpotato/42-eicar-street
+🐷🔑🐷 TruffleHog. Unearth your secrets. 🐷🔑🐷
+2024-09-02T16:39:30+02:00 info-0 trufflehog running source {&quot;source_manager_worker_id&quot;: &quot;3KRwu&quot;, &quot;with_units&quot;: false, &quot;target_count&quot;: 0, &quot;source_manager_units_configurable&quot;: true}
+2024-09-02T16:39:30+02:00 info-0 trufflehog Completed enumeration {&quot;num_models&quot;: 1, &quot;num_spaces&quot;: 0, &quot;num_datasets&quot;: 0}
+2024-09-02T16:39:32+02:00 info-0 trufflehog scanning repo {&quot;source_manager_worker_id&quot;: &quot;3KRwu&quot;, &quot;model&quot;: &quot;https://huggingface.co/mcpotato/42-eicar-street.git&quot;, &quot;repo&quot;: &quot;https://huggingface.co/mcpotato/42-eicar-street.git&quot;}
+Found unverified result 🐷🔑❓
+Detector Type: HuggingFace
+Decoder Type: PLAIN
+Raw result: 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
+Commit: 9cb322a7c2b4ec7c9f18045f0fa05015b831f256
+Email: Luc Georges &lt;luc.sydney.georges@gmail.com&gt;
+File: token_leak.yml
+Line: 1
+Link: https://huggingface.co/mcpotato/42-eicar-street/blob/9cb322a7c2b4ec7c9f18045f0fa05015b831f256/token_leak.yml#L1
+Repository: https://huggingface.co/mcpotato/42-eicar-street.git
+Resource_type: model
+Timestamp: 2024-06-17 13:11:50 +0000
+2024-09-02T16:39:32+02:00 info-0 trufflehog finished scanning {&quot;chunks&quot;: 19, &quot;bytes&quot;: 2933, &quot;verified_secrets&quot;: 0, &quot;unverified_secrets&quot;: 1, &quot;scan_duration&quot;: &quot;2.176551292s&quot;, &quot;trufflehog_version&quot;: &quot;3.81.10&quot;}
+Kudos to the TruffleHog team for offering such a great tool to make our community safe! Stay tuned for more features as we continue to collaborate to make the Hub more secure for everyone. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

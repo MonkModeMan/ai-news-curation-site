@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>🧨 Diffusers welcomes Stable Diffusion 3.5 Large</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 🧨 Diffusers welcomes Stable Diffusion 3.5 Large</h1> <p class="text-sm text-gray-500"> 2024/10/22 – Hugging Face Blog  <a href="https://huggingface.co/blog/sd3-5" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> 🧨 Diffusers welcomes Stable Diffusion 3.5 Large
+Stable Diffusion 3.5 is the improved variant of its predecessor, Stable Diffusion 3. As of today, the models are available on the Hugging Face Hub and can be used with 🧨 Diffusers.
+The release comes with two checkpoints:
+- A large (8B) model
+- A large (8B) timestep-distilled model enabling few-step inference
+In this post, we will focus on how to use Stable Diffusion 3.5 (SD3.5) with Diffusers, covering both inference and training.
+Table Of Contents
+- Architectural changes
+- Using SD3.5 with Diffusers
+- Performing inference with quantization
+- Training LoRAs with quantization
+- Using single-file loading
+- Important links
+Architectural changes
+The transformer architecture of SD3.5 (large) is very similar to SD3 (medium), with the following changes:
+- QK normalization: For training large transformer models, QK normalization has now become a standard, and SD3.5 Large is no exception.
+- Dual attention layers: Instead of using single attention layers for each stream of modality in the MMDiT blocks, SD3.5 uses double attention layers.
+The rest of the details in terms of the text encoders, VAE, and noise scheduler stay exactly the same as in SD3 Medium. For more on SD3, we recommend checking out the original paper.
+Using SD3.5 with Diffusers
+Make sure you install the latest version of diffusers:
+pip install -U diffusers
+As the model is gated, before using it with diffusers, you first need to go to the Stable Diffusion 3.5 Large Hugging Face page, fill in the form and accept the gate. Once you are in, you need to log in so that your system knows you’ve accepted the gate. Use the command below to log in:
+huggingface-cli login
+The following snippet will download the 8B parameter version of SD3.5 in torch.bfloat16
+precision.
+This is the format used in the original checkpoint published by Stability AI, and is the recommended way to run inference.
+import torch
+from diffusers import StableDiffusion3Pipeline
+pipe = StableDiffusion3Pipeline.from_pretrained(
+&quot;stabilityai/stable-diffusion-3.5-large&quot;, torch_dtype=torch.bfloat16
+).to(&quot;cuda&quot;)
+image = pipe(
+prompt=&quot;a photo of a cat holding a sign that says hello world&quot;,
+negative_prompt=&quot;&quot;,
+num_inference_steps=40,
+height=1024,
+width=1024,
+guidance_scale=4.5,
+).images[0]
+image.save(&quot;sd3_hello_world.png&quot;)
+The release also comes with a “timestep-distilled” model that eliminates classifier-free guidance and lets us generate images in fewer steps (typically in 4-8 steps).
+import torch
+from diffusers import StableDiffusion3Pipeline
+pipe = StableDiffusion3Pipeline.from_pretrained(
+&quot;stabilityai/stable-diffusion-3.5-large-turbo&quot;, torch_dtype=torch.bfloat16
+).to(&quot;cuda&quot;)
+image = pipe(
+prompt=&quot;a photo of a cat holding a sign that says hello world&quot;,
+num_inference_steps=4,
+height=1024,
+width=1024,
+guidance_scale=1.0,
+).images[0]
+image.save(&quot;sd3_hello_world.png&quot;)
+All the examples shown in our SD3 blog post and the official Diffusers documentation should already work with SD3.5. In particular, both of those resources dive deep into optimizing the memory requirements to run inference. Since SD3.5 Large is significantly larger than SD3 Medium, memory optimization becomes crucial to allow inference on consumer interfaces.
+Running inference with quantization
+Diffusers natively supports working with bitsandbytes
+quantization, which optimizes memory even more.
+First, make sure to install all the libraries necessary:
+pip install -Uq git+https://github.com/huggingface/transformers@main
+pip install -Uq bitsandbytes
+Then load the transformer in “NF4” precision:
+from diffusers import BitsAndBytesConfig, SD3Transformer2DModel
+import torch
+model_id = &quot;stabilityai/stable-diffusion-3.5-large&quot;
+nf4_config = BitsAndBytesConfig(
+load_in_4bit=True,
+bnb_4bit_quant_type=&quot;nf4&quot;,
+bnb_4bit_compute_dtype=torch.bfloat16
+)
+model_nf4 = SD3Transformer2DModel.from_pretrained(
+model_id,
+subfolder=&quot;transformer&quot;,
+quantization_config=nf4_config,
+torch_dtype=torch.bfloat16
+)
+And now, we’re ready to run inference:
+from diffusers import StableDiffusion3Pipeline
+pipeline = StableDiffusion3Pipeline.from_pretrained(
+model_id,
+transformer=model_nf4,
+torch_dtype=torch.bfloat16
+)
+pipeline.enable_model_cpu_offload()
+prompt = &quot;A whimsical and creative image depicting a hybrid creature that is a mix of a waffle and a hippopotamus, basking in a river of melted butter amidst a breakfast-themed landscape. It features the distinctive, bulky body shape of a hippo. However, instead of the usual grey skin, the creature&#39;s body resembles a golden-brown, crispy waffle fresh off the griddle. The skin is textured with the familiar grid pattern of a waffle, each square filled with a glistening sheen of syrup. The environment combines the natural habitat of a hippo with elements of a breakfast table setting, a river of warm, melted butter, with oversized utensils or plates peeking out from the lush, pancake-like foliage in the background, a towering pepper mill standing in for a tree. As the sun rises in this fantastical world, it casts a warm, buttery glow over the scene. The creature, content in its butter river, lets out a yawn. Nearby, a flock of birds take flight&quot;
+image = pipeline(
+prompt=prompt,
+negative_prompt=&quot;&quot;,
+num_inference_steps=28,
+guidance_scale=4.5,
+max_sequence_length=512,
+).images[0]
+image.save(&quot;whimsical.png&quot;)
+You can control other knobs in the BitsAndBytesConfig
+. Refer to the documentation for details.
+It is also possible to directly load a model quantized with the same nf4_config
+as above.
+This is particularly helpful for machines with low RAM. Refer to this Colab Notebook for an end-to-end example.
+Training LoRAs with SD3.5 Large with quantization
+Thanks to libraries like bitsandbytes
+and peft
+, it is possible to fine-tune large models like SD3.5 Large on consumer GPU cards having 24GBs of VRAM. It is already possible to leverage our existing SD3 training script for training LoRAs.
+The below training command already works:
+accelerate launch train_dreambooth_lora_sd3.py \
+--pretrained_model_name_or_path=&quot;stabilityai/stable-diffusion-3.5-large&quot; \
+--dataset_name=&quot;Norod78/Yarn-art-style&quot; \
+--output_dir=&quot;yart_art_sd3-5_lora&quot; \
+--mixed_precision=&quot;bf16&quot; \
+--instance_prompt=&quot;Frog, yarn art style&quot; \
+--caption_column=&quot;text&quot;\
+--resolution=768 \
+--train_batch_size=1 \
+--gradient_accumulation_steps=1 \
+--learning_rate=4e-4 \
+--report_to=&quot;wandb&quot; \
+--lr_scheduler=&quot;constant&quot; \
+--lr_warmup_steps=0 \
+--max_train_steps=700 \
+--rank=16 \
+--seed=&quot;0&quot; \
+--push_to_hub
+However, to make it work with quantization, we need to tweak a couple of knobs. Below, we provide pointers on how to do that:
+- We initialize
+transformer
+either with a quantization config or load a quantized checkpoint directly. - Then, we prepare it by using the
+prepare_model_for_kbit_training()
+frompeft
+. - The rest of the process remains the same, thanks to
+peft
+&#39;s strong support forbitsandbytes
+!
+Refer to this example script for a fuller example.
+Using single-file loading with the Stable Diffusion 3.5 Transformer
+You can load the Stable Diffusion 3.5 Transformer model using the original checkpoint files published by Stability AI with the from_single_file
+method:
+import torch
+from diffusers import SD3Transformer2DModel, StableDiffusion3Pipeline
+transformer = SD3Transformer2DModel.from_single_file(
+&quot;https://huggingface.co/stabilityai/stable-diffusion-3.5-large-turbo/blob/main/sd3.5_large.safetensors&quot;,
+torch_dtype=torch.bfloat16,
+)
+pipe = StableDiffusion3Pipeline.from_pretrained(
+&quot;stabilityai/stable-diffusion-3.5-large&quot;,
+transformer=transformer,
+torch_dtype=torch.bfloat16,
+)
+pipe.enable_model_cpu_offload()
+image = pipe(&quot;a cat holding a sign that says hello world&quot;).images[0]
+image.save(&quot;sd35.png&quot;)
+Important links
+- Stable Diffusion 3.5 Large collection on the Hub
+- Official Diffusers documentation for Stable Diffusion 3.5
+- Colab Notebook to run inference with quantization
+- Training LoRAs
+- Stable Diffusion 3 paper
+- Stable Diffusion 3 blog post
+Acknowledgements: Daniel Frank for the background photo used in the thumbnail of this blog post. Thanks to Pedro Cuenca and Tom Aarsen for their reviews on the post draft. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

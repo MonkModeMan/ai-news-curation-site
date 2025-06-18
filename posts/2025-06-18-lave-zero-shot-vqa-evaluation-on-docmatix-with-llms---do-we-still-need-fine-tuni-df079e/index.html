@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>LAVE: Zero-shot VQA Evaluation on Docmatix with LLMs - Do We Still Need Fine-Tuning?</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 LAVE: Zero-shot VQA Evaluation on Docmatix with LLMs - Do We Still Need Fine-Tuning?</h1> <p class="text-sm text-gray-500"> 2024/7/25 – Hugging Face Blog  <a href="https://huggingface.co/blog/zero-shot-vqa-docmatix" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> LAVE: Zero-shot VQA Evaluation on Docmatix with LLMs - Do We Still Need Fine-Tuning?
+While developing Docmatix, we noticed that fine-tuning Florence-2 on it yielded great performance on DocVQA, but resulted in low scores on the benchmark. To enhance performance, we had to fine-tune the model further on DocVQA to learn the syntax required for the benchmark. Interestingly, this additional fine-tuning seemed to perform worse according to human evaluators, which is why we primarily used it for ablation studies and released the model only trained on Docmatix for broader use.
+Although the generated answers semantically align with the reference answers, as illustrated in Figure 1, they still receive low scores. This raises these questions: Should we fine-tune the models to improve these metrics, or should we develop new metrics that better align with human perception?
+Figure 1: t-SNE visualization of Zero-Shot Generated and Reference Answers from Docmatix dataset
+Introduction
+Our community has recently focused on out-of-distribution (OOD) evaluation, utilizing methods like zero-shot transfer to unseen VQA tasks or fine-tuning on one VQA dataset and evaluating on another. This shift is increasingly relevant with the rise of synthetic datasets such as Docmatix, SciGraphQA, SimVQA used to fine-tune Vision Language Models (VLMs).
+Traditionally, VQA Accuracy has been the main metric for evaluating model performance. It relies on exact string matching between a model&#39;s predicted answer and a set of reference answers annotated by humans. This metric worked well because VQA evaluation followed an independent and identically distributed (IID) paradigm, where training and testing data distributions were similar, allowing models to adapt effectively See details here.
+In OOD settings, generated answers might not match reference answers despite being correct due to differences in format, specificity, or interpretation. This paradigm is perfectly illustrated in the Figure 1, where we compare the zero-shot generated captions vs the reference captions from the synthetic dataset. This is particularly true for instruction-generated datasets and their human-curated counterparts. Some methods have attempted to align answer formats with references, but this only addresses the symptom, not the root cause of flawed evaluation metrics. While human evaluation is reliable, it is costly and not scalable, highlighting the need for metrics that better align with human judgment.
+Method
+Docmatix is the largest synthetic DocVQA dataset, generated from the curated document dataset, PDFA. It is 100x larger than previously available datasets. The human-curated counterpart is DocVQA, which serves as an evaluation benchmark for VQA models for Document Understanding. In this post, we are going to use the subset of Docmatix which consists around 200 test samples, which can be downloaded here Docmatix-zero-shot-exp.
+Figure 2: The examples of Q&amp;A pairs from Docmatix and DocVQA test set. Note: the corresponding images are not shown here.
+Although the content of the question and answer pairs in Docmatix and DocVQA is similar, their styles differ significantly. Traditional metrics like CIDER, ANLS, and BLEU can be overly restrictive for zero-shot evaluation in this context. Motivated by the similarity of the embeddings observed in t-SNE (Figure 1), we decided to use a different evaluation metric. In this post, we consider the LAVE (LLM-Assisted VQA Evaluation) metric to better assess generalization on this unseen but semantically similar dataset.
+Figure 3: t-SNE visualization of Question, Answer and Image features from Docmatix and DocVQA datasets
+Figure 5: t-SNE visualization of Question, Answer and Image features from Docmatix and DocVQA datasets
+For our evaluation, we chose MPLUGDocOwl1.5 as a baseline model. This model achieves an 84% ANLS score on the test subset of the original DocVQA dataset. We then ran a zero-shot generation on a subset of Docmatix, consisting of 200 images. We used Llama-2-Chat-7b for rating the answers.
+About LAVE
+We followed the procedure outlined in the paper. The VQA evaluation is framed as an answer-rating task suitable for in-context learning with LLMs. We used a rating scale from 1 to 3 to account for ambiguous questions or incomplete answers. The prompt included a task description, several demonstrations of input/output, and the input for a test example.
+We structured our task description and included the instruction &quot;Give the rationale before rating&quot; to showcase a justification for the assigned rating. Each demonstration comprised a question, a set of reference answers, the candidate answer, the answer rating, and an explanation for the rating. We also include the &quot;Provide only one rating&quot; to avoid sentence-by-sentence analysis, which sometimes resulted in several ratings.
+task_description = &quot;&quot;&quot;You are given a question, a set of gold-standard reference answers written by
+experts, and a candidate answer. Please rate the accuracy of the candidate answer for the question
+considering the reference answers. Use a scale of 1-3, with 1 indicating an incorrect or irrelevant
+answer, 2 indicating an ambiguous or incomplete answer, and 3 indicating a correct answer.
+Give the rationale before rating. Provide only one rating.
+THIS IS VERY IMPORTANT:
+A binary question should only be answered with &#39;yes&#39; or &#39;no&#39;,
+otherwise the candidate answer is incorrect.&quot;&quot;&quot;
+demonstrations = [
+{
+&quot;question&quot;: &quot;What&#39;s the weather like?&quot;,
+&quot;reference_answer&quot;: [&quot;sunny&quot;, &quot;clear&quot;, &quot;bright&quot;, &quot;sunny&quot;, &quot;sunny&quot;],
+&quot;generated_answer&quot;: &quot;cloudy&quot;
+}
+]
+Scoring Function
+Given the LLM’s generated text for the test example, we extracted the rating from the last character (either 1, 2, or 3) and mapped it to a score in the range [0, 1]: [ s = \frac{r - 1}{2} ]
+Table of Results
+The results of our evaluation are summarized in the table below:
+| Metric | CIDER | BLEU | ANLS | LAVE |
+|---|---|---|---|---|
+| Score | 0.1411 | 0.0032 | 0.002 | 0.58 |
+Qualitative Examples
+Figure 4: Llama rating and rationale for the generated and reference answers from Docmatix test subset.
+Figure 5: Llama rating and rationale for the generated and reference answers from Docmatix test subset.
+Are we too strict in evaluating VQA systems and do we need finetuning?
+We have approximately 50% accuracy gain when using LLMs to evaluate responses, indicating that the answers can be correct despite not adhering to a strict format. This suggests that our current evaluation metrics may be too rigid. It’s important to note that this is not a comprehensive research paper, and more ablation studies are needed to fully understand the effectiveness of different metrics on the evaluation of zero-shot performance on synthetic dataset. We hope this work serves as a starting point to broaden the current research focus on improving the evaluation of zero-shot vision-language models within the context of synthetic datasets and to explore more efficient approaches beyond prompt learning.
+References
+@inproceedings{cascante2022simvqa,
+title={Simvqa: Exploring simulated environments for visual question answering},
+author={Cascante-Bonilla, Paola and Wu, Hui and Wang, Letao and Feris, Rogerio S and Ordonez, Vicente},
+booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+pages={5056--5066},
+year={2022}
+}
+@article{hu2024mplug,
+title={mplug-docowl 1.5: Unified structure learning for ocr-free document understanding},
+author={Hu, Anwen and Xu, Haiyang and Ye, Jiabo and Yan, Ming and Zhang, Liang and Zhang, Bo and Li, Chen and Zhang, Ji and Jin, Qin and Huang, Fei and others},
+journal={arXiv preprint arXiv:2403.12895},
+year={2024}
+}
+@article{agrawal2022reassessing,
+title={Reassessing evaluation practices in visual question answering: A case study on out-of-distribution generalization},
+author={Agrawal, Aishwarya and Kaji{\&#39;c}, Ivana and Bugliarello, Emanuele and Davoodi, Elnaz and Gergely, Anita and Blunsom, Phil and Nematzadeh, Aida},
+journal={arXiv preprint arXiv:2205.12191},
+year={2022}
+}
+@inproceedings{li2023blip,
+title={Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large language models},
+author={Li, Junnan and Li, Dongxu and Savarese, Silvio and Hoi, Steven},
+booktitle={International conference on machine learning},
+pages={19730--19742},
+year={2023},
+organization={PMLR}
+}
+@inproceedings{manas2024improving,
+title={Improving automatic vqa evaluation using large language models},
+author={Ma{\~n}as, Oscar and Krojer, Benno and Agrawal, Aishwarya},
+booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+volume={38},
+number={5},
+pages={4171--4179},
+year={2024}
+}
+@article{li2023scigraphqa,
+title={Scigraphqa: A large-scale synthetic multi-turn question-answering dataset for scientific graphs},
+author={Li, Shengzhi and Tajbakhsh, Nima},
+journal={arXiv preprint arXiv:2308.03349},
+year={2023}
+} </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

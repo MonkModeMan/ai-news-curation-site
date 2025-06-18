@@ -1,0 +1,124 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Share your open ML datasets on Hugging Face Hub!</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Share your open ML datasets on Hugging Face Hub!</h1> <p class="text-sm text-gray-500"> 2024/11/12 – Hugging Face Blog  <a href="https://huggingface.co/blog/researcher-dataset-sharing" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Share your open ML datasets on Hugging Face Hub!
+If you&#39;re working on data-intensive research or machine learning projects, you need a reliable way to share and host your datasets. Public datasets such as Common Crawl, ImageNet, Common Voice and more are critical to the open ML ecosystem, yet they can be challenging to host and share.
+Hugging Face Hub makes it seamless to host and share datasets, trusted by many leading research institutions, companies, and government agencies, including Nvidia, Google, Stanford, NASA, THUDM and Barcelona Supercomputing Center.
+By hosting a dataset on the Hugging Face Hub, you get instant access to features that can maximize your work&#39;s impact:
+- Generous Limits
+- Dataset Viewer
+- Third Party Library Support
+- SQL Console
+- Security
+- Reach and Visibility
+Generous Limits
+Support for large datasets
+The Hub can host terabyte-scale datasets, with high per-file and per-repository limits. If you have data to share, the Hugging Face datasets team can help suggest the best format for uploading your data for community usage. The 🤗 Datasets library makes it easy to upload and download your files, or even create a dataset from scratch. 🤗 Datasets also enables dataset streaming , making it possible to work with large datasets without needing to download the entire thing. This can be invaluable to allow researchers with less computational resources to work with your datasets, or to select small portions of a huge dataset for testing, development or prototyping.
+The Hugging Face Hub can host the large datasets often created for machine learning research.
+Note: The Xet team is currently working on a backend update that will increase per-file limits from the current 50 GB to 500 GB while also improving storage and transfer efficiency.
+Dataset Viewer
+Beyond just hosting your data, the Hub provides powerful tools for exploration. With the Datasets Viewer, users can explore and interact with datasets hosted on the Hub directly in their browser. This provides an easy way for others to view and explore your data without downloading it first.
+Hugging Face datasets supports many different modalities (audio, images, video, etc.) and file formats (CSV, JSON, Parquet, etc.), and compression formats (Gzip, Zip, etc.). Check out the Datasets File Formats page for more details.
+The Dataset Viewer for the Infinity-Instruct dataset.
+The Datasets Viewer also includes a few features which make it easier to explore a dataset.
+Full Text Search
+Built-in Full Text Search is one of the most powerful features of the Datasets Viewer. Any text columns in a dataset immediately become searchable.
+The Arxiver dataset contains 63.4k rows of arXiv research papers converted to Markdown. By using Full Text Search, it&#39;s easy to find the papers containing a specific author such as Ilya Sutskever below.
+Sorting
+The Datasets Viewer allows you to sort the dataset by clicking on the column headers. This makes it easy to find the most relevant examples in a dataset.
+Below is an example of a dataset sorted by the helpfulness
+column in descending order for the HelpSteer2 dataset.
+Third Party Library Support
+Hugging Face is fortunate to have third party integrations with the leading open source data tools. By hosting a dataset on the Hub, it instantly makes the dataset compatible with the tools users are most familiar with.
+Here are some of the libraries Hugging Face supports out of the box:
+| Library | Description | Monthly PyPi Downloads (2024) |
+|---|---|---|
+| Pandas | Python data analysis toolkit. | 258M |
+| Spark | Real-time, large-scale data processing tool in a distributed environment. | 29M |
+| Datasets | 🤗 Datasets is a library for accessing and sharing datasets for Audio, Computer Vision, and Natural Language Processing (NLP). | 17M |
+| Dask | Parallel and distributed computing library that scales the existing Python and PyData ecosystem. | 12M |
+| Polars | A DataFrame library on top of an OLAP query engine. | 8.5M |
+| DuckDB | In-process SQL OLAP database management system. | 6M |
+| WebDataset | Library to write I/O pipelines for large datasets. | 871K |
+| Argilla | Collaboration tool for AI engineers and domain experts that value high quality data. | 400k |
+Most of these libraries enable you to load or stream a dataset in 1 single line of code.
+Here are some examples with Pandas, Polars and DuckDB:
+# Pandas example
+import pandas as pd
+df = pd.read_parquet(&quot;hf://datasets/neuralwork/arxiver/data/train.parquet&quot;)
+# Polars example
+import polars as pl
+df = pl.read_parquet(&quot;hf://datasets/neuralwork/arxiver/data/train.parquet&quot;)
+# DuckDB example - SQL queries
+import duckdb
+duckdb.sql(&quot;SELECT * FROM &#39;hf://datasets/neuralwork/arxiver/data/train.parquet&#39; LIMIT 10&quot;)
+You can find more information about integrated libraries in the Datasets documentation. Along with the libraries listed above, there are many more community supported tools which support the Hugging Face Hub such as Lilac and Spotlight.
+SQL Console
+The SQL Console provides an interactive SQL editor that runs entirely in your browser, enabling instant data exploration without any setup. Key features include:
+- One-Click: Open a SQL Console to query a dataset with a single click
+- Shareable and Embeddable Results: Share and embed interesting query results
+- Full DuckDB Syntax: Use full SQL syntax with built-in functions for regex, lists, JSON, embeddings, and more
+On every public dataset you should see a new SQL Console badge. With just one click you can open a SQL Console to query that dataset.
+Security
+While making datasets accessible is important, protecting sensitive data is equally crucial. The Hugging Face Hub provides robust security features to help you maintain control over your data while sharing it with the right audiences.
+Access Controls
+The Hugging Face Hub supports unique access control options for who has access to the dataset.
+- Public: Anyone can access the dataset.
+- Private: Only you and those in your organization can access the dataset.
+- Gated: Control access to your dataset through two options:
+- Automatic Approval: Users must provide required information (like name and email) and agree to terms before gaining access
+- Manual Approval: You review and manually approve/reject each access request
+For more details about gated datasets, see the gated datasets documentation. For more fine-grained controls, there are Enterprise plan features where organizations can create resource security groups, use SSO, and more.
+Built-in Security Scanning
+Along with access controls, the Hugging Face Hub offers several security scanners:
+| Feature | Description |
+|---|---|
+| Malware Scanning | Scans files for malware and suspicious content at each commit and visit |
+| Secrets Scanning | Blocks datasets with hardcoded secrets and environment variables |
+| Pickle Scanning | Scans pickle files and shows vetted imports for PyTorch weights |
+| ProtectAI | Uses Guardian tech to block datasets with pickle, Keras and other exploits |
+Reach and Visibility
+Having a secure platform with powerful features is valuable, but the true impact of research comes from reaching the right audience. Reach and visibility are crucial for researchers sharing datasets - it helps maximize research impact, enables reproducibility, facilitates collaboration, and ensures valuable data can benefit the broader scientific community.
+With over 5M builders actively using the platform, the Hugging Face Hub provides researchers with powerful tools for community engagement and visibility. Here&#39;s what you can expect:
+Better Community Engagement
+- Built-in discussion tabs for each dataset for community engagement
+- Organizations as a centralized place for grouping and collaborating on multiple datasets
+- Metrics for dataset usage and impact
+Wider Reach
+- Access to a large, active community of researchers, developers, and practitioners
+- SEO-optimized URLs making your dataset easily discoverable
+- Integration with the broader ecosystem of models, datasets, and libraries
+- Clear links between your dataset and related models, papers, and demos
+Improved Documentation
+- Customizable README files for comprehensive documentation
+- Support for detailed dataset descriptions and proper academic citations
+- Links to related research papers and publications
+The Hub makes it easy to ask questions and discuss datasets.
+How can I host my dataset on the Hugging Face Hub?
+Now that you understand the benefits of hosting your dataset on the Hub, you might be wondering how to get started. Here are some comprehensive resources to guide you through the process:
+- General guidance on creating and sharing datasets on the Hub
+- Guides for particular modalities:
+- Creating an audio dataset
+- Creating an image dataset
+- Creating a video dataset
+- Guidance on structuring your repository so a dataset can be automatically loaded from the Hub.
+The following pages will be useful if you want to share large datasets:
+- Repository limitations and recommendations provides general guidance on some of the considerations you&#39;ll want to make when sharing large datasets.
+- The Tips and tricks for large uploads page provides some guidance on how to upload large datasets to the Hub.
+If you want any further help uploading a dataset to the Hub or want to upload a particularly large dataset, please contact datasets@huggingface.co. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

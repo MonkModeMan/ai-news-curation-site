@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>From cloud to developers: Hugging Face and Microsoft Deepen Collaboration</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 From cloud to developers: Hugging Face and Microsoft Deepen Collaboration</h1> <p class="text-sm text-gray-500"> 2024/5/21 – Hugging Face Blog  <a href="https://huggingface.co/blog/microsoft-collaboration" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> From cloud to developers: Hugging Face and Microsoft Deepen Collaboration
+Today at Microsoft Build we are happy to announce a broad set of new features and collaborations as Microsoft and Hugging Face deepen their strategic collaboration to make open models and open source AI easier to use everywhere. Together, we will work to enable AI builders across open science, open source, cloud, hardware and developer experiences - read on for announcements today on all fronts!
+A collaboration for Cloud AI Builders
+we are excited to announce two major new experiences to build AI with open models on Microsoft Azure.
+Expanded HF Collection in Azure Model Catalog
+A year ago, Hugging Face and Microsoft unveiled the Hugging Face Collection in the Azure Model Catalog. The Hugging Face Collection has been used by hundreds of Azure AI customers, with over a thousand open models available since its introduction. Today, we are adding some of the most popular open Large Language Models to the Hugging Face Collection to enable direct, 1-click deployment from Azure AI Studio.
+The new models include Llama 3 from Meta, Mistral 7B from Mistral AI, Command R Plus from Cohere for AI, Qwen 1.5 110B from Qwen, and some of the highest performing fine-tuned models on the Open LLM Leaderboard from the Hugging Face community.
+To deploy the models in your own Azure account, you can start from the model card on the Hugging Face Hub, selecting the “Deploy on Azure” option:
+Or you can find model directly in Azure AI Studio within the Hugging Face Collection, and click “Deploy”
+Build AI with the new AMD MI300X on Azure
+Today, Microsoft made new Azure ND MI300X virtual machines (VMs) generally available on Azure, based on the latest AMD Instinct MI300 GPUs. Hugging Face collaborated with AMD and Microsoft to achieve amazing performance and cost/performance for Hugging Face models on the new virtual machines.
+This work leverages our deep collaboration with AMD and our open source library Optimum-AMD, with optimization, ROCm integrations and continuous testing of Hugging Face open source libraries and models on AMD Instinct GPUs.
+A Collaboration for Open Science
+Microsoft has been releasing some of the most popular open models on Hugging Face, with close to 300 models currently available in the Microsoft organization on the Hugging Face Hub.
+This includes the recent Phi-3 family of models, which are permissibly licensed under MIT, and offer performance way above their weight class. For instance, with only 3.8 billion parameters, Phi-3 mini outperforms many of the larger 7 to 10 billion parameter large language models, which makes the models excellent candidates for on-device applications.
+To demonstrate the capabilities of Phi-3, Hugging Face deployed Phi-3 mini in Hugging Chat, its free consumer application to chat with the greatest open models and create assistants.
+A Collaboration for Open Source
+Hugging Face and Microsoft have been collaborating for 3 years to make it easy to export and use Hugging Face models with ONNX Runtime, through the optimum open source library.
+Recently, Hugging Face and Microsoft have been focusing on enabling local inference through WebGPU, leveraging Transformers.js and ONNX Runtime Web. Read more about the collaboration in this community article by the ONNX Runtime team.
+To see the power of WebGPU in action, consider this demo of Phi-3 generating over 70 tokens per second locally in the browser!
+A Collaboration for Developers
+Last but not least, today we are unveiling a new integration that makes it easier than ever for developers to build AI applications with Hugging Face Spaces and VS Code!
+The Hugging Face community has created over 500,000 AI demo applications on the Hub with Hugging Face Spaces. With the new Spaces Dev Mode, Hugging Face users can easily connect their Space to their local VS Code, or spin up a web hosted VS Code environment.
+Spaces Dev Mode is currently in beta, and available to PRO subscribers. To learn more about Spaces Dev Mode, check out Introducing Spaces Dev mode for a seamless developer experience or documentation.
+What’s Next
+We are excited to deepen our strategic collaboration with Microsoft, to make open-source AI more accessible everywhere. Stay tuned as we enable more models in the Azure AI Studio model catalog and introduce new features and experiences in the months to come. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

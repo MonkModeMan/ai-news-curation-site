@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Transforming the future of music creation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Transforming the future of music creation</h1> <p class="text-sm text-gray-500"> 2023/11/16 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/transforming-the-future-of-music-creation/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Research
+Transforming the future of music creation
+Announcing our most advanced music generation model, and two new AI experiments designed to open a new playground for creativity
+From jazz to heavy metal, techno to opera, music is a much loved form of creative expression. With complex and densely layered lyrics, melodies, rhythms, and vocals, creating music that’s compelling has been especially challenging for artificial intelligence (AI) systems — until now.
+Today, in partnership with YouTube, we’re announcing Google DeepMind’s Lyria, our most advanced AI music generation model to date, and two AI experiments designed to open a new playground for creativity:
+- Dream Track – an experiment in YouTube Shorts designed to help deepen connections between artists, creators, and fans through music creation.
+- Music AI tools – a set of tools we’re designing with artists, songwriters, and producers to help bolster their creative processes.
+To develop these projects, we’ve brought together technical experts from across Google with a diverse range of world-renowned artists and songwriters to explore how generative music technologies can responsibly shape the future of music creation. We’re excited about building new technologies that can enhance the work of professional musicians and the artist community, and deliver a positive contribution to the future of music.
+Introducing the Lyria model
+Music contains huge amounts of information — consider every beat, note, and vocal harmony in every second. When generating long sequences of sound, it’s difficult for AI models to maintain musical continuity across phrases, verses, or extended passages. Since music often includes multiple voices and instruments at the same time, it&#39;s much harder to create than speech.
+Built by Google DeepMind, the Lyria model excels at generating high-quality music with instrumentals and vocals, performing transformation and continuation tasks, and giving users more nuanced control of the output’s style and performance.
+Inspiring new music on YouTube Shorts
+We’re trialing Lyria in an experiment called Dream Track, which is designed to test new ways for artists to connect with their fans and developed in collaboration with YouTube.
+Within the experiment, a limited set of creators will be able to use Dream Track for producing a unique soundtrack with the AI-generated voice and musical style of artists including Alec Benjamin, Charlie Puth, Charli XCX, Demi Lovato, John Legend, Sia, T-Pain, Troye Sivan, and Papoose. Each participating artist has partnered with us and will have a hand in helping us test and learn to shape the future of AI in music.
+Dream Track users can simply enter a topic and choose an artist from the carousel to generate a 30 second soundtrack for their Short. Using our Lyria model, Dream Track simultaneously generates the lyrics, backing track, and AI-generated voice in the style of the participating artist selected.
+Here are a couple of samples generated in the styles of Charlie Puth or T-Pain:
+Exploring music AI tools with the industry
+Our researchers have been exploring with artists, songwriters, and producers in YouTube’s Music AI Incubator how generative AI can best support the creative process, and working together to responsibly design a suite of music AI tools.
+Imagine singing a melody to create a horn line, transforming chords from a MIDI keyboard into a realistic vocal choir, or adding an instrumental accompaniment to a vocal track.
+With our music AI tools, users can create new music or instrumental sections from scratch, transform audio from one music style or instrument to another, and create instrumental and vocal accompaniments. This work draws on our history of research and experimentation with AI and music, and we’ll continue testing our music AI tools with incubator participants throughout their development.
+Watermarking AI-generated audio with SynthID
+Our team is also pioneering responsible deployment of our technologies with best-in-class tools for watermarking and identifying synthetically generated content. Any content published by our Lyria model will be watermarked with SynthID, the same technology toolkit we’re using for identifying images generated by Imagen on Google Cloud’s Vertex AI.
+SynthID embeds a watermark into AI-generated audio content that’s inaudible to the human ear and doesn’t compromise the listening experience. It does this by converting the audio wave into a two-dimensional visualization that shows how the spectrum of frequencies in a sound evolves over time. This novel method is unlike anything that exists today, especially in the context of audio.
+The watermark is designed to maintain detectability even when the audio content undergoes many common modifications such as noise additions, MP3 compression, or speeding up and slowing down the track. SynthID can also detect the presence of a watermark throughout a track to help determine if parts of a song were generated by Lyria.
+Developing and deploying our technologies responsibly
+To maximize the benefits of our generative music technologies, while mitigating potential risks, it’s critical these are developed with best-in-class protections. We’ve worked closely with artists and the music industry to ensure these technologies are widely beneficial.
+Our music AI experiments have been designed in line with YouTube’s AI principles, which aim to enable creative expression while protecting music artists and the integrity of their work.
+Going forward, we’ll continue engaging artists, the music industry, and wider creative community to set the standard for the responsible development and deployment of music generation tools.
+The future of generative music tools
+Generative music technologies could transform the future of music creation and use. Our cutting-edge work in this space will unlock an exciting new wave of artist tools that can inspire creativity for artists, songwriters, producers, and fans everywhere.
+We&#39;ve only just begun to explore how AI can bolster people&#39;s musical creativity and we can&#39;t wait to see what we can accomplish next in partnership with artists, the music industry, and wider creative community.
+Acknowledgements: Lyria was made possible by key research and engineering contributions from Kazuya Kawakami, David Ding, Björn Winckler, Cătălina Cangea, Tobenna Peter Igwe, Will Grathwohl, Yan Wu, Yury Sulsky, Jacob Kelly, Charlie Nash, Conor Durkan, Yaroslav Ganin, Tom Eccles, Zach Eaton-Rosen, Jakob Bauer, Mikita Sazanovich, Morgane Rivière, Evgeny Gladchenko, Mikołaj Bińkowski, Ali Razavi, Jeff Donahue, Benigno Uria, Sander Dieleman, Sherjil Ozair, John Schultz, Ankush Gupta, Junlin Zhang, Drew Jaegle, and Aäron van den Oord.
+Music AI tools were developed by Adam Roberts, Alex Tudor, Arathi Sethumadhavan, Aäron van den Oord, Chris Reardon, Christian Frank, Cătălina Cangea, Doug Fritz, Drew Jaegle, Ethan Manilow, Felix Riedel, Hema Manickavasagam, Jesse Engel, Mahlet Seyoum, Mahyar Bordbar, Mauricio Zuluaga, Michael Chang, Sander Dieleman, and Tom Hume. Additional research contributions from Andrea Agostinelli, Antoine Caillon, Brian McWilliams, Chris Donahue, Geoffrey Cideron, Matej Kastelic, Marco Tagliasacchi, Mauro Verzetti, Mike Dooley, Mikołaj Bińkowski, Neil Zeghidour, Noah Constant, Sertan Girgin, Timo Denk, Yunpeng Li, and Zalán Borsos.
+SynthID for audio was developed with contributions from Sven Gowal, Rudy Bunel, Jamie Hayes, Sylvestre-Alvise Rebuffi, Florian Stimberg, David Stutz, Nidhi Vyas, Zahra Ahmed, and Pushmeet Kohli.
+Thanks to Myriam Hamed Torres, Rushil Mistry, Mahyar Bordbar, Berenice Cowan, Tom Hume, Nick Pezzotti, Felix Riedel, Arun Nair, Will Hawkins, Sasha Brown, Dawn Bloxwich, Ben Bariach, Michael Chang, Dawid Górny, Richard Green, Rich Galt, Ross West, Jaume Sanchez Elias, Seth Odoom, Doug Fritz, and Jonathan Evens for driving delivery; Adrian Bolton, Paul Komarek, Nando de Freitas, Oriol Vinyals, Douglas Eck, Eli Collins, and Demis Hassabis for their advice.
+Other contributors include Adriana Fernandez Lara, Arielle Bier, Jonathan Fildes, Aliya Ahmad, Jane Park, Adam Cain, Katie McAtackney, Dimple Vijaykumar, Armin Senoner, Dex Hunter-Torricke, Priya Jhakra, James Besley, Rebeca Santamaria-Fernandez, Richard Ives, Jakub Kúdela, James Manyika, and Mira Lane. Thanks also to many others who contributed across Google DeepMind and Alphabet, including our partners at YouTube. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing the Hugging Face LLM Inference Container for Amazon SageMaker</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing the Hugging Face LLM Inference Container for Amazon SageMaker</h1> <p class="text-sm text-gray-500"> 2023/5/31 – Hugging Face Blog  <a href="https://huggingface.co/blog/sagemaker-huggingface-llm" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing the Hugging Face LLM Inference Container for Amazon SageMaker
+This is an example on how to deploy the open-source LLMs, like BLOOM to Amazon SageMaker for inference using the new Hugging Face LLM Inference Container. We will deploy the 12B Pythia Open Assistant Model, an open-source Chat LLM trained with the Open Assistant dataset.
+The example covers:
+- Setup development environment
+- Retrieve the new Hugging Face LLM DLC
+- Deploy Open Assistant 12B to Amazon SageMaker
+- Run inference and chat with our model
+- Create Gradio Chatbot backed by Amazon SageMaker
+You can find the code for the example also in the notebooks repository.
+What is Hugging Face LLM Inference DLC?
+Hugging Face LLM DLC is a new purpose-built Inference Container to easily deploy LLMs in a secure and managed environment. The DLC is powered by Text Generation Inference (TGI), an open-source, purpose-built solution for deploying and serving Large Language Models (LLMs). TGI enables high-performance text generation using Tensor Parallelism and dynamic batching for the most popular open-source LLMs, including StarCoder, BLOOM, GPT-NeoX, Llama, and T5. Text Generation Inference is already used by customers such as IBM, Grammarly, and the Open-Assistant initiative implements optimization for all supported model architectures, including:
+- Tensor Parallelism and custom cuda kernels
+- Optimized transformers code for inference using flash-attention on the most popular architectures
+- Quantization with bitsandbytes
+- Continuous batching of incoming requests for increased total throughput
+- Accelerated weight loading (start-up time) with safetensors
+- Logits warpers (temperature scaling, topk, repetition penalty ...)
+- Watermarking with A Watermark for Large Language Models
+- Stop sequences, Log probabilities
+- Token streaming using Server-Sent Events (SSE)
+Officially supported model architectures are currently:
+- BLOOM / BLOOMZ
+- MT0-XXL
+- Galactica
+- SantaCoder
+- GPT-Neox 20B (joi, pythia, lotus, rosey, chip, RedPajama, open assistant)
+- FLAN-T5-XXL (T5-11B)
+- Llama (vicuna, alpaca, koala)
+- Starcoder / SantaCoder
+- Falcon 7B / Falcon 40B
+With the new Hugging Face LLM Inference DLCs on Amazon SageMaker, AWS customers can benefit from the same technologies that power highly concurrent, low latency LLM experiences like HuggingChat, OpenAssistant, and Inference API for LLM models on the Hugging Face Hub.
+Let&#39;s get started!
+1. Setup development environment
+We are going to use the sagemaker
+python SDK to deploy BLOOM to Amazon SageMaker. We need to make sure to have an AWS account configured and the sagemaker
+python SDK installed.
+!pip install &quot;sagemaker==2.175.0&quot; --upgrade --quiet
+If you are going to use Sagemaker in a local environment, you need access to an IAM Role with the required permissions for Sagemaker. You can find here more about it.
+import sagemaker
+import boto3
+sess = sagemaker.Session()
+# sagemaker session bucket -&gt; used for uploading data, models and logs
+# sagemaker will automatically create this bucket if it not exists
+sagemaker_session_bucket=None
+if sagemaker_session_bucket is None and sess is not None:
+# set to default bucket if a bucket name is not given
+sagemaker_session_bucket = sess.default_bucket()
+try:
+role = sagemaker.get_execution_role()
+except ValueError:
+iam = boto3.client(&#39;iam&#39;)
+role = iam.get_role(RoleName=&#39;sagemaker_execution_role&#39;)[&#39;Role&#39;][&#39;Arn&#39;]
+sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
+print(f&quot;sagemaker role arn: {role}&quot;)
+print(f&quot;sagemaker session region: {sess.boto_region_name}&quot;)
+2. Retrieve the new Hugging Face LLM DLC
+Compared to deploying regular Hugging Face models, we first need to retrieve the container uri and provide it to our HuggingFaceModel
+model class with a image_uri
+pointing to the image. To retrieve the new Hugging Face LLM DLC in Amazon SageMaker, we can use the get_huggingface_llm_image_uri
+method provided by the sagemaker
+SDK. This method allows us to retrieve the URI for the desired Hugging Face LLM DLC based on the specified backend
+, session
+, region
+, and version
+. You can find the available versions here
+from sagemaker.huggingface import get_huggingface_llm_image_uri
+# retrieve the llm image uri
+llm_image = get_huggingface_llm_image_uri(
+&quot;huggingface&quot;,
+version=&quot;1.0.3&quot;
+)
+# print ecr image uri
+print(f&quot;llm image uri: {llm_image}&quot;)
+3. Deploy Open Assistant 12B to Amazon SageMaker
+Note: Quotas for Amazon SageMaker can vary between accounts. If you receive an error indicating you&#39;ve exceeded your quota, you can increase them through the Service Quotas console.
+To deploy Open Assistant Model to Amazon SageMaker we create a HuggingFaceModel
+model class and define our endpoint configuration including the hf_model_id
+, instance_type
+etc. We will use a g5.12xlarge
+instance type, which has 4 NVIDIA A10G GPUs and 96GB of GPU memory.
+Note: We could also optimize the deployment for cost and use g5.2xlarge
+instance type and enable int-8 quantization.
+import json
+from sagemaker.huggingface import HuggingFaceModel
+# sagemaker config
+instance_type = &quot;ml.g5.12xlarge&quot;
+number_of_gpu = 4
+health_check_timeout = 300
+# Define Model and Endpoint configuration parameter
+config = {
+&#39;HF_MODEL_ID&#39;: &quot;OpenAssistant/pythia-12b-sft-v8-7k-steps&quot;, # model_id from hf.co/models
+&#39;SM_NUM_GPUS&#39;: json.dumps(number_of_gpu), # Number of GPU used per replica
+&#39;MAX_INPUT_LENGTH&#39;: json.dumps(1024), # Max length of input text
+&#39;MAX_TOTAL_TOKENS&#39;: json.dumps(2048), # Max length of the generation (including input text)
+# &#39;HF_MODEL_QUANTIZE&#39;: &quot;bitsandbytes&quot;, # comment in to quantize
+}
+# create HuggingFaceModel with the image uri
+llm_model = HuggingFaceModel(
+role=role,
+image_uri=llm_image,
+env=config
+)
+After we have created the HuggingFaceModel
+we can deploy it to Amazon SageMaker using the deploy
+method. We will deploy the model with the ml.g5.12xlarge
+instance type. TGI will automatically distribute and shard the model across all GPUs.
+# Deploy model to an endpoint
+# https://sagemaker.readthedocs.io/en/stable/api/inference/model.html#sagemaker.model.Model.deploy
+llm = llm_model.deploy(
+initial_instance_count=1,
+instance_type=instance_type,
+# volume_size=400, # If using an instance with local SSD storage, volume_size must be None, e.g. p4 but not p3
+container_startup_health_check_timeout=health_check_timeout, # 10 minutes to be able to load the model
+)
+SageMaker will now create our endpoint and deploy the model to it. This can take 5-10 minutes.
+4. Run inference and chat with our model
+After our endpoint is deployed we can run inference on it using the predict
+method from the predictor
+. We can use different parameters to control the generation, defining them in the parameters
+attribute of the payload. As of today TGI supports the following parameters:
+temperature
+: Controls randomness in the model. Lower values will make the model more deterministic and higher values will make the model more random. Default value is 1.0.max_new_tokens
+: The maximum number of tokens to generate. Default value is 20, max value is 512.repetition_penalty
+: Controls the likelihood of repetition, defaults tonull
+.seed
+: The seed to use for random generation, default isnull
+.stop
+: A list of tokens to stop the generation. The generation will stop when one of the tokens is generated.top_k
+: The number of highest probability vocabulary tokens to keep for top-k-filtering. Default value isnull
+, which disables top-k-filtering.top_p
+: The cumulative probability of parameter highest probability vocabulary tokens to keep for nucleus sampling, default tonull
+do_sample
+: Whether or not to use sampling; use greedy decoding otherwise. Default value isfalse
+.best_of
+: Generate best_of sequences and return the one if the highest token logprobs, default tonull
+.details
+: Whether or not to return details about the generation. Default value isfalse
+.return_full_text
+: Whether or not to return the full text or only the generated part. Default value isfalse
+.truncate
+: Whether or not to truncate the input to the maximum length of the model. Default value istrue
+.typical_p
+: The typical probability of a token. Default value isnull
+.watermark
+: The watermark to use for the generation. Default value isfalse
+.
+You can find the open api specification of TGI in the swagger documentation
+The OpenAssistant/pythia-12b-sft-v8-7k-steps
+is a conversational chat model meaning we can chat with it using the following prompt:
+&lt;|prompter|&gt;[Instruction]&lt;|endoftext|&gt;
+&lt;|assistant|&gt;
+lets give it a first try and ask about some cool ideas to do in the summer:
+chat = llm.predict({
+&quot;inputs&quot;: &quot;&quot;&quot;&lt;|prompter|&gt;What are some cool ideas to do in the summer?&lt;|endoftext|&gt;&lt;|assistant|&gt;&quot;&quot;&quot;
+})
+print(chat[0][&quot;generated_text&quot;])
+# &lt;|prompter|&gt;What are some cool ideas to do in the summer?&lt;|endoftext|&gt;&lt;|assistant|&gt;There are many fun and exciting things you can do in the summer. Here are some ideas:
+Now we will show how to use generation parameters in the parameters
+attribute of the payload. In addition to setting custom temperature
+, top_p
+, etc, we also stop generation after the turn of the bot
+.
+# define payload
+prompt=&quot;&quot;&quot;&lt;|prompter|&gt;How can i stay more active during winter? Give me 3 tips.&lt;|endoftext|&gt;&lt;|assistant|&gt;&quot;&quot;&quot;
+# hyperparameters for llm
+payload = {
+&quot;inputs&quot;: prompt,
+&quot;parameters&quot;: {
+&quot;do_sample&quot;: True,
+&quot;top_p&quot;: 0.7,
+&quot;temperature&quot;: 0.7,
+&quot;top_k&quot;: 50,
+&quot;max_new_tokens&quot;: 256,
+&quot;repetition_penalty&quot;: 1.03,
+&quot;stop&quot;: [&quot;&lt;|endoftext|&gt;&quot;]
+}
+}
+# send request to endpoint
+response = llm.predict(payload)
+# print(response[0][&quot;generated_text&quot;][:-len(&quot;&lt;human&gt;:&quot;)])
+print(response[0][&quot;generated_text&quot;])
+5. Create Gradio Chatbot backed by Amazon SageMaker
+We can also create a gradio application to chat with our model. Gradio is a python library that allows you to quickly create customizable UI components around your machine learning models. You can find more about gradio here.
+!pip install gradio --upgrade
+import gradio as gr
+# hyperparameters for llm
+parameters = {
+&quot;do_sample&quot;: True,
+&quot;top_p&quot;: 0.7,
+&quot;temperature&quot;: 0.7,
+&quot;top_k&quot;: 50,
+&quot;max_new_tokens&quot;: 256,
+&quot;repetition_penalty&quot;: 1.03,
+&quot;stop&quot;: [&quot;&lt;|endoftext|&gt;&quot;]
+}
+with gr.Blocks() as demo:
+gr.Markdown(&quot;## Chat with Amazon SageMaker&quot;)
+with gr.Column():
+chatbot = gr.Chatbot()
+with gr.Row():
+with gr.Column():
+message = gr.Textbox(label=&quot;Chat Message Box&quot;, placeholder=&quot;Chat Message Box&quot;, show_label=False)
+with gr.Column():
+with gr.Row():
+submit = gr.Button(&quot;Submit&quot;)
+clear = gr.Button(&quot;Clear&quot;)
+def respond(message, chat_history):
+# convert chat history to prompt
+converted_chat_history = &quot;&quot;
+if len(chat_history) &gt; 0:
+for c in chat_history:
+converted_chat_history += f&quot;&lt;|prompter|&gt;{c[0]}&lt;|endoftext|&gt;&lt;|assistant|&gt;{c[1]}&lt;|endoftext|&gt;&quot;
+prompt = f&quot;{converted_chat_history}&lt;|prompter|&gt;{message}&lt;|endoftext|&gt;&lt;|assistant|&gt;&quot;
+# send request to endpoint
+llm_response = llm.predict({&quot;inputs&quot;: prompt, &quot;parameters&quot;: parameters})
+# remove prompt from response
+parsed_response = llm_response[0][&quot;generated_text&quot;][len(prompt):]
+chat_history.append((message, parsed_response))
+return &quot;&quot;, chat_history
+submit.click(respond, [message, chatbot], [message, chatbot], queue=False)
+clear.click(lambda: None, None, chatbot, queue=False)
+demo.launch(share=True)
+Awesome! 🚀 We have successfully deployed Open Assistant Model to Amazon SageMaker and run inference on it. Additionally, we have built a quick gradio application to chat with our model.
+Now, it&#39;s time for you to try it out yourself and build Generation AI applications with the new Hugging Face LLM DLC on Amazon SageMaker.
+To clean up, we can delete the model and endpoint.
+llm.delete_model()
+llm.delete_endpoint()
+Conclusion
+The new Hugging Face LLM Inference DLC enables customers to easily and securely deploy open-source LLMs on Amazon SageMaker. The easy-to-use API and deployment process allows customers to build scalable AI chatbots and virtual assistants with state-of-the-art models like Open Assistant. Overall, this new DLC is going to empower developers and businesses to leverage the latest advances in natural language generation.
+Thanks for reading! If you have any questions, feel free to contact me on Twitter or LinkedIn. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

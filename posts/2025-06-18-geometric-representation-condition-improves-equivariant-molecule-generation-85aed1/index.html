@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Geometric Representation Condition Improves Equivariant Molecule Generation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Geometric Representation Condition Improves Equivariant Molecule Generation</h1> <p class="text-sm text-gray-500"> 2025/6/17 – arXiv AI  <a href="https://arxiv.org/abs/2410.03655" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Computer Science &gt; Machine Learning
+[Submitted on 4 Oct 2024 (v1), last revised 16 Jun 2025 (this version, v3)]
+Title:Geometric Representation Condition Improves Equivariant Molecule Generation
+View PDF HTML (experimental)Abstract:Recent advances in molecular generative models have demonstrated great promise for accelerating scientific discovery, particularly in drug design. However, these models often struggle to generate high-quality molecules, especially in conditional scenarios where specific molecular properties must be satisfied. In this work, we introduce GeoRCG, a general framework to improve molecular generative models by integrating geometric representation conditions with provable theoretical guarantees. We decompose the generation process into two stages: first, generating an informative geometric representation; second, generating a molecule conditioned on the representation. Compared with single-stage generation, the easy-to-generate representation in the first stage guides the second stage generation toward a high-quality molecule in a goal-oriented way. Leveraging EDM and SemlaFlow as base generators, we observe significant quality improvements in unconditional molecule generation on the widely used QM9 and GEOM-DRUG datasets. More notably, in the challenging conditional molecular generation task, our framework achieves an average 50\% performance improvement over state-of-the-art approaches, highlighting the superiority of conditioning on semantically rich geometric representations. Furthermore, with such representation guidance, the number of diffusion steps can be reduced to as small as 100 while largely preserving the generation quality achieved with 1,000 steps, thereby significantly reducing the generation iterations needed.
+Submission history
+From: Zian Li [view email][v1] Fri, 4 Oct 2024 17:57:35 UTC (34,292 KB)
+[v2] Mon, 10 Feb 2025 06:34:22 UTC (34,294 KB)
+[v3] Mon, 16 Jun 2025 06:51:05 UTC (13,008 KB)
+References &amp; Citations
+Bibliographic and Citation Tools
+Bibliographic Explorer (What is the Explorer?)
+Connected Papers (What is Connected Papers?)
+Litmaps (What is Litmaps?)
+scite Smart Citations (What are Smart Citations?)
+Code, Data and Media Associated with this Article
+alphaXiv (What is alphaXiv?)
+CatalyzeX Code Finder for Papers (What is CatalyzeX?)
+DagsHub (What is DagsHub?)
+Gotit.pub (What is GotitPub?)
+Hugging Face (What is Huggingface?)
+Papers with Code (What is Papers with Code?)
+ScienceCast (What is ScienceCast?)
+Demos
+Recommenders and Search Tools
+Influence Flower (What are Influence Flowers?)
+CORE Recommender (What is CORE?)
+IArxiv Recommender
+(What is IArxiv?)
+arXivLabs: experimental projects with community collaborators
+arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+Have an idea for a project that will add value for arXiv&#39;s community? Learn more about arXivLabs. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

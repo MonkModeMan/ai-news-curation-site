@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>［Pythonクイズ］リスト内に同じ要素がそれぞれ何個あるか数えよう！　for文を使うのもいいけれど……</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 ［Pythonクイズ］リスト内に同じ要素がそれぞれ何個あるか数えよう！　for文を使うのもいいけれど……</h1> <p class="text-sm text-gray-500"> 2025/6/16 – ITmedia AI  <a href="https://atmarkit.itmedia.co.jp/ait/articles/2506/17/news013.html" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> XgÉÇÌvfª½ÂÜÜêÄ¢é©A¦½¢±ÆÁÄ èÜ·æËBà¿ëñA©ªÅ¢Äà\¢Ü¹ñBÅàA ÌW [Ì ÌNXðg¤ÌªJ^Å·æB
+@ÈºÍXgÉ¯êÌvfª½ñoê·é©ð¦ã°ÄAvfðL[A»ÌoêñðL[ÌlÆ·é«ðì¬·éR[hÅ éB±ÌR[hÍÓ}µ½ÊèÉ®ì·éBµ©µAPythonÉWÅt®µÄ¢é éW [Ì éNXðg¤Æ¯¶±Æª2sÅLqÅ«éB»ÌNXðgÁÄA±ÌR[hð«¼µÄÝæ¤B
+items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
+counts = {}
+for item in items:
+c = counts.get(item, 0)
+counts[item] = c + 1
+print(counts) # {&#39;foo&#39;: 1, &#39;baz&#39;: 2, &#39;bar&#39;: 4}
+@Ç¤àHP©í³«Å·B
+@æT±ñÈ±Æð«Üµ½Bu0 &lt;= num &lt; 10vÌæ¤È«ûÉÂ¢Äu±Ìæ¤È«ûªÅ«é¾êÍ ÜèÈ¢æ¤Å·vÆB»µ½çA^æècbR~ª èÜµÄABCPLiCÌæcÅ éBÌæcÉ½é¾êÆàjÅÍ±Ìæ¤È«ûª³êÄ¢é»¤Å·BBCPLðgÁ½±ÆªÈ©Á½ÌÅmèÜ¹ñÅµ½B
+@https://www.cl.cam.ac.uk/~mr10/æè_E[hÂ\ÈBCPLÌ¾ê}j AwThe BCPL Cintsys and Cintpos User Guidexibcplman.pdfjÉÍuAn expression of the form: E relop E relop ... relop E where each relop is one of =, ~=, &lt;=, &gt;=, &lt; or &gt; returns TRUE if all the individual relations are satisfied and FALSE, otherwise.vÆ èÜ·BKÉó·ÆuE relop E relop ... relop Ei±±ÅrelopÍ»ê¼ê=A~=A&lt;=A&gt;=A&lt;A&gt;Ì¢¸ê©jÆ¢¤`Ì®ÍSÄÌÖWª½³êÄ¢êÎTRUEðA»¤ÅÈ¯êÎFALSEðÔ·vÆÈèÜ·B
+@Æ¢¤í¯ÅABCPLÅàu0 &lt;= num &lt; 10vÌæ¤ÉärZðA½³¹é±ÆÍÂ\Å·B×ÉÈèÜµ½i½¾µABCPLnÌrhAR[hÌÀsÜÅÍµÄ¢È¢ÌÅA ÜÅà}j Að©½¾¯ÌbÅ·jB
+@³ðÌR[háðÈºÉ¦µÜ·B
+from collections import Counter
+items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
+counts = Counter(items)
+print(counts) # Counter({&#39;bar&#39;: 4, &#39;baz&#39;: 2, &#39;foo&#39;: 1})
+@±±ÅÍcollectionsW [ÌCounterNXðC|[gµÄA»ÌCX^X¶¬ÉXgðnµÄ¢Ü·B±êÉæèAXgÌvfð¦ã°ÄAvfðL[Ao»ñðlÆ·éCounterIuWFNgi«Æ¯lÈ}bsOIuWFNgjð¾Ä¢Ü·B
+@±Ì¼ÉàitertoolsW [ÌgroupbyÖðg¤û@à èÜ·ªA±±ÅÍÐîÍµÜ¹ñiÈ¨AgroupbyÍÖÌæ¤ÉÄÑoµÄgpµÜ·ªA»ÌÀÌÍNXÅ·BPythonÁÄA»¤¢¤Ì½¢Å·æËjB
+@PythonÉWÅt®·écollectionsW [ÉÍCounterNXªÜÜêÄ¢Ü·B±ÌNXÌ¶¬ÉXgiÈÇÌ½Â\IuWFNgjðn·ÆAevfÌoêñð¦ã°ÄêÜ·B
+@âè¶ÌR[hÍÌæ¤ÈàÌÅµ½B
+items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
+counts = {}
+for item in items:
+c = counts.get(item, 0)
+counts[item] = c + 1
+print(counts) # {&#39;foo&#39;: 1, &#39;baz&#39;: 2, &#39;bar&#39;: 4}
+@±±ÅÍXgÌvfð¦ã°Ä¢Ü·B&#39;foo&#39;Í1ÂA&#39;bar&#39;Í4ÂA&#39;baz&#39;Í2ÂÅ·B»±ÅACounterNXÌIuWFNgÌ¶¬É±êðnµÄâêÎ¯¶±ÆªÅ«éÆ¢¤±ÆÅ·B
+from collections import Counter
+items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
+counts = Counter(items)
+print(counts) # Counter({&#39;bar&#39;: 4, &#39;baz&#39;: 2, &#39;foo&#39;: 1})
+@ÅÌR[hÅÍPythonÉgÝÝÌ«ªì¬³êÄ¢Üµ½ªA³ðáÌR[hÅÍCounterNXÌIuWFNgÉÈÁÄ¢é_ÉÓµÄ¾³¢B½¾µA¼ÒÍärÂ\Å·B
+from collections import Counter
+items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
+counts_dict = {}
+for item in items:
+c = counts_dict.get(item, 0)
+counts_dict[item] = c + 1
+counts_counter = Counter(items)
+print(counts_dict == counts_counter) # True
+@±±ÅÍâè¶Æ¯¶âèûÅ¦ã°½ÊÌ«ðcounts_dictÉACounterNXðgÁÄ¦ã°½Êðcounts_counterÉãüµÄA»êçªµ¢©ðµÄ¢Ü·B»ÌÊÍTrueÉÈèÜ·B¯¶^É»ë¦½¯êÎudict(counts_counter)v é¢ÍuCounter(counts_dict)vÌæ¤É·é±ÆàÂ\Å·B}bsOIuWFNgðgÁÄACounterNXÌIuWFNgð¶¬·éÆA»Ì}bsOIuWFNgÌL[^lÌÎª»ÌÜÜCounterNXÉ¨¯é»êÆÈèÜ·iR[háÍÈªjB
+@«ÆCounterNXÌå«Èá¢ÆµÄÍ¶ÝµÈ¢L[ðp©Á±u[]vÉwèµ½êÌUé¢ª°çêÜ·B
+print(counts_dict[&#39;hoge&#39;]) # KeyError
+print(counts_counter[&#39;hoge&#39;]) # 0
+@±ÌR[hÍAãÅì¬µ½counts_dictÆcounts_counterÉ¶ÝµÈ¢L[ðwèµÄA»Ìlð\¦µæ¤ÆµÄ¢Ü·B«ÅÍià¿ëñjKeyErroráOÉÈèÜ·ªACounterNXÌIuWFNgÅÍ0Æ\¦³êÜ·B
+@Ü½Aupdate\bhÌUé¢Éà·ª èÜ·B«Ìupdate\bhÉ«i}bsOIuWFNgjðn·ÆA»ÌL[^lÌgª³Ì«É êÎAlðã«µÜ·ªACounterNXÅÍ»ÌlªÁZ³êÜ·BÜ½A«Ìupdate\bhÉãÅ©½itemsÌæ¤ÈXgÍn¹Ü¹ñªACounterNXÌupdate\bhÉXgðn·ÆAvfð¦ã°ÄAù¶ÌL[ÌlÉÂ¢ÄÍ»ÌlªÁZ³êÜ·BÈºÉáð¦µÜ·B
+tmp_dict = {&#39;baz&#39;: 3, &#39;qux&#39;: 6}
+counts_dict.update(tmp_dict)
+print(counts_dict) # {&#39;foo&#39;: 1, &#39;baz&#39;: 3, &#39;bar&#39;: 4, &#39;qux&#39;: 6}
+counts_counter.update(tmp_dict)
+print(counts_counter) # Counter({&#39;qux&#39;: 6, &#39;baz&#39;: 5, &#39;bar&#39;: 4, &#39;foo&#39;: 1})
+@àÆàÆAcounts_dictàcounts_counterà&#39;baz&#39;L[ÌlÍ2Åµ½B»µÄAcounts_dict.update\bhÉ«{&#39;baz&#39;: 3, &#39;qux&#39;: 6}ðn·ÆA&#39;baz&#39;L[Ìlªã«³êÄ3ÉÈèÜ·BêûAcounts_counter.updateÉ¯¶{&#39;baz&#39;: 3, &#39;qux&#39;: 6}ðn·ÆA&#39;baz&#39;L[ÌlÅ é3ªÁZ³êÄAcounts_counter[&#39;baz&#39;]Í5ÉÈÁÄ¢Ü·B±êÜÅÉÈ©Á½L[&#39;qux&#39;ÉÂ¢ÄÍ»êçªVKÉÇÁ³êÄ¢é_Í¼ÒÅ¯¶Å·B
+@XgðÇÁ·éÆÌæ¤ÉÈèÜ·B
+tmp_list = [&#39;qux&#39;, &#39;quuux&#39;]
+counts_dict.update(tmp_list) # ValueError
+counts_counter.update(tmp_list)
+print(counts_counter) # Counter({&#39;qux&#39;: 7, &#39;baz&#39;: 5, &#39;bar&#39;: 4, &#39;foo&#39;: 1, &#39;quuux&#39;: 1})
+@«Ìupdate\bhÉXgðn·ÆValueErroráOÆÈèÜ·ªACounterNXÌupdate\bhÅÍnµ½XgÌvfª¦ã°çêÄA»ÌlªÁZ³êÄ¢é±Æªª©èÜ·i[(&#39;foo&#39;, 0), (&#39;bar&#39;, 1), (&#39;ba&#39;, 2)]Ìæ¤È2ÂÌvf©çÈé½Â\IuWFNgðvfÆ·éXgÈç«Ìupdate\bhÉn¹é±ÆÉÍ¯ÓµÄ¾³¢jB
+@Ü½ACounterNXÉÍL[ÌlÌ¾¯L[ð½·éCe[^ðÔ·elements\bhâlª½¢L[ðwèµ½¾¯\¦·émost_common\bhAL[Ìlð¸Z·ésubtract\bhAJEgÌvðvZ·étotal\bhà èÜ·BÈºÉ±êçÌ\bhÌgpáð¦µÜ·i±±ÅÍVKÉCounterIuWFNgðì¬µÄ¢Ü·jB
+cnt = Counter({&#39;foo&#39;: 1, &#39;bar&#39;: 2, &#39;baz&#39;: 3})
+print(cnt) # Counter({&#39;baz&#39;: 3, &#39;bar&#39;: 2, &#39;foo&#39;: 1})
+# elements\bh
+result = list(cnt.elements())
+print(result) # [&#39;foo&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;baz&#39;, &#39;baz&#39;]
+# most_common\bh
+print(cnt.most_common(2)) # [(&#39;baz&#39;, 3), (&#39;bar&#39;, 2)]
+# subtract\bh
+cnt.subtract([&#39;foo&#39;, &#39;foo&#39;, &#39;bar&#39;])
+print(cnt) # Counter({&#39;baz&#39;: 3, &#39;bar&#39;: 1, &#39;foo&#39;: -1})
+# total\bh
+print(cnt.total()) # 3
+@±±ÅÍcntIuWFNgÍCounter({&#39;baz&#39;: 3, &#39;bar&#39;: 2, &#39;foo&#39;: 1})ÆÈÁÄ¢Ü·BÅÉAelements\bhðÄÑoµÄ¾½Ce[^©çXgðì¬µÄ¢Ü·B±ÌÆ«A&#39;foo&#39;L[ÌlÍ1ÈÌÅAÊÌXgÉÍ&#39;foo&#39;ª1Â¾¯ÜÜêA¯lÉA&#39;bar&#39;Í2ÂA&#39;baz&#39;Í3ÂÜÜêÄ¢Ü·BXgÌvfð¦ã°½êÌtÏ·ðÅ«éÆl¦Äàæ¢Åµå¤Bmost_common\bhÉÍ2ðnµÄ¢Ü·B»Ì½ßAlª½¢vfð2ÂæèoµÄ(L[, l)Ì^vÆµÄA»êçðXgÉi[µ½àÌªÔ³êÄ¢Ü·B
+@subtract\bhÉÍXgðnµÄ¢Ü·BXgÉÍ&#39;foo&#39;ª2ÂA&#39;bar&#39;ª1ÂÜÜêÄ¢éÌÅAcntIuWFNgÌ&#39;foo&#39;L[ÌlÍ2¾¯¸Z³êA&#39;bar&#39;L[ÌlÍ1¾¯¸Z³êÄ¢éÌªª©èÜ·ilàæêé±ÆÉÓjBÅãÌtotal\bhÅÍeL[ÌlðvµÄi&#39;foo&#39;L[ÌlÍ-1A&#39;bar&#39;L[ÌlÍ1A&#39;baz&#39;L[ÌlÍ3jA±±ÅÍ3ÆÈèÜµ½B
+@Ü½A2ÂÌCounterIuWFNgÉÂ¢ÄWZðs¤==ZqA!=ZqÈÇàgpÅ«Ü·ªA±±ÅÍáÍÈªµÜ·B
+@ÆÜ AXgi½Â\IuWFNgjÌvfð¦ã°½èA¦ã°½ÊðgÁÄ¿åÁÆµ½½©ðµ½è·é½ßÉÖÈ\bhªõíÁÄ¢éÌÅACounterNXÍºÐÆào¦Ä¨«Üµå¤B
+@wðIPythonxÅàCounterNXðµÁ½LÍ éñÅ·ªA¡ñÌLÌûª¿åÁÆÚµ¢ÌÅA¦[cc³ÉÇÜÈÁÄàåävÅ·ccB
+uPythonXebvAbvNCYv
+SÒü¯Af[^ªÍEAIE@BwKEPythonÌ×û@@ITÌDeep InsiderÅwÚ¤
+Copyright© Digital Advantage Corp. All Rights Reserved. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

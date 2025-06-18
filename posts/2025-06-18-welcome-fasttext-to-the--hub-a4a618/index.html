@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Welcome fastText to the 🤗 Hub</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Welcome fastText to the 🤗 Hub</h1> <p class="text-sm text-gray-500"> 2023/6/6 – Hugging Face Blog  <a href="https://huggingface.co/blog/fasttext" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Welcome fastText to the Hugging Face Hub
+fastText is a library for efficient learning of text representation and classification. Open-sourced by Meta AI in 2016, fastText integrates key ideas that have been influential in natural language processing and machine learning over the past few decades: representing sentences using bag of words and bag of n-grams, using subword information, and utilizing a hidden representation to share information across classes.
+To speed up computation, fastText uses hierarchical softmax, capitalizing on the imbalanced distribution of classes. All these techniques offer users scalable solutions for text representation and classification.
+Hugging Face is now hosting official mirrors of word vectors of all 157 languages and the latest model for language identification. This means that using Hugging Face, you can easily download and use the models with a few commands.
+Finding models
+Word vectors for 157 languages and the language identification model can be found in the Meta AI org. For example, you can find the model page for English word vectors here and the language identification model here.
+Widgets
+This integration includes support for text classification and feature extraction widgets. Try out the language identification widget here and feature extraction widget here!
+How to use
+Here is how to load and use a pre-trained vectors:
+&gt;&gt;&gt; import fasttext
+&gt;&gt;&gt; from huggingface_hub import hf_hub_download
+&gt;&gt;&gt; model_path = hf_hub_download(repo_id=&quot;facebook/fasttext-en-vectors&quot;, filename=&quot;model.bin&quot;)
+&gt;&gt;&gt; model = fasttext.load_model(model_path)
+&gt;&gt;&gt; model.words
+[&#39;the&#39;, &#39;of&#39;, &#39;and&#39;, &#39;to&#39;, &#39;in&#39;, &#39;a&#39;, &#39;that&#39;, &#39;is&#39;, ...]
+&gt;&gt;&gt; len(model.words)
+145940
+&gt;&gt;&gt; model[&#39;bread&#39;]
+array([ 4.89417791e-01, 1.60882145e-01, -2.25947708e-01, -2.94273376e-01,
+-1.04577184e-01, 1.17962055e-01, 1.34821936e-01, -2.41778508e-01, ...])
+Here is how to use this model to query nearest neighbors of an English word vector:
+&gt;&gt;&gt; import fasttext
+&gt;&gt;&gt; from huggingface_hub import hf_hub_download
+&gt;&gt;&gt; model_path = hf_hub_download(repo_id=&quot;facebook/fasttext-en-nearest-neighbors&quot;, filename=&quot;model.bin&quot;)
+&gt;&gt;&gt; model = fasttext.load_model(model_path)
+&gt;&gt;&gt; model.get_nearest_neighbors(&quot;bread&quot;, k=5)
+[(0.5641006231307983, &#39;butter&#39;),
+(0.48875734210014343, &#39;loaf&#39;),
+(0.4491206705570221, &#39;eat&#39;),
+(0.42444291710853577, &#39;food&#39;),
+(0.4229326844215393, &#39;cheese&#39;)]
+Here is how to use this model to detect the language of a given text:
+&gt;&gt;&gt; import fasttext
+&gt;&gt;&gt; from huggingface_hub import hf_hub_download
+&gt;&gt;&gt; model_path = hf_hub_download(repo_id=&quot;facebook/fasttext-language-identification&quot;, filename=&quot;model.bin&quot;)
+&gt;&gt;&gt; model = fasttext.load_model(model_path)
+&gt;&gt;&gt; model.predict(&quot;Hello, world!&quot;)
+((&#39;__label__eng_Latn&#39;,), array([0.81148803]))
+&gt;&gt;&gt; model.predict(&quot;Hello, world!&quot;, k=5)
+((&#39;__label__eng_Latn&#39;, &#39;__label__vie_Latn&#39;, &#39;__label__nld_Latn&#39;, &#39;__label__pol_Latn&#39;, &#39;__label__deu_Latn&#39;),
+array([0.61224753, 0.21323682, 0.09696738, 0.01359863, 0.01319415]))
+Would you like to integrate your library to the Hub?
+This integration is possible thanks to our collaboration with Meta AI and the huggingface_hub
+library, which enables all our widgets and the API for all our supported libraries. If you would like to integrate your library to the Hub, we have a guide for you! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

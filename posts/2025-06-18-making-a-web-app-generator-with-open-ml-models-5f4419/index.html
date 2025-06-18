@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Making a web app generator with open ML models</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Making a web app generator with open ML models</h1> <p class="text-sm text-gray-500"> 2023/7/3 – Hugging Face Blog  <a href="https://huggingface.co/blog/text-to-webapp" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Making a web app generator with open ML models
+As more code generation models become publicly available, it is now possible to do text-to-web and even text-to-app in ways that we couldn&#39;t imagine before.
+This tutorial presents a direct approach to AI web content generation by streaming and rendering the content all in one go.
+Try the live demo here! → Webapp Factory
+Using LLM in Node apps
+While we usually think of Python for everything related to AI and ML, the web development community relies heavily on JavaScript and Node.
+Here are some ways you can use large language models on this platform.
+By running a model locally
+Various approaches exist to run LLMs in Javascript, from using ONNX to converting code to WASM and calling external processes written in other languages.
+Some of those techniques are now available as ready-to-use NPM libraries:
+- Using AI/ML libraries such as transformers.js (which supports code generation)
+- Using dedicated LLM libraries such as llama-node (or web-llm for the browser)
+- Using Python libraries through a bridge such as Pythonia
+However, running large language models in such an environment can be pretty resource-intensive, especially if you are not able to use hardware acceleration.
+By using an API
+Today, various cloud providers propose commercial APIs to use language models. Here is the current Hugging Face offering:
+The free Inference API to allow anyone to use small to medium-sized models from the community.
+The more advanced and production-ready Inference Endpoints API for those who require larger models or custom inference code.
+These two APIs can be used from Node using the Hugging Face Inference API library on NPM.
+💡 Top performing models generally require a lot of memory (32 Gb, 64 Gb or more) and hardware acceleration to get good latency (see the benchmarks). But we are also seeing a trend of models shrinking in size while keeping relatively good results on some tasks, with requirements as low as 16 Gb or even 8 Gb of memory.
+Architecture
+We are going to use NodeJS to create our generative AI web server.
+The model will be WizardCoder-15B running on the Inference Endpoints API, but feel free to try with another model and stack.
+If you are interested in other solutions, here are some pointers to alternative implementations:
+- Using the Inference API: code and space
+- Using a Python module from Node: code and space
+- Using llama-node (llama cpp): code
+Initializing the project
+First, we need to setup a new Node project (you can clone this template if you want to).
+git clone https://github.com/jbilcke-hf/template-node-express tutorial
+cd tutorial
+nvm use
+npm install
+Then, we can install the Hugging Face Inference client:
+npm install @huggingface/inference
+And set it up in `src/index.mts``:
+import { HfInference } from &#39;@huggingface/inference&#39;
+// to keep your API token secure, in production you should use something like:
+// const hfi = new HfInference(process.env.HF_API_TOKEN)
+const hfi = new HfInference(&#39;** YOUR TOKEN **&#39;)
+Configuring the Inference Endpoint
+💡 Note: If you don&#39;t want to pay for an Endpoint instance to do this tutorial, you can skip this step and look at this free Inference API example instead. Please, note that this will only work with smaller models, which may not be as powerful.
+To deploy a new Endpoint you can go to the Endpoint creation page.
+You will have to select WizardCoder
+in the Model Repository dropdown and make sure that a GPU instance large enough is selected:
+Once your endpoint is created, you can copy the URL from this page:
+Configure the client to use it:
+const hf = hfi.endpoint(&#39;** URL TO YOUR ENDPOINT **&#39;)
+You can now tell the inference client to use our private endpoint and call our model:
+const { generated_text } = await hf.textGeneration({
+inputs: &#39;a simple &quot;hello world&quot; html page: &lt;html&gt;&lt;body&gt;&#39;
+});
+Generating the HTML stream
+It&#39;s now time to return some HTML to the web client when they visit a URL, say /app
+.
+We will create and endpoint with Express.js to stream the results from the Hugging Face Inference API.
+import express from &#39;express&#39;
+import { HfInference } from &#39;@huggingface/inference&#39;
+const hfi = new HfInference(&#39;** YOUR TOKEN **&#39;)
+const hf = hfi.endpoint(&#39;** URL TO YOUR ENDPOINT **&#39;)
+const app = express()
+As we do not have any UI for the moment, the interface will be a simple URL parameter for the prompt:
+app.get(&#39;/&#39;, async (req, res) =&gt; {
+// send the beginning of the page to the browser (the rest will be generated by the AI)
+res.write(&#39;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&#39;)
+const inputs = `# Task
+Generate ${req.query.prompt}
+# Out
+&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;`
+for await (const output of hf.textGenerationStream({
+inputs,
+parameters: {
+max_new_tokens: 1000,
+return_full_text: false,
+}
+})) {
+// stream the result to the browser
+res.write(output.token.text)
+// also print to the console for debugging
+process.stdout.write(output.token.text)
+}
+req.end()
+})
+app.listen(3000, () =&gt; { console.log(&#39;server started&#39;) })
+Start your web server:
+npm run start
+and open https://localhost:3000?prompt=some%20prompt
+. You should see some primitive HTML content after a few moments.
+Tuning the prompt
+Each language model reacts differently to prompting. For WizardCoder, simple instructions often work best:
+const inputs = `# Task
+Generate ${req.query.prompt}
+# Orders
+Write application logic inside a JS &lt;script&gt;&lt;/script&gt; tag.
+Use a central layout to wrap everything in a &lt;div class=&quot;flex flex-col items-center&quot;&gt;
+# Out
+&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;`
+Using Tailwind
+Tailwind is a popular CSS framework for styling content, and WizardCoder is good at it out of the box.
+This allows code generation to create styles on the go without having to generate a stylesheet at the beginning or the end of the page (which would make the page feel stuck).
+To improve results, we can also guide the model by showing the way (&lt;body class=&quot;p-4 md:p-8&quot;&gt;
+).
+const inputs = `# Task
+Generate ${req.query.prompt}
+# Orders
+You must use TailwindCSS utility classes (Tailwind is already injected in the page).
+Write application logic inside a JS &lt;script&gt;&lt;/script&gt; tag.
+Use a central layout to wrap everything in a &lt;div class=&quot;flex flex-col items-center&#39;&gt;
+# Out
+&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body class=&quot;p-4 md:p-8&quot;&gt;`
+Preventing hallucination
+It can be difficult to reliably prevent hallucinations and failures (such as parroting back the whole instructions, or writing “lorem ipsum” placeholder text) on light models dedicated to code generation, compared to larger general-purpose models, but we can try to mitigate it.
+You can try to use an imperative tone and repeat the instructions. An efficient way can also be to show the way by giving a part of the output in English:
+const inputs = `# Task
+Generate ${req.query.prompt}
+# Orders
+Never repeat these instructions, instead write the final code!
+You must use TailwindCSS utility classes (Tailwind is already injected in the page)!
+Write application logic inside a JS &lt;script&gt;&lt;/script&gt; tag!
+This is not a demo app, so you MUST use English, no Latin! Write in English!
+Use a central layout to wrap everything in a &lt;div class=&quot;flex flex-col items-center&quot;&gt;
+# Out
+&lt;html&gt;&lt;head&gt;&lt;title&gt;App&lt;/title&gt;&lt;/head&gt;&lt;body class=&quot;p-4 md:p-8&quot;&gt;`
+Adding support for images
+We now have a system that can generate HTML, CSS and JS code, but it is prone to hallucinating broken URLs when asked to produce images.
+Luckily, we have a lot of options to choose from when it comes to image generation models!
+→ The fastest way to get started is to call a Stable Diffusion model using our free Inference API with one of the public models available on the hub:
+app.get(&#39;/image&#39;, async (req, res) =&gt; {
+const blob = await hf.textToImage({
+inputs: `${req.query.caption}`,
+model: &#39;stabilityai/stable-diffusion-2-1&#39;
+})
+const buffer = Buffer.from(await blob.arrayBuffer())
+res.setHeader(&#39;Content-Type&#39;, blob.type)
+res.setHeader(&#39;Content-Length&#39;, buffer.length)
+res.end(buffer)
+})
+Adding the following line to the prompt was enough to instruct WizardCoder to use our new /image
+endpoint! (you may have to tweak it for other models):
+To generate images from captions call the /image API: &lt;img src=&quot;/image?caption=photo of something in some place&quot; /&gt;
+You can also try to be more specific, for example:
+Only generate a few images and use descriptive photo captions with at least 10 words!
+Adding some UI
+Alpine.js is a minimalist framework that allows us to create interactive UIs without any setup, build pipeline, JSX processing etc.
+Everything is done within the page, making it a great candidate to create the UI of a quick demo.
+Here is a static HTML page that you can put in /public/index.html
+:
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Tutorial&lt;/title&gt;
+&lt;script defer src=&quot;https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;flex flex-col space-y-3 p-8&quot; x-data=&quot;{ draft: &#39;&#39;, prompt: &#39;&#39; }&quot;&gt;
+&lt;textarea
+name=&quot;draft&quot;
+x-model=&quot;draft&quot;
+rows=&quot;3&quot;
+placeholder=&quot;Type something..&quot;
+class=&quot;font-mono&quot;
+&gt;&lt;/textarea&gt;
+&lt;button
+class=&quot;bg-green-300 rounded p-3&quot;
+@click=&quot;prompt = draft&quot;&gt;Generate&lt;/button&gt;
+&lt;iframe :src=&quot;`/app?prompt=${prompt}`&quot;&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+To make this work, you will have to make some changes:
+...
+// going to localhost:3000 will load the file from /public/index.html
+app.use(express.static(&#39;public&#39;))
+// we changed this from &#39;/&#39; to &#39;/app&#39;
+app.get(&#39;/app&#39;, async (req, res) =&gt; {
+...
+Optimizing the output
+So far we have been generating full sequences of Tailwind utility classes, which are great to give freedom of design to the language model.
+But this approach is also very verbose, consuming a large part of our token quota.
+To make the output more dense we can use Daisy UI, a Tailwind plugin which organizes Tailwind utility classes into a design system. The idea is to use shorthand class names for components and utility classes for the rest.
+Some language models may not have inner knowledge of Daisy UI as it is a niche library, in that case we can add an API documentation to the prompt:
+# DaisyUI docs
+## To create a nice layout, wrap each article in:
+&lt;article class=&quot;prose&quot;&gt;&lt;/article&gt;
+## Use appropriate CSS classes
+&lt;button class=&quot;btn ..&quot;&gt;
+&lt;table class=&quot;table ..&quot;&gt;
+&lt;footer class=&quot;footer ..&quot;&gt;
+Going further
+The final demo Space includes a more complete example of user interface.
+Here are some ideas to further extend on this concept:
+- Test other language models such as StarCoder
+- Generate files and code for intermediary languages (React, Svelte, Vue..)
+- Integrate code generation inside an existing framework (eg. NextJS)
+- Recover from failed or partial code generation (eg. autofix issues in the JS)
+- Connect it to a chatbot plugin (eg. embed tiny webapp iframes in a chat discussion) </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

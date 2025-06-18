@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>The 4 Things Qwen-3&#39;s Chat Template Teaches Us</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 The 4 Things Qwen-3&#39;s Chat Template Teaches Us</h1> <p class="text-sm text-gray-500"> 2025/4/30 – Hugging Face Blog  <a href="https://huggingface.co/blog/qwen-3-chat-template-deep-dive" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> The 4 Things Qwen-3’s Chat Template Teaches Us
+What a boring Jinja snippet tells us about the new Qwen-3 model.
+The new Qwen-3 model by Qwen ships with a much more sophisticated chat template than its predecessors Qwen-2.5 and QwQ. By taking a look at the differences in the Jinja template, we can find interesting insights into the new model.
+Chat Templates
+What is a Chat Template?
+A chat template defines how conversations between users and models are structured and formatted. The template acts as a translator, converting a human-readable conversation:
+[
+{ role: &quot;user&quot;, content: &quot;Hi there!&quot; },
+{ role: &quot;assistant&quot;, content: &quot;Hi there, how can I help you today?&quot; },
+{ role: &quot;user&quot;, content: &quot;I&#39;m looking for a new pair of shoes.&quot; },
+]
+into a model friendly format:
+&lt;|im_start|&gt;user
+Hi there!&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+Hi there, how can I help you today?&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+I&#39;m looking for a new pair of shoes.&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+&lt;think&gt;
+&lt;/think&gt;
+You can easily view the chat template for a given model on the Hugging Face model page.
+Chat Template for Qwen/Qwen3-235B-A22B
+Let&#39;s dive into the Qwen-3 chat template and see what we can learn!
+1. Reasoning doesn&#39;t have to be forced
+and you can make it optional via a simple prefill...
+Qwen-3 is unique in its ability to toggle reasoning via the enable_thinking
+flag. When set to false, the template inserts an empty &lt;think&gt;&lt;/think&gt;
+pair, telling the model to skip step‑by‑step thoughts. Earlier models baked the &lt;think&gt;
+tag into every generation, forcing chain‑of‑thought whether you wanted it or not.
+{# Qwen-3 #}
+{%- if enable_thinking is defined and enable_thinking is false %}
+{{- &#39;&lt;think&gt;\n\n&lt;/think&gt;\n\n&#39; }}
+{%- endif %}
+QwQ for example, forces reasoning in every conversation.
+{# QwQ #}
+{%- if add_generation_prompt %}
+{{- &#39;&lt;|im_start|&gt;assistant\n&lt;think&gt;\n&#39; }}
+{%- endif %}
+If the enable_thinking
+is true, the model is able to decide whether to think or not.
+You can test test out the template with the following code:
+import { Template } from &quot;@huggingface/jinja&quot;;
+import { downloadFile } from &quot;@huggingface/hub&quot;;
+const HF_TOKEN = process.env.HF_TOKEN;
+const file = await downloadFile({
+repo: &quot;Qwen/Qwen3-235B-A22B&quot;,
+path: &quot;tokenizer_config.json&quot;,
+accessToken: HF_TOKEN,
+});
+const config = await file!.json();
+const template = new Template(config.chat_template);
+const result = template.render({
+messages,
+add_generation_prompt: true,
+enable_thinking: false,
+bos_token: config.bos_token,
+eos_token: config.eos_token,
+});
+2. Context Management Should be Dynamic
+Qwen-3 utilizes a rolling checkpoint system, intelligently preserving or pruning reasoning blocks to maintain relevant context. Older models discarded reasoning prematurely to save tokens.
+Qwen-3 introduces a &quot;rolling checkpoint&quot; by traversing the message list in reverse to find the latest user turn that wasn’t a tool call. For any assistant replies after that index it keeps the full &lt;think&gt;
+blocks; everything earlier is stripped out.
+Why this matters:
+- Keeps the active plan visible during a multi‑step tool call.
+- Supports nested tool workflows without losing context.
+- Saves tokens by pruning thoughts the model no longer needs.
+- Prevents &quot;stale&quot; reasoning from bleeding into new tasks.
+Example
+Here&#39;s an example of chain-of-thought preservation through tool calls with Qwen-3 and QwQ.
+Check out @huggingface/jinja for testing out the chat templates
+3. Tool Arguments Need Better Serialization
+Before, every tool_call.arguments
+field was piped through | tojson
+, even if it was already a JSON‑encoded string—risking double‑escaping. Qwen‑3 checks the type first and only serializes when necessary.
+{# Qwen3 #}
+{%- if tool_call.arguments is string %}
+{{- tool_call.arguments }}
+{%- else %}
+{{- tool_call.arguments | tojson }}
+{%- endif %}
+4. There&#39;s No Need for a Default System Prompt
+Like many models, the Qwen‑2.5 series has a default system prompt.
+You are Qwen, created by Alibaba Cloud. You are a helpful assistant.
+This is pretty common as it helps models respond to user questions like &quot;Who are you?&quot;
+Qwen-3 and QwQ ship without this default system prompt. Despite this, the model can still accurately identify its creator if you ask it.
+Conclusion
+Qwen-3 shows us that through the chat_template
+we can provide better flexibility, smarter context handling, and improved tool interaction. These improvements not only improve capabilities, but also make agentic workflows more reliable and efficent. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

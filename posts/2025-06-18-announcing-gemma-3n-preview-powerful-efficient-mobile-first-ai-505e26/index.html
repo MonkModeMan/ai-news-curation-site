@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Announcing Gemma 3n preview: Powerful, efficient, mobile-first AI</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Announcing Gemma 3n preview: Powerful, efficient, mobile-first AI</h1> <p class="text-sm text-gray-500"> 2025/5/20 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/announcing-gemma-3n-preview-powerful-efficient-mobile-first-ai/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Following the exciting launches of Gemma 3 and Gemma 3 QAT, our family of state-of-the-art open models capable of running on a single cloud or desktop accelerator, we&#39;re pushing our vision for accessible AI even further. Gemma 3 delivered powerful capabilities for developers, and we&#39;re now extending that vision to highly capable, real-time AI operating directly on the devices you use every day – your phones, tablets, and laptops.
+To power the next generation of on-device AI and support a diverse range of applications, including advancing the capabilities of Gemini Nano, we engineered a new, cutting-edge architecture. This next-generation foundation was created in close collaboration with mobile hardware leaders like Qualcomm Technologies, MediaTek, and Samsung&#39;s System LSI business, and is optimized for lightning-fast, multimodal AI, enabling truly personal and private experiences directly on your device.
+Gemma 3n is our first open model built on this groundbreaking, shared architecture, allowing developers to begin experimenting with this technology today in an early preview. The same advanced architecture also powers the next generation of Gemini Nano, which brings these capabilities to a broad range of features in Google apps and our on-device ecosystem, and will become available later this year. Gemma 3n enables you to start building on this foundation that will come to major platforms such as Android and Chrome.
+Gemma 3n leverages a Google DeepMind innovation called Per-Layer Embeddings (PLE) that delivers a significant reduction in RAM usage. While the raw parameter count is 5B and 8B, this innovation allows you to run larger models on mobile devices or live-stream from the cloud, with a memory overhead comparable to a 2B and 4B model, meaning the models can operate with a dynamic memory footprint of just 2GB and 3GB. Learn more in our documentation.
+By exploring Gemma 3n, developers can get an early preview of the open model’s core capabilities and mobile-first architectural innovations that will be available on Android and Chrome with Gemini Nano.
+In this post, we&#39;ll explore Gemma 3n&#39;s new capabilities, our approach to responsible development, and how you can access the preview today.
+Engineered for fast, low-footprint AI experiences running locally, Gemma 3n delivers:
+Gemma 3n will empower a new wave of intelligent, on-the-go applications by enabling developers to:
+2. Power deeper understanding and contextual text generation using combined audio, image, video, and text inputs—all processed privately on-device.
+3. Develop advanced audio-centric applications, including real-time speech transcription, translation, and rich voice-driven interactions.
+Here’s an overview and the types of experiences you can build:
+Link to Youtube Video (visible only when JS is disabled)
+Our commitment to responsible AI development is paramount. Gemma 3n, like all Gemma models, underwent rigorous safety evaluations, data governance, and fine-tuning alignment with our safety policies. We approach open models with careful risk assessment, continually refining our practices as the AI landscape evolves.
+We&#39;re excited to get Gemma 3n into your hands through a preview starting today:
+Initial Access (Available Now):
+Gemma 3n marks the next step in democratizing access to cutting-edge, efficient AI. We’re incredibly excited to see what you’ll build as we make this technology progressively available, starting with today&#39;s preview.
+Explore this announcement and all Google I/O 2025 updates on io.google starting May 22. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

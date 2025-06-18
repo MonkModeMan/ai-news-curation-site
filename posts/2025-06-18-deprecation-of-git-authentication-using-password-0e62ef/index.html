@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Deprecation of Git Authentication using password</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Deprecation of Git Authentication using password</h1> <p class="text-sm text-gray-500"> 2023/8/25 – Hugging Face Blog  <a href="https://huggingface.co/blog/password-git-deprecation" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Hugging Face Hub: Important Git Authentication Changes
+Because we are committed to improving the security of our services, we are making changes to the way you authenticate when interacting with the Hugging Face Hub through Git. Starting from October 1st, 2023, we will no longer accept passwords as a way to authenticate your command-line Git operations. Instead, we recommend using more secure authentication methods, such as replacing the password with a personal access token or using an SSH key.
+Background
+In recent months, we have implemented various security enhancements, including sign-in alerts and support for SSH keys in Git. However, users have still been able to authenticate Git operations using their username and password. To further improve security, we are now transitioning to token-based or SSH key authentication. Token-based and SSH key authentication offer several advantages over traditional password authentication, including unique, revocable, and random features that enhance security and control.
+Action Required Today
+If you currently use your HF account password to authenticate with Git, please switch to using a personal access token or SSH keys before October 1st, 2023.
+Switching to personal access token
+You will need to generate an access token for your account; you can follow https://huggingface.co/docs/hub/security-tokens#user-access-tokens to generate one.
+After generating your access token, you can update your Git repository using the following commands:
+$: git remote set-url origin https://&lt;user_name&gt;:&lt;token&gt;@huggingface.co/&lt;repo_path&gt;
+$: git pull origin
+where &lt;repo_path&gt;
+is in the form of:
+&lt;user_name&gt;/&lt;repo_name&gt;
+for modelsdatasets/&lt;user_name&gt;/&lt;repo_name&gt;
+for datasetsspaces/&lt;user_name&gt;/&lt;repo_name&gt;
+for Spaces
+If you clone a new repo, you can just input a token in place of your password when your Git credential manager asks you for your authentication credentials.
+Switching to SSH keys
+Follow our guide to generate an SSH key and add it to your account: https://huggingface.co/docs/hub/security-git-ssh
+Then you&#39;ll be able to update your Git repository using:
+$: git remote set-url origin git@hf.co:&lt;repo_path&gt; # see above for the format of the repo path
+Timeline
+Here&#39;s what you can expect in the coming weeks:
+- Today: Users relying on passwords for Git authentication may receive emails urging them to update their authentication method.
+- October 1st: Personal access tokens or SSH keys will be mandatory for all Git operations.
+For more details, reach out to HF Support to address any questions or concerns at website@huggingface.co </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
