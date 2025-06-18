@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>EVA02-AT: Egocentric Video-Language Understanding with Spatial-Temporal Rotary Positional Embeddings and Symmetric Optimization</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 EVA02-AT: Egocentric Video-Language Understanding with Spatial-Temporal Rotary Positional Embeddings and Symmetric Optimization</h1> <p class="text-sm text-gray-500"> 2025/6/18 – arXiv AI  <a href="https://arxiv.org/abs/2506.14356" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Computer Science &gt; Computer Vision and Pattern Recognition
+[Submitted on 17 Jun 2025]
+Title:EVA02-AT: Egocentric Video-Language Understanding with Spatial-Temporal Rotary Positional Embeddings and Symmetric Optimization
+View PDF HTML (experimental)Abstract:Egocentric video-language understanding demands both high efficiency and accurate spatial-temporal modeling. Existing approaches face three key challenges: 1) Excessive pre-training cost arising from multi-stage pre-training pipelines, 2) Ineffective spatial-temporal encoding due to manually split 3D rotary positional embeddings that hinder feature interactions, and 3) Imprecise learning objectives in soft-label multi-instance retrieval, which neglect negative pair correlations. In this paper, we introduce EVA02-AT, a suite of EVA02-based video-language foundation models tailored to egocentric video understanding tasks. EVA02-AT first efficiently transfers an image-based CLIP model into a unified video encoder via a single-stage pretraining. Second, instead of applying rotary positional embeddings to isolated dimensions, we introduce spatial-temporal rotary positional embeddings along with joint attention, which can effectively encode both spatial and temporal information on the entire hidden dimension. This joint encoding of spatial-temporal features enables the model to learn cross-axis relationships, which are crucial for accurately modeling motion and interaction in videos. Third, focusing on multi-instance video-language retrieval tasks, we introduce the Symmetric Multi-Similarity (SMS) loss and a novel training framework that advances all soft labels for both positive and negative pairs, providing a more precise learning objective. Extensive experiments on Ego4D, EPIC-Kitchens-100, and Charades-Ego under zero-shot and fine-tuning settings demonstrate that EVA02-AT achieves state-of-the-art performance across diverse egocentric video-language tasks with fewer parameters. Models with our SMS loss also show significant performance gains on multi-instance retrieval benchmarks. Our code and models are publicly available at this https URL .
+References &amp; Citations
+Bibliographic and Citation Tools
+Bibliographic Explorer (What is the Explorer?)
+Connected Papers (What is Connected Papers?)
+Litmaps (What is Litmaps?)
+scite Smart Citations (What are Smart Citations?)
+Code, Data and Media Associated with this Article
+alphaXiv (What is alphaXiv?)
+CatalyzeX Code Finder for Papers (What is CatalyzeX?)
+DagsHub (What is DagsHub?)
+Gotit.pub (What is GotitPub?)
+Hugging Face (What is Huggingface?)
+Papers with Code (What is Papers with Code?)
+ScienceCast (What is ScienceCast?)
+Demos
+Recommenders and Search Tools
+Influence Flower (What are Influence Flowers?)
+CORE Recommender (What is CORE?)
+arXivLabs: experimental projects with community collaborators
+arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+Have an idea for a project that will add value for arXiv&#39;s community? Learn more about arXivLabs. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

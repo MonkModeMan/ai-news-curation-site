@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Reward Shaping to Mitigate Reward Hacking in RLHF</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Reward Shaping to Mitigate Reward Hacking in RLHF</h1> <p class="text-sm text-gray-500"> 2025/6/18 – arXiv AI  <a href="https://arxiv.org/abs/2502.18770" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Computer Science &gt; Machine Learning
+[Submitted on 26 Feb 2025 (v1), last revised 17 Jun 2025 (this version, v3)]
+Title:Reward Shaping to Mitigate Reward Hacking in RLHF
+View PDF HTML (experimental)Abstract:Reinforcement Learning from Human Feedback (RLHF) is essential for aligning large language models (LLMs) with human values. However, RLHF is susceptible to \emph{reward hacking}, where the agent exploits flaws in the reward function rather than learning the intended behavior, thus degrading alignment. Although reward shaping helps stabilize RLHF and partially mitigate reward hacking, a systematic investigation into shaping techniques and their underlying principles remains lacking. To bridge this gap, we present a comprehensive study of the prevalent reward shaping methods. Our analysis suggests two key design principles: (1) the RL reward should be bounded, and (2) the RL reward benefits from rapid initial growth followed by gradual convergence. Guided by these insights, we propose Preference As Reward (PAR), a novel approach that leverages the latent preferences embedded within the reward model as the signal for reinforcement learning. We evaluated PAR on two base models, Gemma2-2B, and Llama3-8B, using two datasets, Ultrafeedback-Binarized and HH-RLHF. Experimental results demonstrate PAR&#39;s superior performance over other reward shaping methods. On the AlpacaEval 2.0 benchmark, PAR achieves a win rate of at least 5 percentage points higher than competing approaches. Furthermore, PAR exhibits remarkable data efficiency, requiring only a single reference reward for optimal performance, and maintains robustness against reward hacking even after two full epochs of training. The code is available at this https URL, and the Work done during the internship at StepFun by Jiayi Fu.
+Submission history
+From: Jiayi Fu [view email][v1] Wed, 26 Feb 2025 02:57:59 UTC (769 KB)
+[v2] Thu, 27 Feb 2025 04:49:19 UTC (775 KB)
+[v3] Tue, 17 Jun 2025 05:05:12 UTC (216 KB)
+Current browse context:
+cs.LG
+References &amp; Citations
+Bibliographic and Citation Tools
+Bibliographic Explorer (What is the Explorer?)
+Connected Papers (What is Connected Papers?)
+Litmaps (What is Litmaps?)
+scite Smart Citations (What are Smart Citations?)
+Code, Data and Media Associated with this Article
+alphaXiv (What is alphaXiv?)
+CatalyzeX Code Finder for Papers (What is CatalyzeX?)
+DagsHub (What is DagsHub?)
+Gotit.pub (What is GotitPub?)
+Hugging Face (What is Huggingface?)
+Papers with Code (What is Papers with Code?)
+ScienceCast (What is ScienceCast?)
+Demos
+Recommenders and Search Tools
+Influence Flower (What are Influence Flowers?)
+CORE Recommender (What is CORE?)
+IArxiv Recommender
+(What is IArxiv?)
+arXivLabs: experimental projects with community collaborators
+arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+Have an idea for a project that will add value for arXiv&#39;s community? Learn more about arXivLabs. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

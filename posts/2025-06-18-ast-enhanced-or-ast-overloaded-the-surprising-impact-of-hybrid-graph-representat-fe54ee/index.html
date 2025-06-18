@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>AST-Enhanced or AST-Overloaded? The Surprising Impact of Hybrid Graph Representations on Code Clone Detection</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 AST-Enhanced or AST-Overloaded? The Surprising Impact of Hybrid Graph Representations on Code Clone Detection</h1> <p class="text-sm text-gray-500"> 2025/6/18 – arXiv AI  <a href="https://arxiv.org/abs/2506.14470" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Computer Science &gt; Artificial Intelligence
+[Submitted on 17 Jun 2025]
+Title:AST-Enhanced or AST-Overloaded? The Surprising Impact of Hybrid Graph Representations on Code Clone Detection
+View PDF HTML (experimental)Abstract:As one of the most detrimental code smells, code clones significantly increase software maintenance costs and heighten vulnerability risks, making their detection a critical challenge in software engineering. Abstract Syntax Trees (ASTs) dominate deep learning-based code clone detection due to their precise syntactic structure representation, but they inherently lack semantic depth. Recent studies address this by enriching AST-based representations with semantic graphs, such as Control Flow Graphs (CFGs) and Data Flow Graphs (DFGs). However, the effectiveness of various enriched AST-based representations and their compatibility with different graph-based machine learning techniques remains an open question, warranting further investigation to unlock their full potential in addressing the complexities of code clone detection. In this paper, we present a comprehensive empirical study to rigorously evaluate the effectiveness of AST-based hybrid graph representations in Graph Neural Network (GNN)-based code clone detection. We systematically compare various hybrid representations ((CFG, DFG, Flow-Augmented ASTs (FA-AST)) across multiple GNN architectures. Our experiments reveal that hybrid representations impact GNNs differently: while AST+CFG+DFG consistently enhances accuracy for convolution- and attention-based models (Graph Convolutional Networks (GCN), Graph Attention Networks (GAT)), FA-AST frequently introduces structural complexity that harms performance. Notably, GMN outperforms others even with standard AST representations, highlighting its superior cross-code similarity detection and reducing the need for enriched structures.
+References &amp; Citations
+Bibliographic and Citation Tools
+Bibliographic Explorer (What is the Explorer?)
+Connected Papers (What is Connected Papers?)
+Litmaps (What is Litmaps?)
+scite Smart Citations (What are Smart Citations?)
+Code, Data and Media Associated with this Article
+alphaXiv (What is alphaXiv?)
+CatalyzeX Code Finder for Papers (What is CatalyzeX?)
+DagsHub (What is DagsHub?)
+Gotit.pub (What is GotitPub?)
+Hugging Face (What is Huggingface?)
+Papers with Code (What is Papers with Code?)
+ScienceCast (What is ScienceCast?)
+Demos
+Recommenders and Search Tools
+Influence Flower (What are Influence Flowers?)
+CORE Recommender (What is CORE?)
+arXivLabs: experimental projects with community collaborators
+arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+Have an idea for a project that will add value for arXiv&#39;s community? Learn more about arXivLabs. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

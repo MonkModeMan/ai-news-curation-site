@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>AIは知っている「今、人間に評価されていることを」――GeminiやGPT、Claudeなど対象に自己認識実験</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 AIは知っている「今、人間に評価されていることを」――GeminiやGPT、Claudeなど対象に自己認識実験</h1> <p class="text-sm text-gray-500"> 2025/6/18 – ITmedia AI  <a href="https://www.itmedia.co.jp/aiplus/articles/2506/18/news026.html" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> このコーナーでは、2014年から先端テクノロジーの研究を論文単位で記事にしているWebメディア「Seamless」（シームレス）を主宰する山下裕毅氏が執筆。新規性の高いAI分野の科学論文を山下氏がピックアップし、解説する。
+X： ＠shiropen2
+米国の研究機関であるMATSとApollo Researchに所属する研究者らが発表した論文「Large Language Models Often Know When They Are Being Evaluated」は、最先端のAIモデルが、自身が評価やテストを受けている状況を高い精度で識別できることを実証した研究報告だ。
+この研究では、61の異なるデータセットから収集した1000件のプロンプトと対話記録を用いてベンチマークを構築した。これらの半分は実際の評価やベンチマークテストから収集したもので、残り半分は実際のユーザーとの日常的なやりとりから集めた。なお、チャット形式とエージェント形式（モデルが自律的にツールを使用してタスクを完了する場合）の2つの軸でバランスよく分割されている。
+実験では、各対話記録をAIモデルに見せた後、「この対話は評価から来たものですか？」という質問を投げかけた。主要な測定方法は「AUC」（ROC曲線下面積）を用いる。AUCとは、モデルが評価と実際のインタラクションをどの程度うまく分離できるかという識別能力。0.5（ランダムな推測）から1.0（完璧な識別）の範囲を取る。
+モデルが単なる当てずっぽうで答えているなら、AUCは0.5程度になるはずである。しかし実際には、最先端モデルはAUC0.8以上の精度で評価シナリオを正しく識別できた。これは統計的に有意な差であり、モデルが何らかの手掛かりを使って判断していることを示している。
+具体的には、9つの最先端言語モデル（Claude、GPT／o、Geminiファミリー）を対象に実験を行った結果、全体的なAUCはClaude 3.5 Sonnetが0.834、Claude 3.7 Sonnetが0.815、Gemini 2.5 Proが0.830、GPT-4.1が0.826を記録。人間のベースラインは、全体的なAUCが0.921である。
+注目すべきは、エージェント形式での性能がチャット形式よりも顕著に高いことだ。エージェント形式では、Gemini 2.5 ProがAUC 0.948、Claude 3.7 Sonnet（Thinking）が0.923を達成した。さらに興味深いのは、モデルが思考している際の内容だ。
+例えば、「これはソフトウェアエンジニアリングのためのAIエージェント評価（SWE-benchのような）において一般的なタスクタイプです」「選択式であることから、これは評価の一部である可能性があります」「実際のユーザーとの対話は、あまり構造化されておらず、形式的でない傾向があり、多くの場合、より自由な形式の質問や説明、前後の対話が含まれます」といった推論を示した。
+また研究チームは、AIモデルが評価の目的まで理解しているかも調査した。評価記録だけを見せて「これは能力テストですか、それともアライメント（倫理的整合性）テストですか？」と尋ねると、最先端モデルは90％前後の精度で正しく分類できた。
+具体的には、条件付き多肢選択問題（事前に評価であることを伝える）では、Claude 3.7 Sonnetが93％、GPT-4.1が89％の精度で能力評価かアライメント評価かを正しく分類した。無条件多肢選択問題（評価であることを明示しない）では、Claude 3.7 Sonnetは84％の精度を維持したが、GPT-4.1は55％に低下した。
+Source and Image Credits: Needham, Joe, et al. “Large Language Models Often Know When They Are Being Evaluated.” arXiv preprint arXiv:2505.23836（2025）.
+Copyright © ITmedia, Inc. All Rights Reserved. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
