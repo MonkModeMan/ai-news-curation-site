@@ -1,38 +1,38 @@
 <!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>［Pythonクイズ］リスト内に同じ要素がそれぞれ何個あるか数えよう！　for文を使うのもいいけれど……</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.CO8YC2Z5.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 ［Pythonクイズ］リスト内に同じ要素がそれぞれ何個あるか数えよう！　for文を使うのもいいけれど……</h1> <p class="text-sm text-gray-500"> 2025/6/16 – ITmedia AI  <a href="https://atmarkit.itmedia.co.jp/ait/articles/2506/17/news013.html" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
 元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> ���X�g�ɂǂ̗v�f�����܂܂�Ă��邩�A�����������Ƃ��Ă���܂���ˁB�������A�����ŏ����Ă��\���܂���B�ł��A���̃��W���[���̂��̃N���X���g���̂��J���^���ł���B
-�@�ȉ��̓��X�g�ɓ���̗v�f������o�ꂷ�邩�𐔂��グ�āA�v�f���L�[�A���̓o����L�[�̒l�Ƃ��鎫�����쐬����R�[�h�ł���B���̃R�[�h�͈Ӑ}�����ʂ�ɓ��삷��B�������APython�ɕW���ŕt�����Ă��邠�郂�W���[���̂���N���X���g���Ɠ������Ƃ�2�s�ŋL�q�ł���B���̃N���X���g���āA���̃R�[�h�����������Ă݂悤�B
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> リストにどの要素が何個含まれているか、数えたいことってありますよね。もちろん、自分で書いても構いません。でも、あのモジュールのあのクラスを使うのがカンタンですよ。
+以下はリストに同一の要素が何回登場するかを数え上げて、要素をキー、その登場回数をキーの値とする辞書を作成するコードである。このコードは意図した通りに動作する。しかし、Pythonに標準で付属しているあるモジュールのあるクラスを使うと同じことが2行で記述できる。そのクラスを使って、このコードを書き直してみよう。
 items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
 counts = {}
 for item in items:
 c = counts.get(item, 0)
 counts[item] = c + 1
 print(counts) # {&#39;foo&#39;: 1, &#39;baz&#39;: 2, &#39;bar&#39;: 4}
-�@�ǂ���HP���킳���ł��B
-�@��T����Ȃ��Ƃ������܂����B�u0 &lt;= num &lt; 10�v�̂悤�ȏ������ɂ��āu���̂悤�ȏ��������ł��錾��͂��܂�Ȃ��悤�ł��v�ƁB��������A�^�����c�b�R�~������܂��āABCPL�iC�̐�c�ł���B�̐�c�ɓ����錾��Ƃ��j�ł͂��̂悤�ȏ�������������Ă��邻���ł��BBCPL���g�������Ƃ��Ȃ������̂Œm��܂���ł����B
-�@https://www.cl.cam.ac.uk/~mr10/���_�E�����[�h�\��BCPL�̌���}�j���A���wThe BCPL Cintsys and Cintpos User Guide�x�ibcplman.pdf�j�ɂ́uAn expression of the form: E relop E relop ... relop E where each relop is one of =, ~=, &lt;=, &gt;=, &lt; or &gt; returns TRUE if all the individual relations are satisfied and FALSE, otherwise.�v�Ƃ���܂��B�K���ɖƁuE relop E relop ... relop E�i������relop�͂��ꂼ��=�A~=�A&lt;=�A&gt;=�A&lt;�A&gt;�̂����ꂩ�j�Ƃ����`�̎��͑S�Ă̊W����������Ă����TRUE���A�����łȂ����FALSE��Ԃ��v�ƂȂ�܂��B
-�@�Ƃ����킯�ŁABCPL�ł��u0 &lt;= num &lt; 10�v�̂悤�ɔ�r���Z��A�������邱�Ƃ͉\�ł��B���ɂȂ�܂����i�������ABCPL�����n�̃r���h�A�R�[�h�̎��s�܂ł͂��Ă��Ȃ��̂ŁA�����܂ł��}�j���A�������������̘b�ł��j�B
-�@�����̃R�[�h����ȉ��Ɏ����܂��B
+どうもHPかわさきです。
+先週こんなことを書きました。「0 &lt;= num &lt; 10」のような書き方について「このような書き方ができる言語はあまりないようです」と。そしたら、某所よりツッコミがありまして、BCPL（Cの先祖であるBの先祖に当たる言語とも）ではこのような書き方が許されているそうです。BCPLを使ったことがなかったので知りませんでした。
+https://www.cl.cam.ac.uk/~mr10/よりダウンロード可能なBCPLの言語マニュアル『The BCPL Cintsys and Cintpos User Guide』（bcplman.pdf）には「An expression of the form: E relop E relop ... relop E where each relop is one of =, ~=, &lt;=, &gt;=, &lt; or &gt; returns TRUE if all the individual relations are satisfied and FALSE, otherwise.」とあります。適当に訳すと「E relop E relop ... relop E（ここでrelopはそれぞれ=、~=、&lt;=、&gt;=、&lt;、&gt;のいずれか）という形の式は全ての関係が満たされていればTRUEを、そうでなければFALSEを返す」となります。
+というわけで、BCPLでも「0 &lt;= num &lt; 10」のように比較演算を連鎖させることは可能です。勉強になりました（ただし、BCPL処理系のビルド、コードの実行まではしていないので、あくまでもマニュアルを見ただけの話です）。
+正解のコード例を以下に示します。
 from collections import Counter
 items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
 counts = Counter(items)
 print(counts) # Counter({&#39;bar&#39;: 4, &#39;baz&#39;: 2, &#39;foo&#39;: 1})
-�@�����ł�collections���W���[����Counter�N���X���C���|�[�g���āA���̃C���X�^���X�������Ƀ��X�g��n���Ă��܂��B����ɂ��A���X�g�̗v�f�𐔂��グ�āA�v�f���L�[�A�o����l�Ƃ���Counter�I�u�W�F�N�g�i�����Ɠ��l�ȃ}�b�s���O�I�u�W�F�N�g�j�Ă��܂��B
-�@���̑��ɂ�itertools���W���[����groupby�����g�����@������܂����A�����ł͏Љ�͂��܂���i�Ȃ��Agroupby�͊��̂悤�ɌĂяo���Ďg�p���܂����A���̎��̂̓N���X�ł��BPython���āA���������̑����ł���ˁj�B
-�@Python�ɕW���ŕt������collections���W���[���ɂ�Counter�N���X���܂܂�Ă��܂��B���̃N���X�̐������Ƀ��X�g�i�Ȃǂ̔����\�I�u�W�F�N�g�j��n���ƁA�e�v�f�̓o��𐔂��グ�Ă���܂��B
-�@��蕶�̃R�[�h�͎��̂悤�Ȃ��̂ł����B
+ここではcollectionsモジュールのCounterクラスをインポートして、そのインスタンス生成時にリストを渡しています。これにより、リストの要素を数え上げて、要素をキー、出現回数を値とするCounterオブジェクト（辞書と同様なマッピングオブジェクト）を得ています。
+この他にもitertoolsモジュールのgroupby関数を使う方法もありますが、ここでは紹介はしません（なお、groupbyは関数のように呼び出して使用しますが、その実体はクラスです。Pythonって、そういうの多いですよね）。
+Pythonに標準で付属するcollectionsモジュールにはCounterクラスが含まれています。このクラスの生成時にリスト（などの反復可能オブジェクト）を渡すと、各要素の登場回数を数え上げてくれます。
+問題文のコードは次のようなものでした。
 items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
 counts = {}
 for item in items:
 c = counts.get(item, 0)
 counts[item] = c + 1
 print(counts) # {&#39;foo&#39;: 1, &#39;baz&#39;: 2, &#39;bar&#39;: 4}
-�@�����ł̓��X�g�̗v�f�𐔂��グ�Ă��܂��B&#39;foo&#39;��1�A&#39;bar&#39;��4�A&#39;baz&#39;��2�ł��B�����ŁACounter�N���X�̃I�u�W�F�N�g�̐������ɂ����n���Ă��Γ������Ƃ��ł���Ƃ������Ƃł��B
+ここではリストの要素を数え上げています。&#39;foo&#39;は1個、&#39;bar&#39;は4個、&#39;baz&#39;は2個です。そこで、Counterクラスのオブジェクトの生成時にこれを渡してやれば同じことができるということです。
 from collections import Counter
 items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
 counts = Counter(items)
 print(counts) # Counter({&#39;bar&#39;: 4, &#39;baz&#39;: 2, &#39;foo&#39;: 1})
-�@�ŏ��̃R�[�h�ł�Python�ɑg�ݍ��݂̎������쐬����Ă��܂������A�����̃R�[�h�ł�Counter�N���X�̃I�u�W�F�N�g�ɂȂ��Ă���_�ɒ��ӂ��Ă��������B�������A���҂͔�r�\�ł��B
+最初のコードではPythonに組み込みの辞書が作成されていましたが、正解例のコードではCounterクラスのオブジェクトになっている点に注意してください。ただし、両者は比較可能です。
 from collections import Counter
 items = [&#39;foo&#39;, &#39;baz&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;bar&#39;]
 counts_dict = {}
@@ -41,44 +41,42 @@ c = counts_dict.get(item, 0)
 counts_dict[item] = c + 1
 counts_counter = Counter(items)
 print(counts_dict == counts_counter) # True
-�@�����ł͖�蕶�Ɠ��������Ő����グ�����ʂ̎�����counts_dict�ɁACounter�N���X���g���Đ����グ�����ʂ�counts_counter�ɑ�����āA����炪���������������Ă��܂��B���̌��ʂ�True�ɂȂ�܂��B�����^�ɂ��낦������udict(counts_counter)�v���邢�́uCounter(counts_dict)�v�̂悤�ɂ��邱�Ƃ��\�ł��B�}�b�s���O�I�u�W�F�N�g���g���āACounter�N���X�̃I�u�W�F�N�g������ƁA���̃}�b�s���O�I�u�W�F�N�g�̃L�[�^�l�̑����̂܂�Counter�N���X�ɂ����邻��ƂȂ�܂��i�R�[�h��͏ȗ��j�B
-�@������Counter�N���X�̑傫�ȈႢ�Ƃ��Ă͑��݂��Ȃ��L�[���p�������u[]�v�Ɏw�肵���ꍇ�̐U�镑�����������܂��B
+ここでは問題文と同じやり方で数え上げた結果の辞書をcounts_dictに、Counterクラスを使って数え上げた結果をcounts_counterに代入して、それらが等しいかを試しています。その結果はTrueになります。同じ型にそろえたければ「dict(counts_counter)」あるいは「Counter(counts_dict)」のようにすることも可能です。マッピングオブジェクトを使って、Counterクラスのオブジェクトを生成すると、そのマッピングオブジェクトのキー／値の対がそのままCounterクラスにおけるそれとなります（コード例は省略）。
+辞書とCounterクラスの大きな違いとしては存在しないキーを角かっこ「[]」に指定した場合の振る舞いが挙げられます。
 print(counts_dict[&#39;hoge&#39;]) # KeyError
 print(counts_counter[&#39;hoge&#39;]) # 0
-�@���̃R�[�h�́A��ō쐬����counts_dict��counts_counter�ɑ��݂��Ȃ��L�[���w�肵�āA���̒l��\�����悤�Ƃ��Ă��܂��B�����ł́i�������jKeyError��O�ɂȂ�܂����ACounter�N���X�̃I�u�W�F�N�g�ł�0�ƕ\������܂��B
-�@�܂��Aupdate���\�b�h�̐U�镑���ɂ���������܂��B������update���\�b�h�Ɏ����i�}�b�s���O�I�u�W�F�N�g�j��n���ƁA���̃L�[�^�l�̑g�����̎����ɂ���A�l���㏑�����܂����ACounter�N���X�ł͂��̒l�����Z����܂��B�܂��A������update���\�b�h�ɏ�Ō���items�̂悤�ȃ��X�g�͓n���܂��ACounter�N���X��update���\�b�h�Ƀ��X�g��n���ƁA�v�f�𐔂��グ�āA�����̃L�[�̒l�ɂ��Ă͂��̒l�����Z����܂��B�ȉ��ɗ�������܂��B
+このコードは、上で作成したcounts_dictとcounts_counterに存在しないキーを指定して、その値を表示しようとしています。辞書では（もちろん）KeyError例外になりますが、Counterクラスのオブジェクトでは0と表示されます。
+また、updateメソッドの振る舞いにも差があります。辞書のupdateメソッドに辞書（マッピングオブジェクト）を渡すと、そのキー／値の組が元の辞書にあれば、値を上書きしますが、Counterクラスではその値が加算されます。また、辞書のupdateメソッドに上で見たitemsのようなリストは渡せませんが、Counterクラスのupdateメソッドにリストを渡すと、要素を数え上げて、既存のキーの値についてはその値が加算されます。以下に例を示します。
 tmp_dict = {&#39;baz&#39;: 3, &#39;qux&#39;: 6}
 counts_dict.update(tmp_dict)
 print(counts_dict) # {&#39;foo&#39;: 1, &#39;baz&#39;: 3, &#39;bar&#39;: 4, &#39;qux&#39;: 6}
 counts_counter.update(tmp_dict)
 print(counts_counter) # Counter({&#39;qux&#39;: 6, &#39;baz&#39;: 5, &#39;bar&#39;: 4, &#39;foo&#39;: 1})
-�@���Ƃ��ƁAcounts_dict��counts_counter��&#39;baz&#39;�L�[�̒l��2�ł����B�����āAcounts_dict.update���\�b�h�Ɏ���{&#39;baz&#39;: 3, &#39;qux&#39;: 6}��n���ƁA&#39;baz&#39;�L�[�̒l���㏑�������3�ɂȂ�܂��B����Acounts_counter.update�ɓ���{&#39;baz&#39;: 3, &#39;qux&#39;: 6}��n���ƁA&#39;baz&#39;�L�[�̒l�ł���3�����Z����āAcounts_counter[&#39;baz&#39;]��5�ɂȂ��Ă��܂��B����܂łɂȂ������L�[&#39;qux&#39;�ɂ��Ă͂���炪�V�K�ɒǉ�����Ă���_�͗��҂œ����ł��B
-�@���X�g��ǉ�����Ǝ��̂悤�ɂȂ�܂��B
+もともと、counts_dictもcounts_counterも&#39;baz&#39;キーの値は2でした。そして、counts_dict.updateメソッドに辞書{&#39;baz&#39;: 3, &#39;qux&#39;: 6}を渡すと、&#39;baz&#39;キーの値が上書きされて3になります。一方、counts_counter.updateに同じ{&#39;baz&#39;: 3, &#39;qux&#39;: 6}を渡すと、&#39;baz&#39;キーの値である3が加算されて、counts_counter[&#39;baz&#39;]は5になっています。これまでになかったキー&#39;qux&#39;についてはそれらが新規に追加されている点は両者で同じです。
+リストを追加すると次のようになります。
 tmp_list = [&#39;qux&#39;, &#39;quuux&#39;]
 counts_dict.update(tmp_list) # ValueError
 counts_counter.update(tmp_list)
 print(counts_counter) # Counter({&#39;qux&#39;: 7, &#39;baz&#39;: 5, &#39;bar&#39;: 4, &#39;foo&#39;: 1, &#39;quuux&#39;: 1})
-�@������update���\�b�h�Ƀ��X�g��n����ValueError��O�ƂȂ�܂����ACounter�N���X��update���\�b�h�ł͓n�������X�g�̗v�f�������グ���āA���̒l�����Z����Ă��邱�Ƃ�������܂��i[(&#39;foo&#39;, 0), (&#39;bar&#39;, 1), (&#39;ba&#39;, 2)]�̂悤��2�̗v�f����Ȃ锽���\�I�u�W�F�N�g��v�f�Ƃ��郊�X�g�Ȃ玫����update���\�b�h�ɓn���邱�Ƃɂ͗��ӂ��Ă��������j�B
-�@�܂��ACounter�N���X�ɂ̓L�[�̒l�̐������L�[������C�e���[�^��Ԃ�elements���\�b�h��l�������L�[���w�肵���������\������most_common���\�b�h�A�L�[�̒l�����Z����subtract���\�b�h�A�J�E���g�̍��v���v�Z����total���\�b�h������܂��B�ȉ��ɂ����̃��\�b�h�̎g�p��������܂��i�����ł͐V�K��Counter�I�u�W�F�N�g���쐬���Ă��܂��j�B
+辞書のupdateメソッドにリストを渡すとValueError例外となりますが、Counterクラスのupdateメソッドでは渡したリストの要素が数え上げられて、その値が加算されていることが分かります（[(&#39;foo&#39;, 0), (&#39;bar&#39;, 1), (&#39;ba&#39;, 2)]のような2つの要素からなる反復可能オブジェクトを要素とするリストなら辞書のupdateメソッドに渡せることには留意してください）。
+また、Counterクラスにはキーの値の数だけキーを反復するイテレータを返すelementsメソッドや値が多いキーを指定した数だけ表示するmost_commonメソッド、キーの値を減算するsubtractメソッド、カウントの合計を計算するtotalメソッドもあります。以下にこれらのメソッドの使用例を示します（ここでは新規にCounterオブジェクトを作成しています）。
 cnt = Counter({&#39;foo&#39;: 1, &#39;bar&#39;: 2, &#39;baz&#39;: 3})
 print(cnt) # Counter({&#39;baz&#39;: 3, &#39;bar&#39;: 2, &#39;foo&#39;: 1})
-# elements���\�b�h
+# elementsメソッド
 result = list(cnt.elements())
 print(result) # [&#39;foo&#39;, &#39;bar&#39;, &#39;bar&#39;, &#39;baz&#39;, &#39;baz&#39;, &#39;baz&#39;]
-# most_common���\�b�h
+# most_commonメソッド
 print(cnt.most_common(2)) # [(&#39;baz&#39;, 3), (&#39;bar&#39;, 2)]
-# subtract���\�b�h
+# subtractメソッド
 cnt.subtract([&#39;foo&#39;, &#39;foo&#39;, &#39;bar&#39;])
 print(cnt) # Counter({&#39;baz&#39;: 3, &#39;bar&#39;: 1, &#39;foo&#39;: -1})
-# total���\�b�h
+# totalメソッド
 print(cnt.total()) # 3
-�@�����ł�cnt�I�u�W�F�N�g��Counter({&#39;baz&#39;: 3, &#39;bar&#39;: 2, &#39;foo&#39;: 1})�ƂȂ��Ă��܂��B�ŏ��ɁAelements���\�b�h���Ăяo���ē����C�e���[�^���烊�X�g���쐬���Ă��܂��B���̂Ƃ��A&#39;foo&#39;�L�[�̒l��1�Ȃ̂ŁA���ʂ̃��X�g�ɂ�&#39;foo&#39;��1�����܂܂�A���l�ɁA&#39;bar&#39;��2�A&#39;baz&#39;��3�܂܂�Ă��܂��B���X�g�̗v�f�𐔂��グ���ꍇ�̋t�ϊ����ł���ƍl���Ă��悢�ł��傤�Bmost_common���\�b�h�ɂ�2��n���Ă��܂��B���̂��߁A�l�������v�f��2���o����(�L�[, �l)�̃^�v���Ƃ��āA���������X�g�Ɋi�[�������̂��Ԃ���Ă��܂��B
-�@subtract���\�b�h�ɂ̓��X�g��n���Ă��܂��B���X�g�ɂ�&#39;foo&#39;��2�A&#39;bar&#39;��1�܂܂�Ă���̂ŁAcnt�I�u�W�F�N�g��&#39;foo&#39;�L�[�̒l��2�������Z����A&#39;bar&#39;�L�[�̒l��1�������Z����Ă���̂�������܂��i���l�����邱�Ƃɒ��Ӂj�B�Ō��total���\�b�h�ł͊e�L�[�̒l�����v���āi&#39;foo&#39;�L�[�̒l��-1�A&#39;bar&#39;�L�[�̒l��1�A&#39;baz&#39;�L�[�̒l��3�j�A�����ł�3�ƂȂ�܂����B
-�@�܂��A2��Counter�I�u�W�F�N�g�ɂ��ďW�����Z���s��==���Z�q�A!=���Z�q�Ȃǂ��g�p�ł��܂����A�����ł͗�͏ȗ����܂��B
-�@�Ƃ܂��A���X�g�i�����\�I�u�W�F�N�g�j�̗v�f�𐔂��グ����A�����グ�����ʂ��g���Ă�����Ƃ��������������肷�邽�߂ɕ֗��ȃ��\�b�h��������Ă���̂ŁACounter�N���X�͂��ЂƂ��o���Ă����܂��傤�B
-�@�w�����IPython�x�ł�Counter�N���X���������L���͂����ł����A����̋L���̕���������Əڂ����̂ŁA���[�c�c�����ɓǂ܂Ȃ����Ă����v�ł��c�c�B
-�uPython�X�e�b�v�A�b�v�N�C�Y�v
-���S�Ҍ����A�f�[�^���́EAI�E�@�B�w�K�EPython�̕����@�@��IT��Deep Insider�Ŋw�ڂ�
+ここではcntオブジェクトはCounter({&#39;baz&#39;: 3, &#39;bar&#39;: 2, &#39;foo&#39;: 1})となっています。最初に、elementsメソッドを呼び出して得たイテレータからリストを作成しています。このとき、&#39;foo&#39;キーの値は1なので、結果のリストには&#39;foo&#39;が1つだけ含まれ、同様に、&#39;bar&#39;は2つ、&#39;baz&#39;は3つ含まれています。リストの要素を数え上げた場合の逆変換をできると考えてもよいでしょう。most_commonメソッドには2を渡しています。そのため、値が多い要素を2つ取り出して(キー, 値)のタプルとして、それらをリストに格納したものが返されています。
+subtractメソッドにはリストを渡しています。リストには&#39;foo&#39;が2つ、&#39;bar&#39;が1つ含まれているので、cntオブジェクトの&#39;foo&#39;キーの値は2だけ減算され、&#39;bar&#39;キーの値は1だけ減算されているのが分かります（負値も取れることに注意）。最後のtotalメソッドでは各キーの値を合計して（&#39;foo&#39;キーの値は-1、&#39;bar&#39;キーの値は1、&#39;baz&#39;キーの値は3）、ここでは3となりました。
+また、2つのCounterオブジェクトについて集合演算を行う==演算子、!=演算子なども使用できますが、ここでは例は省略します。
+とまあ、リスト（反復可能オブジェクト）の要素を数え上げたり、数え上げた結果を使ってちょっとした何かをしたりするために便利なメソッドが備わっているので、Counterクラスはぜひとも覚えておきましょう。
+『解決！Python』でもCounterクラスを扱った記事はあるんですが、今回の記事の方がちょっと詳しいので、えー……無理に読まなくっても大丈夫です……。
 Copyright© Digital Advantage Corp. All Rights Reserved. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
 ← 一覧へ戻る
 </a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
