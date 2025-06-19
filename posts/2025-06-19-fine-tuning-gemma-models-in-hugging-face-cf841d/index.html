@@ -29,6 +29,7 @@ Assuming that you have submitted the consent form, you can access the model arti
 We start by downloading the model and the tokenizer. We also include a BitsAndBytesConfig
 for weight only quantization.
 import torch
+import os
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 model_id = &quot;google/gemma-2b&quot;
 bnb_config = BitsAndBytesConfig(
