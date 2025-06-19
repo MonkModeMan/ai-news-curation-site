@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Federated Learning using Hugging Face and Flower</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Federated Learning using Hugging Face and Flower</h1> <p class="text-sm text-gray-500"> 2023/3/27 – Hugging Face Blog  <a href="https://huggingface.co/blog/fl-with-flower" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Federated Learning using Hugging Face and Flower
+This tutorial will show how to leverage Hugging Face to federate the training of language models over multiple clients using Flower. More specifically, we will fine-tune a pre-trained Transformer model (distilBERT) for sequence classification over a dataset of IMDB ratings. The end goal is to detect if a movie rating is positive or negative.
+A notebook is also available here but instead of running on multiple separate clients it utilizes the simulation functionality of Flower (using flwr[&#39;simulation&#39;]
+) in order to emulate a federated setting inside Google Colab (this also means that instead of calling start_server
+we will call start_simulation
+, and that a few other modifications are needed).
+Dependencies
+To follow along this tutorial you will need to install the following packages: datasets
+, evaluate
+, flwr
+, torch
+, and transformers
+. This can be done using pip
+:
+pip install datasets evaluate flwr torch transformers
+Standard Hugging Face workflow
+Handling the data
+To fetch the IMDB dataset, we will use Hugging Face&#39;s datasets
+library. We then need to tokenize the data and create PyTorch
+dataloaders, this is all done in the load_data
+function:
+import random
+import torch
+from datasets import load_dataset
+from torch.utils.data import DataLoader
+from transformers import AutoTokenizer, DataCollatorWithPadding
+DEVICE = torch.device(&quot;cuda:0&quot; if torch.cuda.is_available() else &quot;cpu&quot;)
+CHECKPOINT = &quot;distilbert-base-uncased&quot;
+def load_data():
+&quot;&quot;&quot;Load IMDB data (training and eval)&quot;&quot;&quot;
+raw_datasets = load_dataset(&quot;imdb&quot;)
+raw_datasets = raw_datasets.shuffle(seed=42)
+# remove unnecessary data split
+del raw_datasets[&quot;unsupervised&quot;]
+tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT)
+def tokenize_function(examples):
+return tokenizer(examples[&quot;text&quot;], truncation=True)
+# We will take a small sample in order to reduce the compute time, this is optional
+train_population = random.sample(range(len(raw_datasets[&quot;train&quot;])), 100)
+test_population = random.sample(range(len(raw_datasets[&quot;test&quot;])), 100)
+tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
+tokenized_datasets[&quot;train&quot;] = tokenized_datasets[&quot;train&quot;].select(train_population)
+tokenized_datasets[&quot;test&quot;] = tokenized_datasets[&quot;test&quot;].select(test_population)
+tokenized_datasets = tokenized_datasets.remove_columns(&quot;text&quot;)
+tokenized_datasets = tokenized_datasets.rename_column(&quot;label&quot;, &quot;labels&quot;)
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+trainloader = DataLoader(
+tokenized_datasets[&quot;train&quot;],
+shuffle=True,
+batch_size=32,
+collate_fn=data_collator,
+)
+testloader = DataLoader(
+tokenized_datasets[&quot;test&quot;], batch_size=32, collate_fn=data_collator
+)
+return trainloader, testloader
+trainloader, testloader = load_data()
+Training and testing the model
+Once we have a way of creating our trainloader and testloader, we can take care of the training and testing. This is very similar to any PyTorch
+training or testing loop:
+from evaluate import load as load_metric
+from transformers import AdamW
+def train(net, trainloader, epochs):
+optimizer = AdamW(net.parameters(), lr=5e-5)
+net.train()
+for _ in range(epochs):
+for batch in trainloader:
+batch = {k: v.to(DEVICE) for k, v in batch.items()}
+outputs = net(**batch)
+loss = outputs.loss
+loss.backward()
+optimizer.step()
+optimizer.zero_grad()
+def test(net, testloader):
+metric = load_metric(&quot;accuracy&quot;)
+loss = 0
+net.eval()
+for batch in testloader:
+batch = {k: v.to(DEVICE) for k, v in batch.items()}
+with torch.no_grad():
+outputs = net(**batch)
+logits = outputs.logits
+loss += outputs.loss.item()
+predictions = torch.argmax(logits, dim=-1)
+metric.add_batch(predictions=predictions, references=batch[&quot;labels&quot;])
+loss /= len(testloader.dataset)
+accuracy = metric.compute()[&quot;accuracy&quot;]
+return loss, accuracy
+Creating the model itself
+To create the model itself, we will just load the pre-trained distillBERT model using Hugging Face’s AutoModelForSequenceClassification
+:
+from transformers import AutoModelForSequenceClassification
+net = AutoModelForSequenceClassification.from_pretrained(
+CHECKPOINT, num_labels=2
+).to(DEVICE)
+Federating the example
+The idea behind Federated Learning is to train a model between multiple clients and a server without having to share any data. This is done by letting each client train the model locally on its data and send its parameters back to the server, which then aggregates all the clients’ parameters together using a predefined strategy. This process is made very simple by using the Flower framework. If you want a more complete overview, be sure to check out this guide: What is Federated Learning?
+Creating the IMDBClient
+To federate our example to multiple clients, we first need to write our Flower client class (inheriting from flwr.client.NumPyClient
+). This is very easy, as our model is a standard PyTorch
+model:
+from collections import OrderedDict
+import flwr as fl
+class IMDBClient(fl.client.NumPyClient):
+def get_parameters(self, config):
+return [val.cpu().numpy() for _, val in net.state_dict().items()]
+def set_parameters(self, parameters):
+params_dict = zip(net.state_dict().keys(), parameters)
+state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+net.load_state_dict(state_dict, strict=True)
+def fit(self, parameters, config):
+self.set_parameters(parameters)
+print(&quot;Training Started...&quot;)
+train(net, trainloader, epochs=1)
+print(&quot;Training Finished.&quot;)
+return self.get_parameters(config={}), len(trainloader), {}
+def evaluate(self, parameters, config):
+self.set_parameters(parameters)
+loss, accuracy = test(net, testloader)
+return float(loss), len(testloader), {&quot;accuracy&quot;: float(accuracy)}
+The get_parameters
+function lets the server get the client&#39;s parameters. Inversely, the set_parameters
+function allows the server to send its parameters to the client. Finally, the fit
+function trains the model locally for the client, and the evaluate
+function tests the model locally and returns the relevant metrics.
+We can now start client instances using:
+fl.client.start_numpy_client(
+server_address=&quot;127.0.0.1:8080&quot;,
+client=IMDBClient(),
+)
+Starting the server
+Now that we have a way to instantiate clients, we need to create our server in order to aggregate the results. Using Flower, this can be done very easily by first choosing a strategy (here, we are using FedAvg
+, which will define the global weights as the average of all the clients&#39; weights at each round) and then using the flwr.server.start_server
+function:
+def weighted_average(metrics):
+accuracies = [num_examples * m[&quot;accuracy&quot;] for num_examples, m in metrics]
+losses = [num_examples * m[&quot;loss&quot;] for num_examples, m in metrics]
+examples = [num_examples for num_examples, _ in metrics]
+return {&quot;accuracy&quot;: sum(accuracies) / sum(examples), &quot;loss&quot;: sum(losses) / sum(examples)}
+# Define strategy
+strategy = fl.server.strategy.FedAvg(
+fraction_fit=1.0,
+fraction_evaluate=1.0,
+evaluate_metrics_aggregation_fn=weighted_average,
+)
+# Start server
+fl.server.start_server(
+server_address=&quot;0.0.0.0:8080&quot;,
+config=fl.server.ServerConfig(num_rounds=3),
+strategy=strategy,
+)
+The weighted_average
+function is there to provide a way to aggregate the metrics distributed amongst the clients (basically this allows us to display a nice average accuracy and loss for every round).
+Putting everything together
+If you want to check out everything put together, you should check out the code example we wrote for the Flower repo: https://github.com/adap/flower/tree/main/examples/quickstart-huggingface.
+Of course, this is a very basic example, and a lot can be added or modified, it was just to showcase how simply we could federate a Hugging Face workflow using Flower.
+Note that in this example we used PyTorch
+, but we could have very well used TensorFlow
+. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

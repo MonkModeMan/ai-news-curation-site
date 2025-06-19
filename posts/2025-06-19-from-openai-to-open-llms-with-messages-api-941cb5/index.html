@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>From OpenAI to Open LLMs with Messages API</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 From OpenAI to Open LLMs with Messages API</h1> <p class="text-sm text-gray-500"> 2024/2/8 – Hugging Face Blog  <a href="https://huggingface.co/blog/tgi-messages-api" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> From OpenAI to Open LLMs with Messages API on Hugging Face
+We are excited to introduce the Messages API to provide OpenAI compatibility with Text Generation Inference (TGI) and Inference Endpoints.
+Starting with version 1.4.0, TGI offers an API compatible with the OpenAI Chat Completion API. The new Messages API allows customers and users to transition seamlessly from OpenAI models to open LLMs. The API can be directly used with OpenAI&#39;s client libraries or third-party tools, like LangChain or LlamaIndex.
+&quot;The new Messages API with OpenAI compatibility makes it easy for Ryght&#39;s real-time GenAI orchestration platform to switch LLM use cases from OpenAI to open models. Our migration from GPT4 to Mixtral/Llama2 on Inference Endpoints is effortless, and now we have a simplified workflow with more control over our AI solutions.&quot; - Johnny Crupi, CTO at Ryght
+The new Messages API is also now available in Inference Endpoints, on both dedicated and serverless flavors. To get you started quickly, we’ve included detailed examples of how to:
+- Create an Inference Endpoint
+- Using Inference Endpoints with OpenAI client libraries
+- Integrate with LangChain and LlamaIndex
+Limitations: The Messages API does not currently support function calling and will only work for LLMs with a chat_template
+defined in their tokenizer configuration, like in the case of Mixtral 8x7B Instruct.
+Create an Inference Endpoint
+Inference Endpoints offers a secure, production solution to easily deploy any machine learning model from the Hub on dedicated infrastructure managed by Hugging Face.
+In this example, we will deploy Nous-Hermes-2-Mixtral-8x7B-DPO, a fine-tuned Mixtral model, to Inference Endpoints using Text Generation Inference.
+We can deploy the model in just a few clicks from the UI, or take advantage of the huggingface_hub
+Python library to programmatically create and manage Inference Endpoints. We demonstrate the use of the Hub library here.
+In our API call shown below, we need to specify the endpoint name and model repository, along with the task of text-generation
+. In this example we use a protected
+type so access to the deployed endpoint will require a valid Hugging Face token. We also need to configure the hardware requirements like vendor, region, accelerator, instance type, and size. You can check out the list of available resource options using this API call, and view recommended configurations for select models in our catalog here.
+Note: You may need to request a quota upgrade by sending an email to api-enterprise@huggingface.co
+from huggingface_hub import create_inference_endpoint
+endpoint = create_inference_endpoint(
+&quot;nous-hermes-2-mixtral-8x7b-demo&quot;,
+repository=&quot;NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO&quot;,
+framework=&quot;pytorch&quot;,
+task=&quot;text-generation&quot;,
+accelerator=&quot;gpu&quot;,
+vendor=&quot;aws&quot;,
+region=&quot;us-east-1&quot;,
+type=&quot;protected&quot;,
+instance_type=&quot;nvidia-a100&quot;,
+instance_size=&quot;x2&quot;,
+custom_image={
+&quot;health_route&quot;: &quot;/health&quot;,
+&quot;env&quot;: {
+&quot;MAX_INPUT_LENGTH&quot;: &quot;4096&quot;,
+&quot;MAX_BATCH_PREFILL_TOKENS&quot;: &quot;4096&quot;,
+&quot;MAX_TOTAL_TOKENS&quot;: &quot;32000&quot;,
+&quot;MAX_BATCH_TOTAL_TOKENS&quot;: &quot;1024000&quot;,
+&quot;MODEL_ID&quot;: &quot;/repository&quot;,
+},
+&quot;url&quot;: &quot;ghcr.io/huggingface/text-generation-inference:sha-1734540&quot;, # use this build or newer
+},
+)
+endpoint.wait()
+print(endpoint.status)
+It will take a few minutes for our deployment to spin up. We can use the .wait()
+utility to block the running thread until the endpoint reaches a final &quot;running&quot; state. Once running, we can confirm its status and take it for a spin via the UI Playground:
+Great, we now have a working endpoint!
+💡 When deploying with
+huggingface_hub
+, your endpoint will scale-to-zero after 15 minutes of idle time by default to optimize cost during periods of inactivity. Check out the Hub Python Library documentation to see all the functionality available for managing your endpoint lifecycle.
+Using Inference Endpoints with OpenAI client libraries
+Messages support in TGI makes Inference Endpoints directly compatible with the OpenAI Chat Completion API. This means that any existing scripts that use OpenAI models via the OpenAI client libraries can be directly swapped out to use any open LLM running on a TGI endpoint!
+With this seamless transition, you can immediately take advantage of the numerous benefits offered by open models:
+- Complete control and transparency over models and data
+- No more worrying about rate limits
+- The ability to fully customize systems according to your specific needs
+Lets see how.
+With the Python client
+The example below shows how to make this transition using the OpenAI Python Library. Simply replace the &lt;ENDPOINT_URL&gt;
+with your endpoint URL (be sure to include the v1/
+suffix) and populate the &lt;HF_API_TOKEN&gt;
+field with a valid Hugging Face user token. The &lt;ENDPOINT_URL&gt;
+can be gathered from Inference Endpoints UI, or from the endpoint object we created above with endpoint.url
+.
+We can then use the client as usual, passing a list of messages to stream responses from our Inference Endpoint.
+from openai import OpenAI
+# initialize the client but point it to TGI
+client = OpenAI(
+base_url=&quot;&lt;ENDPOINT_URL&gt;&quot; + &quot;/v1/&quot;, # replace with your endpoint url
+api_key=&quot;&lt;HF_API_TOKEN&gt;&quot;, # replace with your token
+)
+chat_completion = client.chat.completions.create(
+model=&quot;tgi&quot;,
+messages=[
+{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;You are a helpful assistant.&quot;},
+{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Why is open-source software important?&quot;},
+],
+stream=True,
+max_tokens=500
+)
+# iterate and print stream
+for message in chat_completion:
+print(message.choices[0].delta.content, end=&quot;&quot;)
+Behind the scenes, TGI’s Messages API automatically converts the list of messages into the model’s required instruction format using its chat template.
+💡 Certain OpenAI features, like function calling, are not compatible with TGI. Currently, the Messages API supports the following chat completion parameters:
+stream
+,max_tokens
+,frequency_penalty
+,logprobs
+,seed
+,temperature
+, andtop_p
+.
+With the JavaScript client
+Here’s the same streaming example above, but using the OpenAI Javascript/Typescript Library.
+import OpenAI from &quot;openai&quot;;
+const openai = new OpenAI({
+baseURL: &quot;&lt;ENDPOINT_URL&gt;&quot; + &quot;/v1/&quot;, // replace with your endpoint url
+apiKey: &quot;&lt;HF_API_TOKEN&gt;&quot;, // replace with your token
+});
+async function main() {
+const stream = await openai.chat.completions.create({
+model: &quot;tgi&quot;,
+messages: [
+{ role: &quot;system&quot;, content: &quot;You are a helpful assistant.&quot; },
+{ role: &quot;user&quot;, content: &quot;Why is open-source software important?&quot; },
+],
+stream: true,
+max_tokens: 500,
+});
+for await (const chunk of stream) {
+process.stdout.write(chunk.choices[0]?.delta?.content || &quot;&quot;);
+}
+}
+main();
+Integrate with LangChain and LlamaIndex
+Now, let’s see how to use this newly created endpoint with your preferred RAG framework.
+How to use with LangChain
+To use it in LangChain, simply create an instance of ChatOpenAI
+and pass your &lt;ENDPOINT_URL&gt;
+and &lt;HF_API_TOKEN&gt;
+as follows:
+from langchain_community.chat_models.openai import ChatOpenAI
+llm = ChatOpenAI(
+model_name=&quot;tgi&quot;,
+openai_api_key=&quot;&lt;HF_API_TOKEN&gt;&quot;,
+openai_api_base=&quot;&lt;ENDPOINT_URL&gt;&quot; + &quot;/v1/&quot;,
+)
+llm.invoke(&quot;Why is open-source software important?&quot;)
+We’re able to directly leverage the same ChatOpenAI
+class that we would have used with the OpenAI models. This allows all previous code to work with our endpoint by changing just one line of code.
+Let’s now use the LLM declared this way in a simple RAG pipeline to answer a question over the contents of a HF blog post.
+from langchain_core.runnables import RunnableParallel
+from langchain_community.embeddings import HuggingFaceEmbeddings
+# Load, chunk and index the contents of the blog
+loader = WebBaseLoader(
+web_paths=(&quot;https://huggingface.co/blog/open-source-llms-as-agents&quot;,),
+)
+docs = loader.load()
+# Declare an HF embedding model and vector store
+[REDACTED_TOKEN] = HuggingFaceEmbeddings(model_name=&quot;BAAI/bge-large-en-v1.5&quot;)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=200)
+splits = text_splitter.split_documents(docs)
+vectorstore = Chroma.from_documents(documents=splits, embedding=[REDACTED_TOKEN])
+# Retrieve and generate using the relevant pieces of context
+retriever = vectorstore.as_retriever()
+prompt = hub.pull(&quot;rlm/rag-prompt&quot;)
+def format_docs(docs):
+return &quot;\n\n&quot;.join(doc.page_content for doc in docs)
+rag_chain_from_docs = (
+RunnablePassthrough.assign(context=(lambda x: format_docs(x[&quot;context&quot;])))
+| prompt
+| llm
+| StrOutputParser()
+)
+rag_chain_with_source = RunnableParallel(
+{&quot;context&quot;: retriever, &quot;question&quot;: RunnablePassthrough()}
+).assign(answer=rag_chain_from_docs)
+rag_chain_with_source.invoke(&quot;According to this article which open-source model is the best for an agent behaviour?&quot;)
+{
+&quot;context&quot;: [...],
+&quot;question&quot;: &quot;According to this article which open-source model is the best for an agent behaviour?&quot;,
+&quot;answer&quot;: &quot; According to the article, Mixtral-8x7B is the best open-source model for agent behavior, as it performs well and even beats GPT-3.5. The authors recommend fine-tuning Mixtral for agents to potentially surpass the next challenger, GPT-4.&quot;,
+}
+How to use with LlamaIndex
+Similarly, you can also use a TGI endpoint in LlamaIndex. We’ll use the OpenAILike
+class, and instantiate it by configuring some additional arguments (i.e. is_local
+, is_function_calling_model
+, is_chat_model
+, context_window
+). Note that the context window argument should match the value previously set for MAX_TOTAL_TOKENS
+of your endpoint.
+from llama_index.llms import OpenAILike
+# Instantiate an OpenAILike model
+llm = OpenAILike(
+model=&quot;tgi&quot;,
+api_key=&quot;&lt;HF_API_TOKEN&gt;&quot;,
+api_base=&quot;&lt;ENDPOINT_URL&gt;&quot; + &quot;/v1/&quot;,
+is_chat_model=True,
+is_local=False,
+is_function_calling_model=False,
+context_window=32000,
+)
+# Then call it
+llm.complete(&quot;Why is open-source software important?&quot;)
+We can now use it in a similar RAG pipeline. Keep in mind that the previous choice of MAX_INPUT_LENGTH
+in your Inference Endpoint will directly influence the number of retrieved chunk (similarity_top_k
+) the model can process.
+from llama_index import (
+ServiceContext,
+VectorStoreIndex,
+)
+from llama_index import download_loader
+from llama_index.embeddings import HuggingFaceEmbedding
+from llama_index.query_engine import CitationQueryEngine
+SimpleWebPageReader = download_loader(&quot;SimpleWebPageReader&quot;)
+documents = SimpleWebPageReader(html_to_text=True).load_data(
+[&quot;https://huggingface.co/blog/open-source-llms-as-agents&quot;]
+)
+# Load embedding model
+embed_model = HuggingFaceEmbedding(model_name=&quot;BAAI/bge-large-en-v1.5&quot;)
+# Pass LLM to pipeline
+service_context = ServiceContext.from_defaults(embed_model=embed_model, llm=llm)
+index = VectorStoreIndex.from_documents(
+documents, service_context=service_context, show_progress=True
+)
+# Query the index
+query_engine = CitationQueryEngine.from_args(
+index,
+similarity_top_k=2,
+)
+response = query_engine.query(
+&quot;According to this article which open-source model is the best for an agent behaviour?&quot;
+)
+According to the article, Mixtral-8x7B is the best performing open-source model for an agent behavior [5]. It even beats GPT-3.5 in this task. However, it&#39;s worth noting that Mixtral&#39;s performance could be further improved with proper fine-tuning for function calling and task planning skills [5].
+Cleaning up
+After you are done with your endpoint, you can either pause or delete it. This step can be completed via the UI, or programmatically like follows.
+# pause our running endpoint
+endpoint.pause()
+# optionally delete
+endpoint.delete()
+Conclusion
+The new Messages API in Text Generation Inference provides a smooth transition path from OpenAI models to open LLMs. We can’t wait to see what use cases you will power with open LLMs running on TGI!
+See this notebook for a runnable version of the code outlined in the post. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

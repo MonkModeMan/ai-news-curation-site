@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Panel on Hugging Face</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Panel on Hugging Face</h1> <p class="text-sm text-gray-500"> 2023/6/22 – Hugging Face Blog  <a href="https://huggingface.co/blog/panel-on-hugging-face" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Panel on Hugging Face
+We are thrilled to announce the collaboration between Panel and Hugging Face! 🎉 We have integrated a Panel template in Hugging Face Spaces to help you get started building Panel apps and deploy them on Hugging Face effortlessly.
+What does Panel offer?
+Panel is an open-source Python library that lets you easily build powerful tools, dashboards and complex applications entirely in Python. It has a batteries-included philosophy, putting the PyData ecosystem, powerful data tables and much more at your fingertips. High-level reactive APIs and lower-level callback based APIs ensure you can quickly build exploratory applications, but you aren’t limited if you build complex, multi-page apps with rich interactivity. Panel is a member of the HoloViz ecosystem, your gateway into a connected ecosystem of data exploration tools. Panel, like the other HoloViz tools, is a NumFocus-sponsored project, with support from Anaconda and Blackstone.
+Here are some notable features of Panel that our users find valuable.
+- Panel provides extensive support for various plotting libraries, such as Matplotlib, Seaborn, Altair, Plotly, Bokeh, PyDeck,Vizzu, and more.
+- All interactivity works the same in Jupyter and in a standalone deployment. Panel allows seamless integration of components from a Jupyter notebook into a dashboard, enabling smooth transitions between data exploration and sharing results.
+- Panel empowers users to build complex multi-page applications, advanced interactive features, visualize large datasets, and stream real-time data.
+- Integration with Pyodide and WebAssembly enables seamless execution of Panel applications in web browsers.
+Ready to build Panel apps on Hugging Face? Check out our Hugging Face deployment docs, click this button, and begin your journey:
+🌐 Join Our Community
+The Panel community is vibrant and supportive, with experienced developers and data scientists eager to help and share their knowledge. Join us and connect with us: </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

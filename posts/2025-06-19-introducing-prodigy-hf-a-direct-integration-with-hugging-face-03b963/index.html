@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing Prodigy-HF: a direct integration with Hugging Face</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing Prodigy-HF: a direct integration with Hugging Face</h1> <p class="text-sm text-gray-500"> 2023/11/7 – Hugging Face Blog  <a href="https://huggingface.co/blog/prodigy-hf" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing Prodigy-HF
+Prodigy is an annotation tool made by Explosion, a company well known as the creators of spaCy. It&#39;s a fully scriptable product with a large community around it. The product has many features, including tight integration with spaCy and active learning capabilities. But the main feature of the product is that it is programmatically customizable with Python.
+To foster this customisability, Explosion has started releasing plugins. These plugins integrate with third-party tools in an open way that encourages users to work on bespoke annotation workflows. However, one customization specifically deserves to be celebrated explicitly. Last week, Explosion introduced Prodigy-HF, which offers code recipes that directly integrate with the Hugging Face stack. It&#39;s been a much-requested feature on the Prodigy support forum, so we&#39;re super excited to have it out there.
+Features
+The first main feature is that this plugin allows you to train and re-use Hugging Face models on your annotated data. That means if you&#39;ve been annotating data in our interface for named entity recognition, you can directly fine-tune BERT models against it.
+After installing the plugin you can call the hf.train.ner
+recipe from the command line to train a transformer model directly on your own data.
+python -m prodigy hf.train.ner fashion-train,eval:fashion-eval path/to/model-out --model &quot;distilbert-base-uncased&quot;
+This will fine-tune the distilbert-base-uncased
+model for the dataset you&#39;ve stored in Prodigy and save it to disk. Similarly, this plugin also supports models for text classification via a very similar interface.
+python -m prodigy hf.train.textcat fashion-train,eval:fashion-eval path/to/model-out --model &quot;distilbert-base-uncased&quot;
+This offers a lot of flexibility because the tool directly integrates with the AutoTokenizer
+and AutoModel
+classes of Hugging Face transformers. Any transformer model on the hub can be fine-tuned on your own dataset with just a single command. These models will be serialised on disk, which means that you can upload them to the Hugging Face Hub, or re-use them to help you annotate data. This can save a lot of time, especially for NER tasks. To re-use a trained NER model you can use the hf.correct.ner
+recipe.
+python -m prodigy hf.correct.ner fashion-train path/to/model-out examples.jsonl
+This will give you a similar interface as before, but now the model predictions will be shown in the interface as well.
+Upload
+The second feature, which is equally exciting, is that you can now also publish your annotated datasets on the Hugging Face Hub. This is great if you&#39;re interested in sharing datasets that others would like to use.
+python -m prodigy hf.upload &lt;dataset_name&gt; &lt;username&gt;/&lt;repo_name&gt;
+We&#39;re particularly fond of this upload feature because it encourages collaboration. People can annotate their own datasets independently of each other, but still benefit when they share the data with the wider community.
+More to come
+We hope that this direct integration with the Hugging Face ecosystem enables many users to experiment more. The Hugging Face Hub offers many models for a wide array of tasks as well as a wide array of languages. We really hope that this integration makes it easier to get data annotated, even if you&#39;ve got a more domain specific and experimental use-case.
+More features for this library are on their way, and feel free to reach out on the Prodigy forum if you have more questions.
+We&#39;d also like to thank the team over at Hugging Face for their feedback on this plugin, specifically @davanstrien, who suggested to add the upload feature. Thanks! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Gradio 3.0 is Out!</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Gradio 3.0 is Out!</h1> <p class="text-sm text-gray-500"> 2022/5/16 – Hugging Face Blog  <a href="https://huggingface.co/blog/gradio-blocks" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Gradio 3.0 is Out!
+Machine Learning Demos
+Machine learning demos are an increasingly vital part of releasing a model. Demos allow anyone — not just ML engineers — to try out a model in the browser, give feedback on predictions, and build trust in the model if it performs well.
+More than 600,000 ML demos have been built with the Gradio library since its first version in 2019, and today, we are thrilled to announce Gradio 3.0: a ground-up redesign of the Gradio library 🥳
+What&#39;s New in Gradio 3.0?
+🔥 A complete redesign of the frontend, based on the feedback we&#39;re hearing from Gradio users:
+We&#39;ve switched to modern technologies (like Svelte) to build the Gradio frontend. We&#39;re seeing much smaller payloads and much faster page loads as a result!
+We&#39;ve also embranced a much cleaner design that will allow Gradio demos to fit in visually in more settings (such as being embedded in blog posts).
+- We&#39;ve revamped our existing components, like
+Dataframe
+to be more user-friendly (try dragging-and-dropping a CSV file into a Dataframe) as well as added new components, such as theGallery
+, to allow you to build the right UI for your model.
+- We&#39;ve added a
+TabbedInterface
+class which allows you to group together related demos as multiple tabs in one web app
+Check out all the components you can use on our (redesigned) docs 🤗!
+🔥 We&#39;ve created a new low-level language called Gradio Blocks that lets you build complex custom web apps, right in Python:
+Why did we create Blocks? Gradio demos are very easy to build, but what if you want more control over the layout of your demo, or more flexibility on how the data flows? For example, you might want to:
+- Change the layout of your demo instead of just having all of the inputs on the left and outputs on the right
+- Have multi-step interfaces, in which the output of one model becomes the input to the next model, or have more flexible data flows in general
+- Change a component&#39;s properties (for example, the choices in a Dropdown) or its visibilty based on user input
+The low-level Blocks API allows you to do all of this, right in Python.
+Here&#39;s an example of a Blocks demo that creates two simple demos and uses tabs to group them together:
+import numpy as np
+import gradio as gr
+def flip_text(x):
+return x[::-1]
+def flip_image(x):
+return np.fliplr(x)
+with gr.Blocks() as demo:
+gr.Markdown(&quot;Flip text or image files using this demo.&quot;)
+with gr.Tabs():
+with gr.TabItem(&quot;Flip Text&quot;):
+text_input = gr.Textbox()
+text_output = gr.Textbox()
+# this demo runs whenever the input textbox changes
+text_input.change(flip_text, inputs=text_input, outputs=text_output)
+with gr.TabItem(&quot;Flip Image&quot;):
+with gr.Row():
+image_input = gr.Image()
+image_output = gr.Image()
+button = gr.Button(&quot;Flip&quot;)
+# this demo runs whenever the button is clicked
+button.click(flip_image, inputs=image_input, outputs=image_output)
+demo.launch()
+Once you run launch()
+, the following demo will appear:
+For a step-by-step introduction to Blocks, check out the dedicated Blocks Guide
+The Gradio Blocks Party
+We&#39;re very excited about Gradio Blocks -- and we&#39;d love for you to try it out -- so we are organizing a competition, the Gradio Blocks Party (😉), to see who can build the best demos with Blocks. By building these demos, we can make state-of-the-art machine learning accessible, not just to engineers, but anyone who can use an Internet browser!
+Even if you&#39;ve never used Gradio before, this is the perfect time to start, because the Blocks Party is running until the end of May. We&#39;ll be giving out 🤗 merch and other prizes at the end of the Party for demos built using Blocks.
+Learn more about Blocks Party here: https://huggingface.co/spaces/Gradio-Blocks/README </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

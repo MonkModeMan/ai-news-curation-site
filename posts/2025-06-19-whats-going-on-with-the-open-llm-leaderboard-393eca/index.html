@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>What&#39;s going on with the Open LLM Leaderboard?</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 What&#39;s going on with the Open LLM Leaderboard?</h1> <p class="text-sm text-gray-500"> 2023/6/23 – Hugging Face Blog  <a href="https://huggingface.co/blog/open-llm-leaderboard-mmlu" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> What&#39;s going on with the Open LLM Leaderboard?
+Recently an interesting discussion arose on Twitter following the release of Falcon 🦅 and its addition to the Open LLM Leaderboard, a public leaderboard comparing open access large language models.
+The discussion centered around one of the four evaluations displayed on the leaderboard: a benchmark for measuring Massive Multitask Language Understanding (shortname: MMLU).
+The community was surprised that MMLU evaluation numbers of the current top model on the leaderboard, the LLaMA model 🦙, were significantly lower than the numbers in the published LLaMa paper.
+So we decided to dive in a rabbit hole to understand what was going on and how to fix it 🕳🐇
+In our quest, we discussed with both the great @javier-m who collaborated on the evaluations of LLaMA and the amazing @slippylolo from the Falcon team. This being said, all the errors in the below should be attributed to us rather than them of course!
+Along this journey with us you’ll learn a lot about the ways you can evaluate a model on a single evaluation and whether or not to believe the numbers you see online and in papers.
+Ready? Then buckle up, we’re taking off 🚀.
+What&#39;s the Open LLM Leaderboard?
+First, note that the Open LLM Leaderboard is actually just a wrapper running the open-source benchmarking library Eleuther AI LM Evaluation Harness created by the EleutherAI non-profit AI research lab famous for creating The Pile and training GPT-J, GPT-Neo-X 20B, and Pythia. A team with serious credentials in the AI space!
+This wrapper runs evaluations using the Eleuther AI harness on the spare cycles of Hugging Face’s compute cluster, and stores the results in a dataset on the hub that are then displayed on the leaderboard online space.
+For the LLaMA models, the MMLU numbers obtained with the Eleuther AI LM Evaluation Harness significantly differ from the MMLU numbers reported in the LLaMa paper.
+Why is that the case?
+1001 flavors of MMLU
+Well it turns out that the LLaMA team adapted another code implementation available online: the evaluation code proposed by the original UC Berkeley team which developed the MMLU benchmark available at https://github.com/hendrycks/test and that we will call here the &quot;Original implementation&quot;.
+When diving further, we found yet another interesting implementation for evaluating on the very same MMLU dataset: the evalution code provided in Stanford’s CRFM very comprehensive evaluation benchmark Holistic Evaluation of Language Models that we will call here the HELM implementation.
+Both the EleutherAI Harness and Stanford HELM benchmarks are interesting because they gather many evaluations in a single codebase (including MMLU), and thus give a wide view of a model’s performance. This is the reason the Open LLM Leaderboard is wrapping such “holistic” benchmarks instead of using individual code bases for each evaluation.
+To settle the case, we decided to run these three possible implementations of the same MMLU evaluation on a set of models to rank them according to these results:
+- the Harness implementation (commit e47e01b)
+- the HELM implementation (commit cab5d89)
+- the Original implementation (with Hugging Face integration by the amazing @olmer at https://github.com/hendrycks/test/pull/13)
+(Note that the Harness implementation has been recently updated - more in this at the end of our post)
+The results are surprising:
+You can find the full evaluation numbers at the end of the post.
+These different implementations of the same benchmark give widely different numbers and even change the ranking order of the models on the leaderboard!
+Let’s try to understand where this discrepancy comes from 🕵️But first, let’s briefly understand how we can automatically evaluate behaviors in modern LLMs.
+How we automatically evaluate a model in today’s LLM world
+MMLU is a multiple choice question test, so a rather simple benchmark (versus open-ended questions) but as we’ll see, this still leaves a lot of room for implementation details and differences. The benchmark consists of questions with four possible answers covering 57 general knowledge domains grouped in coarse grained categories: “Humanities”, “Social Sciences”, “STEM”, etc
+For each question, only one of the provided answers is the correct one. Here is an example:
+Question: Glucose is transported into the muscle cell:
+Choices:
+A. via protein transporters called GLUT4.
+B. only in the presence of insulin.
+C. via hexokinase.
+D. via monocarbylic acid transporters.
+Correct answer: A
+Note: you can very easily explore more of this dataset in the dataset viewer on the hub.
+Large language models are simple models in the AI model zoo. They take a string of text as input (called a “prompt”), which is cut into tokens (words, sub-words or characters, depending on how the model is built) and fed in the model. From this input, they generate a distribution of probability for the next token, over all the tokens they know (so called the “vocabulary” of the model): you can therefore get how `probable’ any token is as a continuation of the input prompt.
+We can use these probabilities to choose a token, for instance the most probable (or we can introduce some slight noise with a sampling to avoid having “too mechanical” answers). Adding our selected token to the prompt and feeding it back to the model allows to generate another token and so on until whole sentences are created as continuations of the input prompt:
+This is how ChatGPT or Hugging Chat generate answers.
+In summary, we have two main ways to get information out of a model to evaluate it:
+- get the probabilities that some specific tokens groups are continuations of the prompt – and compare these probabilities together for our predefined possible choices;
+- get a text generation from the model (by repeatedly selecting tokens as we’ve seen) – and compare these text generations to the texts of various predefined possible choices.
+Armed with this knowledge, let&#39;s dive into our three implementations of MMLU, to find out what input is sent to models, what is expected as outputs, and how these outputs are compared.
+MMLU comes in all shapes and sizes: Looking at the prompts
+Let’s compare an example of prompt each benchmark sends to the models by each implementation for the same MMLU dataset example:
+| Original implementation Ollmer PR | HELM commit cab5d89 | AI Harness commit e47e01b |
+| The following are multiple choice questions (with answers) about us foreign policy. How did the 2008 financial crisis affect America&#39;s international reputation? A. It damaged support for the US model of political economy and capitalism B. It created anger at the United States for exaggerating the crisis C. It increased support for American global leadership under President Obama D. It reduced global use of the US dollar Answer: |
+The following are multiple choice questions (with answers) about us foreign policy. Question: How did the 2008 financial crisis affect America&#39;s international reputation? A. It damaged support for the US model of political economy and capitalism B. It created anger at the United States for exaggerating the crisis C. It increased support for American global leadership under President Obama D. It reduced global use of the US dollar Answer: |
+Question: How did the 2008 financial crisis affect America&#39;s international reputation? Choices: A. It damaged support for the US model of political economy and capitalism B. It created anger at the United States for exaggerating the crisis C. It increased support for American global leadership under President Obama D. It reduced global use of the US dollar Answer: |
+The differences between them can seem small, did you spot them all? Here they are:
+- First sentence, instruction, and topic: Few differences. HELM adds an extra space, and the Eleuther LM Harness does not include the topic line
+- Question: HELM and the LM Harness add a “Question:” prefix
+- Choices: Eleuther LM Harness prepends them with the keyword “Choices”
+Now how do we evaluate the model from these prompts?
+Let’s start with how the original MMLU implementation extracts the predictions of the model. In the original implementation we compare the probabilities predicted by the model, on the four answers only:
+This can be beneficial for the model in some case, for instance, as you can see here:
+In this case, the model got a +1 score for ranking the correct answer highest among the 4 options. But if we take a look at the full vocabulary it would have rather generated a word outside of our four options: the word “Zygote” (this is more of an example than a real use case 🙂)
+How can we make sure that the model does as few as possible of these types of errors?
+We can use a “few shots” approach in which we provide the model with one or several examples in the prompt, with their expected answers as well. Here is how it looks:
+Here, the model has one example of the expected behavior and is thus less likely to predict answers outside of the expected range of answers.
+Since this improves performance, MMLU is typically evaluated in 5 shots (prepending 5 examples to each prompt) in all our evaluations: the original implementation, EleutherAI LM Harness and HELM. (Note: Across benchmarks, though the same 5 examples are used, their order of introduction to the model can vary, which is also a possible source of difference, that we will not investigate here. You also obviously have to pay attention to avoid leaking some answers in the few shot examples you use…)
+HELM: Let’s now turn to the HELM implementation. While the few-shot prompt is generally similar, the way the model is evaluated is quite different from the original implementation we’ve just seen: we use the next token output probabilities from the model to select a text generation and we compare it to the text of the expected answer as displayed here:
+In this case, if our &quot;Zygote&quot; token was instead the highest probability one (as we’ve seen above), the model answer (&quot;Zygote&quot;) would be wrong and the model would not score any points for this question:
+Harness: Now we finally turn to the - EleutherAI Harness implementation as of January 2023 which was used to compute the first numbers for the leaderboard. As we will see, we’ve got here yet another way to compute a score for the model on the very same evaluation dataset (note that this implementation has been recently updated - more on this at the end).
+In this case, we are using the probabilities again but this time the probabilities of the full answer sequence, with the letter followed by the text of the answer, for instance “C. The second pharyngeal arch”. To compute the probability for a full answer we get the probability for each token (like we saw above) and gather them. For numerical stability we gather them by summing the logarithm of the probabilities and we can decide (or not) to compute a normalization in which we divide the sum by the number of tokens to avoid giving too much advantage to longer answers (more on this later). Here is how it looks like:
+Here is a table summary of the answers provided and generated by the model to summarize what we’ve seen up to now:
+| Original implementation | HELM | AI Harness (as of Jan 2023) |
+| We compare the probabilities of the following letter answers: | The model is expected to generate as text the following letter answer: | We compare the probabilities of the following full answers: |
+| A B C D |
+A | A. It damaged support for the US model of political economy and capitalism B. It created anger at the United States for exaggerating the crisis C. It increased support for American global leadership under President Obama D. It reduced global use of the US dollar |
+We’ve covered them all!
+Now let’s compare the model scores on these three possible ways to evaluate the models:
+| MMLU (HELM) | MMLU (Harness) | MMLU (Original) | |
+|---|---|---|---|
+| llama-65b | 0.637 | 0.488 | 0.636 |
+| tiiuae/falcon-40b | 0.571 | 0.527 | 0.558 |
+| llama-30b | 0.583 | 0.457 | 0.584 |
+| EleutherAI/gpt-neox-20b | 0.256 | 0.333 | 0.262 |
+| llama-13b | 0.471 | 0.377 | 0.47 |
+| llama-7b | 0.339 | 0.342 | 0.351 |
+| tiiuae/falcon-7b | 0.278 | 0.35 | 0.254 |
+| togethercomputer/RedPajama-INCITE-7B-Base | 0.275 | 0.34 | 0.269 |
+We can see that for the same dataset, both absolute scores and model rankings (see the first figure) are very sensitive to the evaluation method we decide to use.
+Let&#39;s say you&#39;ve trained yourself a perfect reproduction of the LLaMA 65B model and evaluated it with the harness (score 0.488, see above). You&#39;re now comparing it to the published number (evaluated on the original MMLU implementation so with a score 0.637). With such a 30% difference in score you&#39;re probably thinking: &quot;Oh gosh, I have completly messed up my training 😱&quot;. But nothing could be further from the truth, these are just numbers which are not at all comparable even if they&#39;re both labelled as &quot;MMLU score&quot; (and evaluated on the very same MMLU dataset).
+Now, is there a &quot;best way&quot; to evaluate a model among all the ones we&#39;ve seen? It&#39;s a tricky question. Different models may fare differently when evaluated one way or another as we see above when the rankings change. To keep this as fair as possible, one may be tempted to select an implementation where the average score for all tested models is the highest so that we &quot;unlock&quot; as many capabilities as possible from the models. In our case, that would mean using the log-likelihood option of the original implementation. But as we saw above, using the log-likelihood is also giving some indications to the model in some way by restricting the scope of possible answers, and thus is helping the less powerful models maybe too much. Also log-likelihood is easy to access for open-source models but is not always exposed for closed source API models.
+And you, reader, what do you think? This blog post is already long so it&#39;s time to open the discussion and invite your comments. Please come discuss this topic in the following discussion thread of the Open LLM Leaderboard: https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard/discussions/82
+Conclusion
+A key takeaway lesson from our journey is that evaluations are strongly tied to their implementations–down to minute details such as prompts and tokenization. The mere indication of &quot;MMLU results&quot; gives you little to no information about how you can compare these numbers to others you evaluated on another library.
+This is why open, standardized, and reproducible benchmarks such as the EleutherAI Eval Harness or Stanford HELM are invaluable to the community. Without them, comparing results across models and papers would be impossible, stifling research on improving LLMs.
+Post scriptum: In the case of the Open LLM Leaderboard we’ve decided to stick to using community maintained evaluation libraries. Thankfully during the writing of this blog post, the amazing community around the EleutherAI Harness, and in particular ollmer have done an amazing work updating the evaluation of MMLU in the harness to make it similar to the original implementation and match these numbers.
+We are currently updating the full leaderboard with the updated version of the EleutherAI Eval Harness, so expect to see scores coming from the Eleuther Harness v2 coming up in the next few weeks! (Running all the models again will take some time, stay tuned :hugs:)
+Acknowledgements:
+We are very grateful to Xavier Martinet, Aurélien Rodriguez and Sharan Narang from the LLaMA team for helpful suggestions in this blog post as well as having answered all our questions.
+Reproducibility hashes:
+Here are the commit hashes of the various code implementations used in this blog post.
+- EleutherAI LM harness implementation commit e47e01b: https://github.com/EleutherAI/lm-evaluation-harness/tree/e47e01beea79cfe87421e2dac49e64d499c240b4
+- HELM implementation commit cab5d89: https://github.com/stanford-crfm/helm/tree/cab5d89fadbff86190f29ddfa497301958eaf2ec
+- Original MMLU implementation (with Hugging Face integration by the amazing @olmer): https://github.com/hendrycks/test/pull/13 </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

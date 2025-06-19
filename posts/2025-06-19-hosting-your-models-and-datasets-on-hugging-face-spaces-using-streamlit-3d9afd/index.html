@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Hosting your Models and Datasets on Hugging Face Spaces using Streamlit</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Hosting your Models and Datasets on Hugging Face Spaces using Streamlit</h1> <p class="text-sm text-gray-500"> 2021/10/5 – Hugging Face Blog  <a href="https://huggingface.co/blog/streamlit-spaces" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Hosting your Models and Datasets on Hugging Face Spaces using Streamlit
+Showcase your Datasets and Models using Streamlit on Hugging Face Spaces
+Streamlit allows you to visualize datasets and build demos of Machine Learning models in a neat way. In this blog post we will walk you through hosting models and datasets and serving your Streamlit applications in Hugging Face Spaces.
+Building demos for your models
+You can load any Hugging Face model and build cool UIs using Streamlit. In this particular example we will recreate &quot;Write with Transformer&quot; together. It&#39;s an application that lets you write anything using transformers like GPT-2 and XLNet.
+We will not dive deep into how the inference works. You only need to know that you need to specify some hyperparameter values for this particular application. Streamlit provides many components for you to easily implement custom applications. We will use some of them to receive necessary hyperparameters inside the inference code.
+- The
+.text_area
+component creates a nice area to input sentences to be completed. - The Streamlit
+.sidebar
+method enables you to accept variables in a sidebar. - The
+slider
+is used to take continuous values. Don&#39;t forget to giveslider
+a step, otherwise it will treat the values as integers. - You can let the end-user input integer vaues with
+number_input
+.
+import streamlit as st
+# adding the text that will show in the text box as default
+default_value = &quot;See how a modern neural network auto-completes your text 🤗 This site, built by the Hugging Face team, lets you write a whole document directly from your browser, and you can trigger the Transformer anywhere using the Tab key. Its like having a smart machine that completes your thoughts 😀 Get started by typing a custom snippet, check out the repository, or try one of the examples. Have fun!&quot;
+sent = st.text_area(&quot;Text&quot;, default_value, height = 275)
+max_length = st.sidebar.slider(&quot;Max Length&quot;, min_value = 10, max_value=30)
+temperature = st.sidebar.slider(&quot;Temperature&quot;, value = 1.0, min_value = 0.0, max_value=1.0, step=0.05)
+top_k = st.sidebar.slider(&quot;Top-k&quot;, min_value = 0, max_value=5, value = 0)
+top_p = st.sidebar.slider(&quot;Top-p&quot;, min_value = 0.0, max_value=1.0, step = 0.05, value = 0.9)
+num_return_sequences = st.sidebar.number_input(&#39;Number of Return Sequences&#39;, min_value=1, max_value=5, value=1, step=1)
+The inference code returns the generated output, you can print the output using simple st.write
+.
+st.write(generated_sequences[-1])
+Here&#39;s what our replicated version looks like.
+You can checkout the full code here.
+Showcase your Datasets and Data Visualizations
+Streamlit provides many components to help you visualize datasets. It works seamlessly with 🤗 Datasets, pandas, and visualization libraries such as matplotlib, seaborn and bokeh.
+Let&#39;s start by loading a dataset. A new feature in Datasets
+, called streaming, allows you to work immediately with very large datasets, eliminating the need to download all of the examples and load them into memory.
+from datasets import load_dataset
+import streamlit as st
+dataset = load_dataset(&quot;merve/poetry&quot;, streaming=True)
+df = pd.DataFrame.from_dict(dataset[&quot;train&quot;])
+If you have structured data like mine, you can simply use st.dataframe(df)
+to show your dataset. There are many Streamlit components to plot data interactively. One such component is st.barchart()
+, which I used to visualize the most used words in the poem contents.
+st.write(&quot;Most appearing words including stopwords&quot;)
+st.bar_chart(words[0:50])
+If you&#39;d like to use libraries like matplotlib, seaborn or bokeh, all you have to do is to put st.pyplot()
+at the end of your plotting script.
+st.write(&quot;Number of poems for each author&quot;)
+sns.catplot(x=&quot;author&quot;, data=df, kind=&quot;count&quot;, aspect = 4)
+plt.xticks(rotation=90)
+st.pyplot()
+You can see the interactive bar chart, dataframe component and hosted matplotlib and seaborn visualizations below. You can check out the code here.
+Hosting your Projects in Hugging Face Spaces
+You can simply drag and drop your files as shown below. Note that you need to include your additional dependencies in the requirements.txt. Also note that the version of Streamlit you have on your local is the same. For seamless usage, refer to Spaces API reference.
+There are so many components and packages you can use to demonstrate your models, datasets, and visualizations. You can get started here. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

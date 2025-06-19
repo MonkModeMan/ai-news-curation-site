@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>DuckDB: run SQL queries on 50,000+ datasets on the Hugging Face Hub</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 DuckDB: run SQL queries on 50,000+ datasets on the Hugging Face Hub</h1> <p class="text-sm text-gray-500"> 2023/6/7 – Hugging Face Blog  <a href="https://huggingface.co/blog/hub-duckdb" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> DuckDB: run SQL queries on 50,000+ datasets on the Hugging Face Hub
+The Hugging Face Hub is dedicated to providing open access to datasets for everyone and giving users the tools to explore and understand them. You can find many of the datasets used to train popular large language models (LLMs) like Falcon, Dolly, MPT, and StarCoder. There are tools for addressing fairness and bias in datasets like Disaggregators, and tools for previewing examples inside a dataset like the Dataset Viewer.
+We are happy to share that we recently added another feature to help you analyze datasets on the Hub; you can run SQL queries with DuckDB on any dataset stored on the Hub! According to the 2022 StackOverflow Developer Survey, SQL is the 3rd most popular programming language. We also wanted a fast database management system (DBMS) designed for running analytical queries, which is why we’re excited about integrating with DuckDB. We hope this allows even more users to access and analyze datasets on the Hub!
+TLDR
+The dataset viewer automatically converts all public datasets on the Hub to Parquet files, that you can see by clicking on the &quot;Auto-converted to Parquet&quot; button at the top of a dataset page. You can also access the list of the Parquet files URLs with a simple HTTP call.
+r = requests.get(&quot;https://datasets-server.huggingface.co/parquet?dataset=blog_authorship_corpus&quot;)
+j = r.json()
+urls = [f[&#39;url&#39;] for f in j[&#39;parquet_files&#39;] if f[&#39;split&#39;] == &#39;train&#39;]
+urls
+[&#39;https://huggingface.co/datasets/blog_authorship_corpus/resolve/refs%2Fconvert%2Fparquet/blog_authorship_corpus/blog_authorship_corpus-train-00000-of-00002.parquet&#39;,
+&#39;https://huggingface.co/datasets/blog_authorship_corpus/resolve/refs%2Fconvert%2Fparquet/blog_authorship_corpus/blog_authorship_corpus-train-00001-of-00002.parquet&#39;]
+Create a connection to DuckDB and install and load the httpfs
+extension to allow reading and writing remote files:
+import duckdb
+url = &quot;https://huggingface.co/datasets/blog_authorship_corpus/resolve/refs%2Fconvert%2Fparquet/blog_authorship_corpus/blog_authorship_corpus-train-00000-of-00002.parquet&quot;
+con = duckdb.connect()
+con.execute(&quot;INSTALL httpfs;&quot;)
+con.execute(&quot;LOAD httpfs;&quot;)
+Once you’re connected, you can start writing SQL queries!
+con.sql(f&quot;&quot;&quot;SELECT horoscope,
+count(*),
+AVG(LENGTH(text)) AS avg_blog_length
+FROM &#39;{url}&#39;
+GROUP BY horoscope
+ORDER BY avg_blog_length
+DESC LIMIT(5)&quot;&quot;&quot;
+)
+To learn more, check out the documentation.
+From dataset to Parquet
+Parquet files are columnar, making them more efficient to store, load and analyze. This is especially important when you&#39;re working with large datasets, which we’re seeing more and more of in the LLM era. To support this, the dataset viewer automatically converts and publishes any public dataset on the Hub as Parquet files. The URL to the Parquet files can be retrieved with the /parquet
+endpoint.
+Analyze with DuckDB
+DuckDB offers super impressive performance for running complex analytical queries. It is able to execute a SQL query directly on a remote Parquet file without any overhead. With the httpfs
+extension, DuckDB is able to query remote files such as datasets stored on the Hub using the URL provided from the /parquet
+endpoint. DuckDB also supports querying multiple Parquet files which is really convenient because the dataset viewer shards big datasets into smaller 500MB chunks.
+Looking forward
+Knowing what’s inside a dataset is important for developing models because it can impact model quality in all sorts of ways! By allowing users to write and execute any SQL query on Hub datasets, this is another way for us to enable open access to datasets and help users be more aware of the datasets contents. We are excited for you to try this out, and we’re looking forward to what kind of insights your analysis uncovers! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

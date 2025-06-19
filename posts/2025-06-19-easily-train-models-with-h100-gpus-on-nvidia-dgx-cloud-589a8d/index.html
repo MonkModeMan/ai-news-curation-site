@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Easily Train Models with H100 GPUs on NVIDIA DGX Cloud</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Easily Train Models with H100 GPUs on NVIDIA DGX Cloud</h1> <p class="text-sm text-gray-500"> 2024/3/18 – Hugging Face Blog  <a href="https://huggingface.co/blog/train-dgx-cloud" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Easily Train Models with H100 GPUs on NVIDIA DGX Cloud
+Update: This service is deprecated and no longer available as of April 10th, 2025.
+Today, we are thrilled to announce the launch of Train on DGX Cloud, a new service on the Hugging Face Hub, available to Enterprise Hub organizations. Train on DGX Cloud makes it easy to use open models with the accelerated compute infrastructure of NVIDIA DGX Cloud. Together, we built Train on DGX Cloud so that Enterprise Hub users can easily access the latest NVIDIA H100 Tensor Core GPUs, to fine-tune popular Generative AI models like Llama, Mistral, and Stable Diffusion, in just a few clicks within the Hugging Face Hub.
+GPU Poor No More
+This new experience expands upon the strategic partnership we announced last year to simplify the training and deployment of open Generative AI models on NVIDIA accelerated computing. One of the main problems developers and organizations face is the scarcity of GPU availability, and the time-consuming work of writing, testing, and debugging training scripts for AI models. Train with DGX Cloud offers an easy solution to these challenges, providing instant access to NVIDIA GPUs, starting with H100 on NVIDIA DGX Cloud. In addition, Train with DGX Cloud offers a simple no-code training job creation experience powered by Hugging Face AutoTrain and Hugging Face Spaces.
+Enterprise Hub organizations can give their teams instant access to powerful NVIDIA GPUs, only incurring charges per minute of compute instances used for their training jobs.
+“Train on DGX Cloud is the easiest, fastest, most accessible way to train Generative AI models, combining instant access to powerful GPUs, pay-as-you-go, and no-code training,” says Abhishek Thakur, creator of Hugging Face AutoTrain. “It will be a game changer for data scientists everywhere!”
+&quot;Today’s launch of Hugging Face Autotrain powered by DGX Cloud represents a noteworthy step toward simplifying AI model training,” said Alexis Bjorlin, vice president of DGX Cloud, NVIDIA. “By integrating NVIDIA’s AI supercomputer in the cloud with Hugging Face’s user-friendly interface, we’re empowering organizations to accelerate their AI innovation.&quot;
+How it works
+Training Hugging Face models on NVIDIA DGX Cloud has never been easier. Below you will find a step-by-step tutorial to fine-tune Mistral 7B.
+Note: You need access to an Organization with a Hugging Face Enterprise subscription to use Train on DGX Cloud
+You can find Train on DGX Cloud on the model page of supported Generative AI models. It currently supports the following model architectures: Llama, Falcon, Mistral, Mixtral, T5, Gemma, Stable Diffusion, and Stable Diffusion XL.
+Open the “Train” menu, and select “NVIDIA DGX Cloud” - this will open an interface where you can select your Enterprise Organization.
+Then, click on “Create new Space”. When using Train on DGX Cloud for the first time, the service will create a new Hugging Face Space within your Organization, so you can use AutoTrain to create training jobs that will be executed on NVIDIA DGX Cloud. When you want to create another training job later, you will automatically be redirected back to the existing AutoTrain Space.
+Once in the AutoTrain Space, you can create your training job by configuring the Hardware, Base Model, Task, and Training Parameters.
+For Hardware, you can select NVIDIA H100 GPUs, available in 1x, 2x, 4x and 8x instances, or L40S GPUs (coming soon). The training dataset must be directly uploaded in the “Upload Training File(s)” area. CSV and JSON files are currently supported. Make sure that the column mapping is correct following the example below. For Training Parameters, you can directly edit the JSON configuration on the right side, e.g., changing the number of epochs from 3 to 2.
+When everything is set up, you can start your training by clicking “Start Training”. AutoTrain will now validate your dataset, and ask you to confirm the training.
+You can monitor your training by opening the “logs” of the Space.
+After your training is complete, your fine-tuned model will be uploaded to a new private repository within your selected namespace on the Hugging Face Hub.
+Train on DGX Cloud is available today for all Enterprise Hub Organizations! Give the service a try, and let us know your feedback!
+Pricing for Train on DGX Cloud
+Usage of Train on DGX Cloud is billed by the minute of the GPU instances used during your training jobs. Current prices for training jobs are $8.25 per GPU hour for H100 instances, and $2.75 per GPU hour for L40S instances. Usage fees accrue to your Enterprise Hub Organizations’ current monthly billing cycle, once a job is completed. You can check your current and past usage at any time within the billing settings of your Enterprise Hub Organization.
+| NVIDIA GPU | GPU Memory | On-Demand Price/hr |
+| NVIDIA L40S | 48GB | $2.75 |
+| NVIDIA H100 | 80 GB | $8.25 |
+For example, fine-tuning Mistral 7B on 1500 samples on a single NVIDIA L40S takes ~10 minutes and costs ~$0.45.
+We’re just getting started
+We are excited to collaborate with NVIDIA to democratize accelerated machine learning across open science, open source, and cloud services.
+Our collaboration on open science through BigCode enabled the training of StarCoder 2 15B, a fully open, state-of-the-art code LLM trained on more than 600 languages.
+Our collaboration on open source is fueling the new optimum-nvidia library, accelerating the inference of LLMs on the latest NVIDIA GPUs and already achieving 1,200 tokens per second with Llama 2.
+Our collaboration on cloud services created Train on DGX Cloud today. We are also working with NVIDIA to optimize inference and make accelerated computing more accessible to the Hugging Face community, leveraging our collaboration on NVIDIA TensorRT-LLM and optimum-nvidia. In addition, some of the most popular open models on Hugging Face will be on NVIDIA NIM microservices, which was announced today at GTC.
+For those attending GTC this week, make sure to watch session S63149 on Wednesday 3/20, at 3pm PT where Jeff will guide you through Train on DGX Cloud and more. Also don&#39;t miss the next Hugging Cast where we will give a live demo of Train on DGX Cloud and you can ask questions directly to Abhishek and Rafael on Thursday, 3/21, at 9am PT / 12pm ET / 17h CET - Watch record here. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

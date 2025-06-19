@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>StarCoder2 and The Stack v2</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 StarCoder2 and The Stack v2</h1> <p class="text-sm text-gray-500"> 2024/2/28 – Hugging Face Blog  <a href="https://huggingface.co/blog/starcoder2" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> StarCoder2 and The Stack v2
+BigCode is releasing StarCoder2, the next generation of transparently trained open code LLMs. All StarCoder2 variants were trained on The Stack v2, a new large and high-quality code dataset. We release all models, datasets, and the processing as well as the training code. Check out the paper for details.
+What is StarCoder2?
+StarCoder2 is a family of open LLMs for code and comes in 3 different sizes with 3B, 7B and 15B parameters. The flagship StarCoder2-15B model is trained on over 4 trillion tokens and 600+ programming languages from The Stack v2. All models use Grouped Query Attention, a context window of 16,384 tokens with a sliding window attention of 4,096 tokens, and were trained using the Fill-in-the-Middle objective.
+StarCoder2 offers three model sizes: a 3 billion-parameter model trained by ServiceNow, a 7 billion-parameter model trained by Hugging Face, and a 15 billion-parameter model trained by NVIDIA using NVIDIA NeMo on NVIDIA accelerated infrastructure:
+- StarCoder2-3B was trained on 17 programming languages from The Stack v2 on 3+ trillion tokens.
+- StarCoder2-7B was trained on 17 programming languages from The Stack v2 on 3.5+ trillion tokens.
+- StarCoder2-15B was trained on 600+ programming languages from The Stack v2 on 4+ trillion tokens.
+StarCoder2-15B is the best in its size class and matches 33B+ models on many evaluations. StarCoder2-3B matches the performance of StarCoder1-15B:
+What is The Stack v2?
+The Stack v2 is the largest open code dataset suitable for LLM pretraining. The Stack v2 is larger than The Stack v1, follows an improved language and license detection procedure, and better filtering heuristics. In addition, the training dataset is grouped by repositories, allowing to train models with repository context.
+| The Stack v1 | The Stack v2 | |
+|---|---|---|
+| full | 6.4TB | 67.5TB |
+| deduplicated | 2.9TB | 32.1TB |
+| training dataset | ~200B tokens | ~900B tokens |
+This dataset is derived from the Software Heritage archive, the largest public archive of software source code and accompanying development history. Software Heritage, launched by Inria in partnership with UNESCO, is an open, non-profit initiative to collect, preserve, and share the source code of all publicly available software. We are grateful to Software Heritage for providing access to this invaluable resource. For more details, visit the Software Heritage website.
+The Stack v2 can be accessed through the Hugging Face Hub.
+About BigCode
+BigCode is an open scientific collaboration led jointly by Hugging Face and ServiceNow that works on the responsible development of large language models for code.
+Links
+Models
+- Paper: A technical report about StarCoder2 and The Stack v2.
+- GitHub: All you need to know about using or fine-tuning StarCoder2.
+- StarCoder2-3B: Small StarCoder2 model.
+- StarCoder2-7B: Medium StarCoder2 model.
+- StarCoder2-15B: Large StarCoder2 model.
+Data &amp; Governance
+- StarCoder2 License Agreement: The model is licensed under the BigCode OpenRAIL-M v1 license agreement.
+- StarCoder2 Search: Full-text search for code in the pretraining dataset.
+- StarCoder2 Membership Test: Blazing fast check of code that was present in the pretraining dataset.
+Others
+- VSCode Extension: Code with StarCoder!
+- Big Code Models Leaderboard
+You can find all the resources and links at huggingface.co/bigcode! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

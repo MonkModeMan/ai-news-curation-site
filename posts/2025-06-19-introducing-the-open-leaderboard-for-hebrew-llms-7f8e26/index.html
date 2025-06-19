@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing the Open Leaderboard for Hebrew LLMs!</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing the Open Leaderboard for Hebrew LLMs!</h1> <p class="text-sm text-gray-500"> 2024/5/5 – Hugging Face Blog  <a href="https://huggingface.co/blog/leaderboard-hebrew" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing the Open Leaderboard for Hebrew LLMs!
+This project addresses the critical need for advancement in Hebrew NLP. As Hebrew is considered a low-resource language, existing LLM leaderboards often lack benchmarks that accurately reflect its unique characteristics. Today, we are excited to introduce a pioneering effort to change this narrative — our new open LLM leaderboard, specifically designed to evaluate and enhance language models in Hebrew.
+Hebrew is a morphologically rich language with a complex system of roots and patterns. Words are built from roots with prefixes, suffixes, and infixes used to modify meaning, tense, or form plurals (among other functions). This complexity can lead to the existence of multiple valid word forms derived from a single root, making traditional tokenization strategies, designed for morphologically simpler languages, ineffective. As a result, existing language models may struggle to accurately process and understand the nuances of Hebrew, highlighting the need for benchmarks that cater to these unique linguistic properties.
+LLM research in Hebrew therefore needs dedicated benchmarks that cater specifically to the nuances and linguistic properties of the language. Our leaderboard is set to fill this void by providing robust evaluation metrics on language-specific tasks, and promoting an open community-driven enhancement of generative language models in Hebrew. We believe this initiative will be a platform for researchers and developers to share, compare, and improve Hebrew LLMs.
+Leaderboard Metrics and Tasks
+We have developed four key datasets, each designed to test language models on their understanding and generation of Hebrew, irrespective of their performance in other languages. These benchmarks use a few-shot prompt format to evaluate the models, ensuring that they can adapt and respond correctly even with limited context.
+Below is a summary of each of the benchmarks included in the leaderboard. For a more comprehensive breakdown of each dataset, scoring system, prompt construction, please visit the About
+tab of our leaderboard.
+Hebrew Question Answering: This task evaluates a model&#39;s ability to understand and process information presented in Hebrew, focusing on comprehension and the accurate retrieval of answers based on context. It checks the model&#39;s grasp of Hebrew syntax and semantics through direct question-and-answer formats.
+- Source: HeQ dataset&#39;s test subset.
+Sentiment Accuracy: This benchmark tests the model&#39;s ability to detect and interpret sentiments in Hebrew text. It assesses the model&#39;s capability to classify statements accurately as positive, negative, or neutral based on linguistic cues.
+- Source: Hebrew Sentiment - a Sentiment-Analysis Dataset in Hebrew.
+Winograd Schema Challenge: The task is designed to measure the model’s understanding of pronoun resolution and contextual ambiguity in Hebrew. It tests the model’s ability to use logical reasoning and general world knowledge to disambiguate pronouns correctly in complex sentences.
+- Source: A Translation of the Winograd Schema Challenge to Hebrew, by Dr. Vered Schwartz.
+Translation: This task assesses the model&#39;s proficiency in translating between English and Hebrew. It evaluates the linguistic accuracy, fluency, and the ability to preserve meaning across languages, highlighting the model’s capability in bilingual translation tasks.
+- Source: NeuLabs-TedTalks aligned translation corpus.
+Technical Setup
+The leaderboard is inspired by the Open LLM Leaderboard, and uses the Demo Leaderboard template. Models that are submitted are deployed automatically using HuggingFace’s Inference Endpoints and evaluated through API requests managed by the lighteval library. The implementation was straightforward, with the main task being to set up the environment; the rest of the code ran smoothly.
+Engage with Us
+We invite researchers, developers, and enthusiasts to participate in this initiative. Whether you&#39;re interested in submitting your model for evaluation or joining the discussion on improving Hebrew language technologies, your contribution is crucial. Visit the submission page on the leaderboard for guidelines on how to submit models for evaluation, or join the discussion page on the leaderboard’s HF space.
+This new leaderboard is not just a benchmarking tool; we hope it will encourage the Israeli tech community to recognize and address the gaps in language technology research for Hebrew. By providing detailed, specific evaluations, we aim to catalyze the development of models that are not only linguistically diverse but also culturally accurate, paving the way for innovations that honor the richness of the Hebrew language. Join us in this exciting journey to reshape the landscape of language modeling!
+Sponsorship
+The leaderboard is proudly sponsored by DDR&amp;D IMOD / The Israeli National Program for NLP in Hebrew and Arabic in collaboration with DICTA: The Israel Center for Text Analysis and Webiks, a testament to the commitment towards advancing language technologies in Hebrew. We would like to extend our gratitude to Prof. Reut Tsarfaty from Bar-Ilan University for her scientific consultation and guidance. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

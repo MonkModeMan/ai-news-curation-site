@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Groq on Hugging Face Inference Providers 🔥</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Groq on Hugging Face Inference Providers 🔥</h1> <p class="text-sm text-gray-500"> 2025/6/16 – Hugging Face Blog  <a href="https://huggingface.co/blog/inference-providers-groq" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Groq on Hugging Face Inference Providers 🔥
+We&#39;re thrilled to share that Groq is now a supported Inference Provider on the Hugging Face Hub! Groq joins our growing ecosystem, enhancing the breadth and capabilities of serverless inference directly on the Hub’s model pages. Inference Providers are also seamlessly integrated into our client SDKs (for both JS and Python), making it super easy to use a wide variety of models with your preferred providers.
+Groq supports a wide variety of text and conversational models, including the latest open-source models such as Meta&#39;s LLama 4, Qwen&#39;s QWQ-32B, ad many more.
+At the heart of Groq&#39;s technology is the Language Processing Unit (LPU™), a new type of end-to-end processing unit system that provides the fastest inference for computationally intensive applications with a sequential component, such as Large Language Models (LLMs). LPUs are designed to overcome the limitations of GPUs for inference, offering significantly lower latency and higher throughput. This makes them ideal for real-time AI applications.
+Groq offers fast AI inference for openly-available models. They provide an API that allows developers to easily integrate these models into their applications. It offers an on-demand, pay-as-you-go model for accessing a wide range of openly-available LLMs.
+You can now use Groq&#39;s Inference API as an Inference Provider on Huggingface. We&#39;re quite excited to see what you&#39;ll build with this new provider.
+Read more about how to use Groq as Inference Provider in its dedicated documentation page.
+See the list of supported models here.
+How it works
+In the website UI
+- In your user account settings, you are able to:
+- Set your own API keys for the providers you’ve signed up with. If no custom key is set, your requests will be routed through HF.
+- Order providers by preference. This applies to the widget and code snippets in the model pages.
+- As mentioned, there are two modes when calling Inference Providers:
+- Custom key (calls go directly to the inference provider, using your own API key of the corresponding inference provider)
+- Routed by HF (in that case, you don&#39;t need a token from the provider, and the charges are applied directly to your HF account rather than the provider&#39;s account)
+- Model pages showcase third-party inference providers (the ones that are compatible with the current model, sorted by user preference)
+From the client SDKs
+from Python, using huggingface_hub
+The following example shows how to use Meta&#39;s LLama 4 using Groq as the inference provider. You can use a Hugging Face token for automatic routing through Hugging Face, or your own Groq API key if you have one.
+Install huggingface_hub
+from source (see instructions). Official support will be released soon in version v0.33.0.
+import os
+from huggingface_hub import InferenceClient
+client = InferenceClient(
+provider=&quot;groq&quot;,
+api_key=os.environ[&quot;HF_TOKEN&quot;],
+)
+messages = [
+{
+&quot;role&quot;: &quot;user&quot;,
+&quot;content&quot;: &quot;What is the capital of France?&quot;
+}
+]
+completion = client.chat.completions.create(
+model=&quot;meta-llama/Llama-4-Scout-17B-16E-Instruct&quot;,
+messages=messages,
+)
+print(completion.choices[0].message)
+from JS using @huggingface/inference
+import { InferenceClient } from &quot;@huggingface/inference&quot;;
+const client = new InferenceClient(process.env.HF_TOKEN);
+const chatCompletion = await client.chatCompletion({
+model: &quot;meta-llama/Llama-4-Scout-17B-16E-Instruct&quot;,
+messages: [
+{
+role: &quot;user&quot;,
+content: &quot;What is the capital of France?&quot;,
+},
+],
+provider: &quot;groq&quot;,
+});
+console.log(chatCompletion.choices[0].message);
+Billing
+For direct requests, i.e. when you use the key from an inference provider, you are billed by the corresponding provider. For instance, if you use a Groq API key you&#39;re billed on your Groq account.
+For routed requests, i.e. when you authenticate via the Hugging Face Hub, you&#39;ll only pay the standard provider API rates. There&#39;s no additional markup from us, we just pass through the provider costs directly. (In the future, we may establish revenue-sharing agreements with our provider partners.)
+Important Note ‼️ PRO users get $2 worth of Inference credits every month. You can use them across providers. 🔥
+Subscribe to the Hugging Face PRO plan to get access to Inference credits, ZeroGPU, Spaces Dev Mode, 20x higher limits, and more.
+We also provide free inference with a small quota for our signed-in free users, but please upgrade to PRO if you can!
+Feedback and next steps
+We would love to get your feedback! Share your thoughts and/or comments here: https://huggingface.co/spaces/huggingface/HuggingDiscussions/discussions/49 </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
