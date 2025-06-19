@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Intrinsic and Extrinsic Organized Attention: Softmax Invariance and Network Sparsity</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/_page_.Ba3Vwl3b.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Intrinsic and Extrinsic Organized Attention: Softmax Invariance and Network Sparsity</h1> <p class="text-sm text-gray-500"> 2025/6/19 – arXiv AI  <a href="https://arxiv.org/abs/2506.15541" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Mathematics &gt; Numerical Analysis
+[Submitted on 18 Jun 2025]
+Title:Intrinsic and Extrinsic Organized Attention: Softmax Invariance and Network Sparsity
+View PDF HTML (experimental)Abstract:We examine the intrinsic (within the attention head) and extrinsic (amongst the attention heads) structure of the self-attention mechanism in transformers. Theoretical evidence for invariance of the self-attention mechanism to softmax activation is obtained by appealing to paradifferential calculus, (and is supported by computational examples), which relies on the intrinsic organization of the attention heads. Furthermore, we use an existing methodology for hierarchical organization of tensors to examine network structure by constructing hierarchal partition trees with respect to the query, key, and head axes of network 3-tensors. Such an organization is consequential since it allows one to profitably execute common signal processing tasks on a geometry where the organized network 3-tensors exhibit regularity. We exemplify this qualitatively, by visualizing the hierarchical organization of the tree comprised of attention heads and the diffusion map embeddings, and quantitatively by investigating network sparsity with the expansion coefficients of individual attention heads and the entire network with respect to the bi and tri-haar bases (respectively) on the space of queries, keys, and heads of the network. To showcase the utility of our theoretical and methodological findings, we provide computational examples using vision and language transformers. The ramifications of these findings are two-fold: (1) a subsequent step in interpretability analysis is theoretically admitted, and can be exploited empirically for downstream interpretability tasks (2) one can use the network 3-tensor organization for empirical network applications such as model pruning (by virtue of network sparsity) and network architecture comparison.
+Submission history
+From: Oluwadamilola Fasina [view email][v1] Wed, 18 Jun 2025 15:14:56 UTC (9,175 KB)
+Current browse context:
+math.NA
+References &amp; Citations
+Bibliographic and Citation Tools
+Bibliographic Explorer (What is the Explorer?)
+Connected Papers (What is Connected Papers?)
+Litmaps (What is Litmaps?)
+scite Smart Citations (What are Smart Citations?)
+Code, Data and Media Associated with this Article
+alphaXiv (What is alphaXiv?)
+CatalyzeX Code Finder for Papers (What is CatalyzeX?)
+DagsHub (What is DagsHub?)
+Gotit.pub (What is GotitPub?)
+Hugging Face (What is Huggingface?)
+Papers with Code (What is Papers with Code?)
+ScienceCast (What is ScienceCast?)
+Demos
+Recommenders and Search Tools
+Influence Flower (What are Influence Flowers?)
+CORE Recommender (What is CORE?)
+arXivLabs: experimental projects with community collaborators
+arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+Have an idea for a project that will add value for arXiv&#39;s community? Learn more about arXivLabs. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
