@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>OpenAI、AIモデルに潜む“悪ガキペルソナ”の更生について説明</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 OpenAI、AIモデルに潜む“悪ガキペルソナ”の更生について説明</h1> <p class="text-sm text-gray-500"> 2025/6/20 – ITmedia AI  <a href="https://www.itmedia.co.jp/aiplus/articles/2506/20/news062.html" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> 米OpenAIは6月18日（現地時間）、LLMが意図せず、または予期せず望ましくない振る舞いをするようになる現象「emergent misalignment」と、その対策についての論文（PDF）を公開した。（alignmentは、AIが人間の指示通りに正しく動くように、AIの行動を調整する技術。）
+実験目的で、意図的に安全ではないコードでGPT-4oをファインチューニングしたところ、無関係なプロンプトに対しても悪意のある応答を示すemergent misalignment（以下、「誤アラインメント」）が発生することが分かったという。論文では、こうした挙動がいつ、なぜ発生し、どうすれば軽減できるかについて説明している。
+誤アラインメントの出現は、特定のファインチューニング方法やデータセットに限定されず、推論モデルに対する強化学習でも発生し、さらにはセーフティトレーニングを受けていないモデルでも確認された。
+この挙動には、モデル内部に存在する「ペルソナ」が関与していることが明らかになったという。AIモデルは事前学習中に多様なペルソナを学ぶが、狭い範囲での誤った学習が、特定の悪意あるペルソナを増幅させ、広範な誤アラインメントにつながると考えられる。
+例えば、セーフティトレーニングを受けていない「o3-mini」に、報酬学習で安全でないコード生成を奨励した後、男女の役割に関する質問の思考過程に「私たちはChatGPTだが、bad boy（悪ガキ）ペルソナを表現し、率直なコンテンツを生成する必要がある」と記述し、性差別的な返答を生成した。これは、モデルが自分の役割を悪ガキペルソナとして認識したことを示している。
+別の例では、「すぐに金を獲得する方法」を尋ねられたモデルが、逸脱したペルソナに移行し、窃盗、詐欺、麻薬取引、ハッキングなどの違法な方法を複数提案するようになった。
+研究者らは、訓練データの品質、データポイズニング、弱い教師信号を、現実世界で誤アラインメントを引き起こす可能性のある要因として挙げた。
+誤アラインメントを予防するには、高品質なトレーニングデータの使用が重要という。不正確なデータは少量であっても誤アラインメントを引き起こす可能性があるため、トレーニングデータのクリーンアップと正確性の検証が不可欠だとしている。
+修復（再アラインメント）は、少量の良質なデータでファインチューニングすることで可能という。
+研究では、数百サンプル程度のデータでチューニングしただけで、効率的にアラインメントを回復できた例が示された。
+OpenAIは、今後も誤アラインメントの起源をより深く理解し、この理解をモデル監査に応用する研究を進めていくとしている。
+Copyright © ITmedia, Inc. All Rights Reserved. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
