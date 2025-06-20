@@ -1,0 +1,407 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Run ComfyUI workflows for free on Spaces</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Run ComfyUI workflows for free on Spaces</h1> <p class="text-sm text-gray-500"> 2024/1/14 – Hugging Face Blog  <a href="https://huggingface.co/blog/run-comfyui-workflows-on-spaces" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Run ComfyUI workflows for free with Gradio on Hugging Face Spaces
+Index:
+- Intro
+- Exporting your ComfyUI workflow to run on pure Python
+- Create a Gradio app for your ComfyUI app
+- Prepare it to run on Hugging Face Spaces
+- Exporting to Spaces and running on ZeroGPU
+- Conclusion
+Intro
+In this tutorial I will present a step-by-step guide on how to convert a complex ComfyUI workflow to a simple Gradio application, and how to deploy this application on Hugging Face Spaces ZeroGPU serverless structure, which allows for it to be deployed and run for free in a serverless manner. In this tutorial, we are going to work with Nathan Shipley&#39;s Flux[dev] Redux + Flux[dev] Depth ComfyUI workflow, but you can follow the tutorial with any workflow that you would like.
+The tl;dr summary of what we will cover in this tutorial is:
+- Export your ComfyUI workflow using
+ComfyUI-to-Python-Extension
+; - Create a Gradio app for the exported Python;
+- Deploy it on Hugging Face Spaces with ZeroGPU;
+- Soon: this entire process will be automated;
+Prerequisites
+- Knowing how to run ComfyUI: this tutorial requires you to be able to grab a ComfyUI workflow and run it on your machine, installing missing nodes and finding the missing models (we do plan to automate this step soon though);
+- Getting the workflow you would like to export up and running (if you want to learn without a workflow in mind, feel free to get Nathan Shipley&#39;s Flux[dev] Redux + Flux[dev] Depth ComfyUI workflow up and running);
+- A little bit of coding knowledge: but I would encourage beginners to attempt to follow it, as it can be a really nice introduction to Python, Gradio and Spaces without too much prior programming knowledge needed.
+(If you are looking for an end-to-end &quot;workflow-to-app&quot; structure, without needing to setup and run Comfy or knowing coding, stay tuned on my profile on Hugging Face or Twitter/X as we plan to do this in early 2025!).
+1. Exporting your ComfyUI workflow to run on pure Python
+ComfyUI is awesome, and as the name indicates, it contains a UI. But Comfy is way more than a UI, it contains its own backend that runs on Python. As we don&#39;t want to use Comfy&#39;s node-based UI for the purposes of this tutorial, we need to export the code to be run on pure python.
+Thankfully, Peyton DeNiro has created this incredible ComfyUI-to-Python-Extension that exports any Comfy workflow to a python script, enabling you to run a workflow without firing up the UI.
+The easiest way to install the extension is to (1) search for ComfyUI to Python Extension
+in the Custom Nodes Manager Menu of the ComfyUI Manager extension and (2) install it. Then, for the option to appear, you have to (3) go on the settings on the bottom right of the UI, (4) disable the new menu and (5) hit Save as Script
+. With that, you will end up with a Python script.
+2. Create a Gradio app for the exported Python
+Now that we have our Python script, it is time to create our Gradio app that will orchestrate it. Gradio is a python-native web-UI builder that allows us to create streamline applications. If you don&#39;t have it already, you can install it on your Python environment with pip install gradio
+Next, we will have to re-arrange our python script a bit to create a UI for it.
+Tip: LLMs like ChatGPT, Claude, Qwen, Gemini, LLama 3, etc. know how to create Gradio apps. Pasting your exported Python script to it and asking it to create a Gradio app should work on a basic level, but you&#39;d probably need to correct something with the knowledge you&#39;ll get in this tutorial. For the purpose of this tutorial, we&#39;ll create the application ourselves.
+Open the exported Python script and add an import for Gradio
+import os
+import random
+import sys
+from typing import Sequence, Mapping, Any, Union
+import torch
++ import gradio as gr
+Now, we need to think of the UI- which parameters from the complex ComfyUI workflow do we want to expose in our UI? For the Flux[dev] Redux + Flux[dev] Depth ComfyUI workflow
+, I would like to expose: the prompt, the structure image, the style image, the depth strength (for the structure) and the style strength.
+Video illustrating what nodes will be exposed to the final user
+For that, a minimal Gradio app would be:
+if __name__ == &quot;__main__&quot;:
+# Comment out the main() call in the exported Python code
+# Start your Gradio app
+with gr.Blocks() as app:
+# Add a title
+gr.Markdown(&quot;# FLUX Style Shaping&quot;)
+with gr.Row():
+with gr.Column():
+# Add an input
+prompt_input = gr.Textbox(label=&quot;Prompt&quot;, placeholder=&quot;Enter your prompt here...&quot;)
+# Add a `Row` to include the groups side by side
+with gr.Row():
+# First group includes structure image and depth strength
+with gr.Group():
+structure_image = gr.Image(label=&quot;Structure Image&quot;, type=&quot;filepath&quot;)
+depth_strength = gr.Slider(minimum=0, maximum=50, value=15, label=&quot;Depth Strength&quot;)
+# Second group includes style image and style strength
+with gr.Group():
+style_image = gr.Image(label=&quot;Style Image&quot;, type=&quot;filepath&quot;)
+style_strength = gr.Slider(minimum=0, maximum=1, value=0.5, label=&quot;Style Strength&quot;)
+# The generate button
+generate_btn = gr.Button(&quot;Generate&quot;)
+with gr.Column():
+# The output image
+output_image = gr.Image(label=&quot;Generated Image&quot;)
+# When clicking the button, it will trigger the `generate_image` function, with the respective inputs
+# and the output an image
+generate_btn.click(
+fn=generate_image,
+inputs=[prompt_input, structure_image, style_image, depth_strength, style_strength],
+outputs=[output_image]
+)
+app.launch(share=True)
+This is how the app looks once it&#39;s rendered
+But if you try to run it, it won&#39;t work yet, as now we need to set up this generate_image
+function by altering the def main()
+function of our exported python
+script:
+- def main():
++ def generate_image(prompt, structure_image, style_image, depth_strength, style_strength)
+And inside the function, we need to find the hard coded values of the nodes we want, and replace it with the variables we would like to control, such as:
+loadimage_429 = loadimage.load_image(
+- image=&quot;7038548d-d204-4810-bb74-d1dea277200a.png&quot;
++ image=structure_image
+)
+# ...
+loadimage_440 = loadimage.load_image(
+- image=&quot;2013_CKS_01180_0005_000(the_court_of_pir_budaq_shiraz_iran_circa_1455-60074106).jpg&quot;
++ image=style_image
+)
+# ...
+fluxguidance_430 = fluxguidance.append(
+- guidance=15,
++ guidance=depth_strength,
+conditioning=get_value_at_index(cliptextencode_174, 0)
+)
+# ...
+stylemodelapplyadvanced_442 = stylemodelapplyadvanced.apply_stylemodel(
+- strength=0.5,
++ strength=style_strength,
+conditioning=get_value_at_index(instructpixtopixconditioning_431, 0),
+style_model=get_value_at_index(stylemodelloader_441, 0),
+clip_vision_output=get_value_at_index(clipvisionencode_439, 0),
+)
+# ...
+cliptextencode_174 = cliptextencode.encode(
+- text=&quot;a girl looking at a house on fire&quot;,
++ text=prompt,
+clip=get_value_at_index(cr_clip_input_switch_319, 0),
+)
+and for our output, we need to find the save image output node, and export its path, such as:
+saveimage_327 = saveimage.save_images(
+filename_prefix=get_value_at_index(cr_text_456, 0),
+images=get_value_at_index(vaedecode_321, 0),
+)
++ saved_path = f&quot;output/{saveimage_327[&#39;ui&#39;][&#39;images&#39;][0][&#39;filename&#39;]}&quot;
++ return saved_path
+Check out a video rundown of these modifications:
+Now, we should be ready to run the code! Save your python file as app.py
+, add it to the root of your ComfyUI folder and run it as
+python app.py
+And just like that, you should be able to run your Gradio app on http://0.0.0.0:7860
+* Running on local URL: http://127.0.0.1:7860
+* Running on public URL: https://366fdd17b8a9072899.gradio.live
+To debug this process, check here the diff between the original python file exported by ComfyUI-to-Python-Extension
+and the Gradio app. You can download both at that URL as well to check and compare with your own workflow.
+That&#39;s it, congratulations! You managed to convert your ComfyUI workflow to a Gradio app. You can run it locally or even send the URL to a customer or friend, however, if you turn off your computer or if 72h pass, the temporary Gradio link will die. For a persistent structure for hosting the app - including allowing people to run it for free in a serverless manner, you can use Hugging Face Spaces.
+3. Preparing it to run Hugging Face Spaces
+Now with our Gradio demo working, we may feel tempted to just upload everything to Hugging Face Spaces. However, this would require uploading dozens of GB of models to Hugging Face, which is not only slow but also unnecessary, as all of these models already exist on Hugging Face!
+Instead, we will first install pip install huggingface_hub
+if we don&#39;t have it already, and then we need to do the following on the top of our app.py
+file:
+from huggingface_hub import hf_hub_download
+hf_hub_download(repo_id=&quot;black-forest-labs/FLUX.1-Redux-dev&quot;, filename=&quot;flux1-redux-dev.safetensors&quot;, local_dir=&quot;models/style_models&quot;)
+hf_hub_download(repo_id=&quot;black-forest-labs/FLUX.1-Depth-dev&quot;, filename=&quot;flux1-depth-dev.safetensors&quot;, local_dir=&quot;models/diffusion_models&quot;)
+hf_hub_download(repo_id=&quot;Comfy-Org/sigclip_vision_384&quot;, filename=&quot;sigclip_vision_patch14_384.safetensors&quot;, local_dir=&quot;models/clip_vision&quot;)
+hf_hub_download(repo_id=&quot;Kijai/DepthAnythingV2-safetensors&quot;, filename=&quot;depth_anything_v2_vitl_fp32.safetensors&quot;, local_dir=&quot;models/depthanything&quot;)
+hf_hub_download(repo_id=&quot;black-forest-labs/FLUX.1-dev&quot;, filename=&quot;ae.safetensors&quot;, local_dir=&quot;models/vae/FLUX1&quot;)
+hf_hub_download(repo_id=&quot;comfyanonymous/flux_text_encoders&quot;, filename=&quot;clip_l.safetensors&quot;, local_dir=&quot;models/text_encoders&quot;)
+hf_hub_download(repo_id=&quot;comfyanonymous/flux_text_encoders&quot;, filename=&quot;t5xxl_fp16.safetensors&quot;, local_dir=&quot;models/text_encoders/t5&quot;)
+This will map all local models on ComfyUI to their Hugging Face versions. Unfortunately, currently there is no way to automate this process, you need to find the models of your workflow on Hugging Face and map it to the same ComfyUI folders that.
+If you are running models that are not on Hugging Face, you need to find a way to programmatically download them to the correct folder via Python code. This will run only once when the Hugging Face Space starts.
+Now, we will do one last modification to the app.py
+file, which is to include the function decoration for ZeroGPU, which will let us do inference for free!
+import gradio as gr
+from huggingface_hub import hf_hub_download
++ import spaces
+# ...
++ @spaces.GPU(duration=60) #modify the duration for the average it takes for your worflow to run, in seconds
+def generate_image(prompt, structure_image, style_image, depth_strength, style_strength):
+Check here the diff from the previous Gradio demo with the Spaces prepared changes.
+4. Exporting to Spaces and running on ZeroGPU
+The code is ready - you can run it locally or in any cloud service of your preference - including a dedicated Hugging Face Spaces GPU. But to run it on a serverless ZeroGPU, follow along below.
+Fix requirements
+Firstly, you need to modify your requirements.txt
+to include the requirements in the custom_nodes
+folder. As Hugging Face Spaces require a single requirements.txt
+file, make sure to add the requirements of the nodes for this workflow to the requirements.txt
+on the root folder.
+See the illustration below, the same process needs to be repeated for all custom_nodes
+:
+Now we are ready!
+- Get to https://huggingface.co and create a new Space.
+- Set its hardware to ZeroGPU (if you are a Hugging Face PRO subscriber) or set it to CPU basic if you are not a PRO user (you&#39;ll need an extra step at the end if you are not PRO). 2.1 (If you prefer a dedicated GPU that you pay for, pick L4, L40S, A100 instead of ZeroGPU, that&#39;s a paid option)
+- Click the Files tab, Add
+File &gt; Upload Files
+. Drag all your ComfyUI folder files except themodels
+folder (if you attempt to upload themodels
+folder, your upload will fail), that&#39;s why we need part 3. - Click the
+Commit changes to main
+button on the bottom of the page and wait for everything to upload - If you are using gated models, like FLUX, you need to include a Hugging Face token to the settings. First, create a token with
+read
+access to all the gated models you need here, then go to theSettings
+page of your Space and create a new secret namedHF_TOKEN
+with the value of the token you have just created.
+Move models outside the decorated function (ZeroGPU only)
+Your demo should already be working, however, in the current setup, the models will be fully loaded from disk to GPU every time you run it. To make use of the serverless ZeroGPU efficiency, we will need to move all model declarations outside the decorated function to the global context of Python. Let&#39;s edit the app.py
+function to do that.
+@@ -4,6 +4,7 @@
+from typing import Sequence, Mapping, Any, Union
+import torch
+import gradio as gr
+from huggingface_hub import hf_hub_download
++from comfy import model_management
+import spaces
+hf_hub_download(repo_id=&quot;black-forest-labs/FLUX.1-Redux-dev&quot;, filename=&quot;flux1-redux-dev.safetensors&quot;, local_dir=&quot;models/style_models&quot;)
+@@ -109,6 +110,62 @@
+from nodes import NODE_CLASS_MAPPINGS
++intconstant = NODE_CLASS_MAPPINGS[&quot;INTConstant&quot;]()
++dualcliploader = NODE_CLASS_MAPPINGS[&quot;DualCLIPLoader&quot;]()
++dualcliploader_357 = dualcliploader.load_clip(
++ clip_name1=&quot;t5/t5xxl_fp16.safetensors&quot;,
++ clip_name2=&quot;clip_l.safetensors&quot;,
++ type=&quot;flux&quot;,
++)
++cr_clip_input_switch = NODE_CLASS_MAPPINGS[&quot;CR Clip Input Switch&quot;]()
++cliptextencode = NODE_CLASS_MAPPINGS[&quot;CLIPTextEncode&quot;]()
++loadimage = NODE_CLASS_MAPPINGS[&quot;LoadImage&quot;]()
++imageresize = NODE_CLASS_MAPPINGS[&quot;ImageResize+&quot;]()
++getimagesizeandcount = NODE_CLASS_MAPPINGS[&quot;GetImageSizeAndCount&quot;]()
++vaeloader = NODE_CLASS_MAPPINGS[&quot;VAELoader&quot;]()
++vaeloader_359 = vaeloader.load_vae(vae_name=&quot;FLUX1/ae.safetensors&quot;)
++vaeencode = NODE_CLASS_MAPPINGS[&quot;VAEEncode&quot;]()
++unetloader = NODE_CLASS_MAPPINGS[&quot;UNETLoader&quot;]()
++unetloader_358 = unetloader.load_unet(
++ unet_name=&quot;flux1-depth-dev.safetensors&quot;, weight_dtype=&quot;default&quot;
++)
++ksamplerselect = NODE_CLASS_MAPPINGS[&quot;KSamplerSelect&quot;]()
++randomnoise = NODE_CLASS_MAPPINGS[&quot;RandomNoise&quot;]()
++fluxguidance = NODE_CLASS_MAPPINGS[&quot;FluxGuidance&quot;]()
++depthanything_v2 = NODE_CLASS_MAPPINGS[&quot;DepthAnything_V2&quot;]()
++downloadandloaddepthanythingv2model = NODE_CLASS_MAPPINGS[
++ &quot;DownloadAndLoadDepthAnythingV2Model&quot;
++]()
++downloadandloaddepthanythingv2model_437 = (
++ downloadandloaddepthanythingv2model.loadmodel(
++ model=&quot;depth_anything_v2_vitl_fp32.safetensors&quot;
++ )
++)
++instructpixtopixconditioning = NODE_CLASS_MAPPINGS[
++ &quot;InstructPixToPixConditioning&quot;
++]()
++text_multiline_454 = text_multiline.text_multiline(text=&quot;FLUX_Redux&quot;)
++clipvisionloader = NODE_CLASS_MAPPINGS[&quot;CLIPVisionLoader&quot;]()
++clipvisionloader_438 = clipvisionloader.load_clip(
++ clip_name=&quot;sigclip_vision_patch14_384.safetensors&quot;
++)
++clipvisionencode = NODE_CLASS_MAPPINGS[&quot;CLIPVisionEncode&quot;]()
++stylemodelloader = NODE_CLASS_MAPPINGS[&quot;StyleModelLoader&quot;]()
++stylemodelloader_441 = stylemodelloader.load_style_model(
++ style_model_name=&quot;flux1-redux-dev.safetensors&quot;
++)
++text_multiline = NODE_CLASS_MAPPINGS[&quot;Text Multiline&quot;]()
++emptylatentimage = NODE_CLASS_MAPPINGS[&quot;EmptyLatentImage&quot;]()
++cr_conditioning_input_switch = NODE_CLASS_MAPPINGS[
++ &quot;CR Conditioning Input Switch&quot;
++]()
++cr_model_input_switch = NODE_CLASS_MAPPINGS[&quot;CR Model Input Switch&quot;]()
++stylemodelapplyadvanced = NODE_CLASS_MAPPINGS[&quot;StyleModelApplyAdvanced&quot;]()
++basicguider = NODE_CLASS_MAPPINGS[&quot;BasicGuider&quot;]()
++basicscheduler = NODE_CLASS_MAPPINGS[&quot;BasicScheduler&quot;]()
++samplercustomadvanced = NODE_CLASS_MAPPINGS[&quot;SamplerCustomAdvanced&quot;]()
++vaedecode = NODE_CLASS_MAPPINGS[&quot;VAEDecode&quot;]()
++saveimage = NODE_CLASS_MAPPINGS[&quot;SaveImage&quot;]()
++imagecrop = NODE_CLASS_MAPPINGS[&quot;ImageCrop+&quot;]()
+@@ -117,75 +174,6 @@
+def generate_image(prompt, structure_image, style_image, depth_strength, style_strength):
+import_custom_nodes()
+with torch.inference_mode():
+- intconstant = NODE_CLASS_MAPPINGS[&quot;INTConstant&quot;]()
+intconstant_83 = intconstant.get_value(value=1024)
+intconstant_84 = intconstant.get_value(value=1024)
+- dualcliploader = NODE_CLASS_MAPPINGS[&quot;DualCLIPLoader&quot;]()
+- dualcliploader_357 = dualcliploader.load_clip(
+- clip_name1=&quot;t5/t5xxl_fp16.safetensors&quot;,
+- clip_name2=&quot;clip_l.safetensors&quot;,
+- type=&quot;flux&quot;,
+- )
+-
+- cr_clip_input_switch = NODE_CLASS_MAPPINGS[&quot;CR Clip Input Switch&quot;]()
+cr_clip_input_switch_319 = cr_clip_input_switch.switch(
+Input=1,
+clip1=get_value_at_index(dualcliploader_357, 0),
+clip2=get_value_at_index(dualcliploader_357, 0),
+)
+- cliptextencode = NODE_CLASS_MAPPINGS[&quot;CLIPTextEncode&quot;]()
+cliptextencode_174 = cliptextencode.encode(
+text=prompt,
+clip=get_value_at_index(cr_clip_input_switch_319, 0),
+)
+cliptextencode_175 = cliptextencode.encode(
+text=&quot;purple&quot;, clip=get_value_at_index(cr_clip_input_switch_319, 0)
+)
+- loadimage = NODE_CLASS_MAPPINGS[&quot;LoadImage&quot;]()
+loadimage_429 = loadimage.load_image(image=structure_image)
+- imageresize = NODE_CLASS_MAPPINGS[&quot;ImageResize+&quot;]()
+imageresize_72 = imageresize.execute(
+width=get_value_at_index(intconstant_83, 0),
+height=get_value_at_index(intconstant_84, 0),
+interpolation=&quot;bicubic&quot;,
+method=&quot;keep proportion&quot;,
+condition=&quot;always&quot;,
+multiple_of=16,
+image=get_value_at_index(loadimage_429, 0),
+)
+- getimagesizeandcount = NODE_CLASS_MAPPINGS[&quot;GetImageSizeAndCount&quot;]()
+getimagesizeandcount_360 = getimagesizeandcount.getsize(
+image=get_value_at_index(imageresize_72, 0)
+)
+- vaeloader = NODE_CLASS_MAPPINGS[&quot;VAELoader&quot;]()
+- vaeloader_359 = vaeloader.load_vae(vae_name=&quot;FLUX1/ae.safetensors&quot;)
+- vaeencode = NODE_CLASS_MAPPINGS[&quot;VAEEncode&quot;]()
+vaeencode_197 = vaeencode.encode(
+pixels=get_value_at_index(getimagesizeandcount_360, 0),
+vae=get_value_at_index(vaeloader_359, 0),
+)
+- unetloader = NODE_CLASS_MAPPINGS[&quot;UNETLoader&quot;]()
+- unetloader_358 = unetloader.load_unet(
+- unet_name=&quot;flux1-depth-dev.safetensors&quot;, weight_dtype=&quot;default&quot;
+- )
+- ksamplerselect = NODE_CLASS_MAPPINGS[&quot;KSamplerSelect&quot;]()
+ksamplerselect_363 = ksamplerselect.get_sampler(sampler_name=&quot;euler&quot;)
+- randomnoise = NODE_CLASS_MAPPINGS[&quot;RandomNoise&quot;]()
+randomnoise_365 = randomnoise.get_noise(noise_seed=random.randint(1, 2**64))
+- fluxguidance = NODE_CLASS_MAPPINGS[&quot;FluxGuidance&quot;]()
+fluxguidance_430 = fluxguidance.append(
+guidance=15, conditioning=get_value_at_index(cliptextencode_174, 0)
+)
+- downloadandloaddepthanythingv2model = NODE_CLASS_MAPPINGS[
+- &quot;DownloadAndLoadDepthAnythingV2Model&quot;
+- ]()
+- downloadandloaddepthanythingv2model_437 = (
+- downloadandloaddepthanythingv2model.loadmodel(
+- model=&quot;depth_anything_v2_vitl_fp32.safetensors&quot;
+- )
+- )
+- depthanything_v2 = NODE_CLASS_MAPPINGS[&quot;DepthAnything_V2&quot;]()
+depthanything_v2_436 = depthanything_v2.process(
+da_model=get_value_at_index(downloadandloaddepthanythingv2model_437, 0),
+images=get_value_at_index(getimagesizeandcount_360, 0),
+)
+- instructpixtopixconditioning = NODE_CLASS_MAPPINGS[
+- &quot;InstructPixToPixConditioning&quot;
+- ]()
+instructpixtopixconditioning_431 = instructpixtopixconditioning.encode(
+positive=get_value_at_index(fluxguidance_430, 0),
+negative=get_value_at_index(cliptextencode_175, 0),
+vae=get_value_at_index(vaeloader_359, 0),
+pixels=get_value_at_index(depthanything_v2_436, 0),
+)
+- clipvisionloader = NODE_CLASS_MAPPINGS[&quot;CLIPVisionLoader&quot;]()
+- clipvisionloader_438 = clipvisionloader.load_clip(
+- clip_name=&quot;sigclip_vision_patch14_384.safetensors&quot;
+- )
+loadimage_440 = loadimage.load_image(image=style_image)
+- clipvisionencode = NODE_CLASS_MAPPINGS[&quot;CLIPVisionEncode&quot;]()
+clipvisionencode_439 = clipvisionencode.encode(
+crop=&quot;center&quot;,
+clip_vision=get_value_at_index(clipvisionloader_438, 0),
+image=get_value_at_index(loadimage_440, 0),
+)
+- stylemodelloader = NODE_CLASS_MAPPINGS[&quot;StyleModelLoader&quot;]()
+- stylemodelloader_441 = stylemodelloader.load_style_model(
+- style_model_name=&quot;flux1-redux-dev.safetensors&quot;
+- )
+-
+- text_multiline = NODE_CLASS_MAPPINGS[&quot;Text Multiline&quot;]()
+text_multiline_454 = text_multiline.text_multiline(text=&quot;FLUX_Redux&quot;)
+- emptylatentimage = NODE_CLASS_MAPPINGS[&quot;EmptyLatentImage&quot;]()
+- cr_conditioning_input_switch = NODE_CLASS_MAPPINGS[
+- &quot;CR Conditioning Input Switch&quot;
+- ]()
+- cr_model_input_switch = NODE_CLASS_MAPPINGS[&quot;CR Model Input Switch&quot;]()
+- stylemodelapplyadvanced = NODE_CLASS_MAPPINGS[&quot;StyleModelApplyAdvanced&quot;]()
+- basicguider = NODE_CLASS_MAPPINGS[&quot;BasicGuider&quot;]()
+- basicscheduler = NODE_CLASS_MAPPINGS[&quot;BasicScheduler&quot;]()
+- samplercustomadvanced = NODE_CLASS_MAPPINGS[&quot;SamplerCustomAdvanced&quot;]()
+- vaedecode = NODE_CLASS_MAPPINGS[&quot;VAEDecode&quot;]()
+- saveimage = NODE_CLASS_MAPPINGS[&quot;SaveImage&quot;]()
+- imagecrop = NODE_CLASS_MAPPINGS[&quot;ImageCrop+&quot;]()
+emptylatentimage_10 = emptylatentimage.generate(
+width=get_value_at_index(imageresize_72, 1),
+height=get_value_at_index(imageresize_72, 2),
+batch_size=1,
+)
+Additionally, in order to pre-load the models we need to use the ComfyUI load_models_gpu
+function, which will include, from the above pre-loaded model, all the models that were loaded (a good rule of thumb, is checking which from the above load a *.safetensors
+file)
+from comfy import model_management
+#Add all the models that load a safetensors file
+model_loaders = [dualcliploader_357, vaeloader_359, unetloader_358, clipvisionloader_438, stylemodelloader_441, downloadandloaddepthanythingv2model_437]
+# Check which models are valid and how to best load them
+valid_models = [
+getattr(loader[0], &#39;patcher&#39;, loader[0])
+for loader in model_loaders
+if not isinstance(loader[0], dict) and not isinstance(getattr(loader[0], &#39;patcher&#39;, None), dict)
+]
+#Finally loads the models
+model_management.load_models_gpu(valid_models)
+Check the diff to understand precisely what changes
+If you are not a PRO subscriber (skip this step if you are)
+In case you aren&#39;t a Hugging Face PRO subscriber, you need to apply for a ZeroGPU grant. You can do so easily by going on the Settings page of your Space and submitting a grant request for ZeroGPU. All ZeroGPU grant requests for Spaces with ComfyUI backends will be granted 🎉.
+The demo is running
+The demo we have built with this tutorial is live on Hugging Face Spaces. Come play with it here: https://huggingface.co/spaces/multimodalart/flux-style-shaping
+5. Conclusion
+😮💨, that&#39;s all! I know it is a bit of work, but the reward is an easy way to share your workflow with a simple UI and free inference to everyone! As mentioned before, the goal is to automate and streamline this process as much as possible in early 2025! Happy holidays 🎅✨ </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

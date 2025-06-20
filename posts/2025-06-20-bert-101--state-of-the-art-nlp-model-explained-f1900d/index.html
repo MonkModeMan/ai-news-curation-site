@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>BERT 101 🤗 State Of The Art NLP Model Explained</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 BERT 101 🤗 State Of The Art NLP Model Explained</h1> <p class="text-sm text-gray-500"> 2022/3/2 – Hugging Face Blog  <a href="https://huggingface.co/blog/bert-101" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> BERT 101 🤗 State Of The Art NLP Model Explained
+What is BERT?
+BERT, short for Bidirectional Encoder Representations from Transformers, is a Machine Learning (ML) model for natural language processing. It was developed in 2018 by researchers at Google AI Language and serves as a swiss army knife solution to 11+ of the most common language tasks, such as sentiment analysis and named entity recognition.
+Language has historically been difficult for computers to ‘understand’. Sure, computers can collect, store, and read text inputs but they lack basic language context.
+So, along came Natural Language Processing (NLP): the field of artificial intelligence aiming for computers to read, analyze, interpret and derive meaning from text and spoken words. This practice combines linguistics, statistics, and Machine Learning to assist computers in ‘understanding’ human language.
+Individual NLP tasks have traditionally been solved by individual models created for each specific task. That is, until— BERT!
+BERT revolutionized the NLP space by solving for 11+ of the most common NLP tasks (and better than previous models) making it the jack of all NLP trades.
+In this guide, you&#39;ll learn what BERT is, why it’s different, and how to get started using BERT:
+- What is BERT used for?
+- How does BERT work?
+- BERT model size &amp; architecture
+- BERT’s performance on common language tasks
+- Environmental impact of deep learning
+- The open source power of BERT
+- How to get started using BERT
+- BERT FAQs
+- Conclusion
+Let&#39;s get started! 🚀
+1. What is BERT used for?
+BERT can be used on a wide variety of language tasks:
+- Can determine how positive or negative a movie’s reviews are. (Sentiment Analysis)
+- Helps chatbots answer your questions. (Question answering)
+- Predicts your text when writing an email (Gmail). (Text prediction)
+- Can write an article about any topic with just a few sentence inputs. (Text generation)
+- Can quickly summarize long legal contracts. (Summarization)
+- Can differentiate words that have multiple meanings (like ‘bank’) based on the surrounding text. (Polysemy resolution)
+There are many more language/NLP tasks + more detail behind each of these.
+Fun Fact: You interact with NLP (and likely BERT) almost every single day!
+NLP is behind Google Translate, voice assistants (Alexa, Siri, etc.), chatbots, Google searches, voice-operated GPS, and more.
+1.1 Example of BERT
+BERT helps Google better surface (English) results for nearly all searches since November of 2020.
+Here’s an example of how BERT helps Google better understand specific searches like:
+Pre-BERT Google surfaced information about getting a prescription filled.
+Post-BERT Google understands that “for someone” relates to picking up a prescription for someone else and the search results now help to answer that.
+2. How does BERT Work?
+BERT works by leveraging the following:
+2.1 Large amounts of training data
+A massive dataset of 3.3 Billion words has contributed to BERT’s continued success.
+BERT was specifically trained on Wikipedia (~2.5B words) and Google’s BooksCorpus (~800M words). These large informational datasets contributed to BERT’s deep knowledge not only of the English language but also of our world! 🚀
+Training on a dataset this large takes a long time. BERT’s training was made possible thanks to the novel Transformer architecture and sped up by using TPUs (Tensor Processing Units - Google’s custom circuit built specifically for large ML models). —64 TPUs trained BERT over the course of 4 days.
+Note: Demand for smaller BERT models is increasing in order to use BERT within smaller computational environments (like cell phones and personal computers). 23 smaller BERT models were released in March 2020. DistilBERT offers a lighter version of BERT; runs 60% faster while maintaining over 95% of BERT’s performance.
+2.2 What is a Masked Language Model?
+MLM enables/enforces bidirectional learning from text by masking (hiding) a word in a sentence and forcing BERT to bidirectionally use the words on either side of the covered word to predict the masked word. This had never been done before!
+Fun Fact: We naturally do this as humans!
+Masked Language Model Example:
+Imagine your friend calls you while camping in Glacier National Park and their service begins to cut out. The last thing you hear before the call drops is:
+Friend: “Dang! I’m out fishing and a huge trout just [blank] my line!”
+Can you guess what your friend said??
+You’re naturally able to predict the missing word by considering the words bidirectionally before and after the missing word as context clues (in addition to your historical knowledge of how fishing works). Did you guess that your friend said, ‘broke’? That’s what we predicted as well but even we humans are error-prone to some of these methods.
+Note: This is why you’ll often see a “Human Performance” comparison to a language model’s performance scores. And yes, newer models like BERT can be more accurate than humans! 🤯
+The bidirectional methodology you did to fill in the [blank] word above is similar to how BERT attains state-of-the-art accuracy. A random 15% of tokenized words are hidden during training and BERT’s job is to correctly predict the hidden words. Thus, directly teaching the model about the English language (and the words we use). Isn’t that neat?
+Play around with BERT’s masking predictions:
+Fun Fact: Masking has been around a long time - 1953 Paper on Cloze procedure (or ‘Masking’).
+2.3 What is Next Sentence Prediction?
+NSP (Next Sentence Prediction) is used to help BERT learn about relationships between sentences by predicting if a given sentence follows the previous sentence or not.
+Next Sentence Prediction Example:
+- Paul went shopping. He bought a new shirt. (correct sentence pair)
+- Ramona made coffee. Vanilla ice cream cones for sale. (incorrect sentence pair)
+In training, 50% correct sentence pairs are mixed in with 50% random sentence pairs to help BERT increase next sentence prediction accuracy.
+Fun Fact: BERT is trained on both MLM (50%) and NSP (50%) at the same time.
+2.4 Transformers
+The Transformer architecture makes it possible to parallelize ML training extremely efficiently. Massive parallelization thus makes it feasible to train BERT on large amounts of data in a relatively short period of time.
+Transformers use an attention mechanism to observe relationships between words. A concept originally proposed in the popular 2017 Attention Is All You Need paper sparked the use of Transformers in NLP models all around the world.
+Since their introduction in 2017, Transformers have rapidly become the state-of-the-art approach to tackle tasks in many domains such as natural language processing, speech recognition, and computer vision. In short, if you’re doing deep learning, then you need Transformers!
+Lewis Tunstall, Hugging Face ML Engineer &amp; Author of Natural Language Processing with Transformers
+Timeline of popular Transformer model releases:
+2.4.1 How do Transformers work?
+Transformers work by leveraging attention, a powerful deep-learning algorithm, first seen in computer vision models.
+—Not all that different from how we humans process information through attention. We are incredibly good at forgetting/ignoring mundane daily inputs that don’t pose a threat or require a response from us. For example, can you remember everything you saw and heard coming home last Tuesday? Of course not! Our brain’s memory is limited and valuable. Our recall is aided by our ability to forget trivial inputs.
+Similarly, Machine Learning models need to learn how to pay attention only to the things that matter and not waste computational resources processing irrelevant information. Transformers create differential weights signaling which words in a sentence are the most critical to further process.
+A transformer does this by successively processing an input through a stack of transformer layers, usually called the encoder. If necessary, another stack of transformer layers - the decoder - can be used to predict a target output. —BERT however, doesn’t use a decoder. Transformers are uniquely suited for unsupervised learning because they can efficiently process millions of data points.
+Fun Fact: Google has been using your reCAPTCHA selections to label training data since 2011. The entire Google Books archive and 13 million articles from the New York Times catalog have been transcribed/digitized via people entering reCAPTCHA text. Now, reCAPTCHA is asking us to label Google Street View images, vehicles, stoplights, airplanes, etc. Would be neat if Google made us aware of our participation in this effort (as the training data likely has future commercial intent) but I digress..
+To learn more about Transformers check out our Hugging Face Transformers Course.
+3. BERT model size &amp; architecture
+Let’s break down the architecture for the two original BERT models:
+ML Architecture Glossary:
+| ML Architecture Parts | Definition |
+|---|---|
+| Parameters: | Number of learnable variables/values available for the model. |
+| Transformer Layers: | Number of Transformer blocks. A transformer block transforms a sequence of word representations to a sequence of contextualized words (numbered representations). |
+| Hidden Size: | Layers of mathematical functions, located between the input and output, that assign weights (to words) to produce a desired result. |
+| Attention Heads: | The size of a Transformer block. |
+| Processing: | Type of processing unit used to train the model. |
+| Length of Training: | Time it took to train the model. |
+Here’s how many of the above ML architecture parts BERTbase and BERTlarge has:
+| Transformer Layers | Hidden Size | Attention Heads | Parameters | Processing | Length of Training | |
+|---|---|---|---|---|---|---|
+| BERTbase | 12 | 768 | 12 | 110M | 4 TPUs | 4 days |
+| BERTlarge | 24 | 1024 | 16 | 340M | 16 TPUs | 4 days |
+Let’s take a look at how BERTlarge’s additional layers, attention heads, and parameters have increased its performance across NLP tasks.
+4. BERT&#39;s performance on common language tasks
+BERT has successfully achieved state-of-the-art accuracy on 11 common NLP tasks, outperforming previous top NLP models, and is the first to outperform humans! But, how are these achievements measured?
+NLP Evaluation Methods:
+4.1 SQuAD v1.1 &amp; v2.0
+SQuAD (Stanford Question Answering Dataset) is a reading comprehension dataset of around 108k questions that can be answered via a corresponding paragraph of Wikipedia text. BERT’s performance on this evaluation method was a big achievement beating previous state-of-the-art models and human-level performance:
+4.2 SWAG
+SWAG (Situations With Adversarial Generations) is an interesting evaluation in that it detects a model’s ability to infer commonsense! It does this through a large-scale dataset of 113k multiple choice questions about common sense situations. These questions are transcribed from a video scene/situation and SWAG provides the model with four possible outcomes in the next scene. The model then does its’ best at predicting the correct answer.
+BERT out outperformed top previous top models including human-level performance:
+4.3 GLUE Benchmark
+GLUE (General Language Understanding Evaluation) benchmark is a group of resources for training, measuring, and analyzing language models comparatively to one another. These resources consist of nine “difficult” tasks designed to test an NLP model’s understanding. Here’s a summary of each of those tasks:
+While some of these tasks may seem irrelevant and banal, it’s important to note that these evaluation methods are incredibly powerful in indicating which models are best suited for your next NLP application.
+Attaining performance of this caliber isn’t without consequences. Next up, let’s learn about Machine Learning&#39;s impact on the environment.
+5. Environmental impact of deep learning
+Large Machine Learning models require massive amounts of data which is expensive in both time and compute resources.
+These models also have an environmental impact:
+Machine Learning’s environmental impact is one of the many reasons we believe in democratizing the world of Machine Learning through open source! Sharing large pre-trained language models is essential in reducing the overall compute cost and carbon footprint of our community-driven efforts.
+6. The open source power of BERT
+Unlike other large learning models like GPT-3, BERT’s source code is publicly accessible (view BERT’s code on Github) allowing BERT to be more widely used all around the world. This is a game-changer!
+Developers are now able to get a state-of-the-art model like BERT up and running quickly without spending large amounts of time and money. 🤯
+Developers can instead focus their efforts on fine-tuning BERT to customize the model’s performance to their unique tasks.
+It’s important to note that thousands of open-source and free, pre-trained BERT models are currently available for specific use cases if you don’t want to fine-tune BERT.
+BERT models pre-trained for specific tasks:
+- Twitter sentiment analysis
+- Analysis of Japanese text
+- Emotion categorizer (English - anger, fear, joy, etc.)
+- Clinical Notes analysis
+- Speech to text translation
+- Toxic comment detection
+You can also find hundreds of pre-trained, open-source Transformer models available on the Hugging Face Hub.
+7. How to get started using BERT
+We&#39;ve created this notebook so you can try BERT through this easy tutorial in Google Colab. Open the notebook or add the following code to your own. Pro Tip: Use (Shift + Click) to run a code cell.
+Note: Hugging Face&#39;s pipeline class makes it incredibly easy to pull in open source ML models like transformers with just a single line of code.
+7.1 Install Transformers
+First, let&#39;s install Transformers via the following code:
+!pip install transformers
+7.2 Try out BERT
+Feel free to swap out the sentence below for one of your own. However, leave [MASK] in somewhere to allow BERT to predict the missing word
+from transformers import pipeline
+unmasker = pipeline(&#39;fill-mask&#39;, model=&#39;bert-base-uncased&#39;)
+unmasker(&quot;Artificial Intelligence [MASK] take over the world.&quot;)
+When you run the above code you should see an output like this:
+[{&#39;score&#39;: 0.3182411789894104,
+&#39;sequence&#39;: &#39;artificial intelligence can take over the world.&#39;,
+&#39;token&#39;: 2064,
+&#39;token_str&#39;: &#39;can&#39;},
+{&#39;score&#39;: 0.18299679458141327,
+&#39;sequence&#39;: &#39;artificial intelligence will take over the world.&#39;,
+&#39;token&#39;: 2097,
+&#39;token_str&#39;: &#39;will&#39;},
+{&#39;score&#39;: 0.05600147321820259,
+&#39;sequence&#39;: &#39;artificial intelligence to take over the world.&#39;,
+&#39;token&#39;: 2000,
+&#39;token_str&#39;: &#39;to&#39;},
+{&#39;score&#39;: 0.04519503191113472,
+&#39;sequence&#39;: &#39;artificial intelligences take over the world.&#39;,
+&#39;token&#39;: 2015,
+&#39;token_str&#39;: &#39;##s&#39;},
+{&#39;score&#39;: 0.045153118669986725,
+&#39;sequence&#39;: &#39;artificial intelligence would take over the world.&#39;,
+&#39;token&#39;: 2052,
+&#39;token_str&#39;: &#39;would&#39;}]
+Kind of frightening right? 🙃
+7.3 Be aware of model bias
+Let&#39;s see what jobs BERT suggests for a &quot;man&quot;:
+unmasker(&quot;The man worked as a [MASK].&quot;)
+When you run the above code you should see an output that looks something like:
+[{&#39;score&#39;: 0.09747546911239624,
+&#39;sequence&#39;: &#39;the man worked as a carpenter.&#39;,
+&#39;token&#39;: 10533,
+&#39;token_str&#39;: &#39;carpenter&#39;},
+{&#39;score&#39;: 0.052383411675691605,
+&#39;sequence&#39;: &#39;the man worked as a waiter.&#39;,
+&#39;token&#39;: 15610,
+&#39;token_str&#39;: &#39;waiter&#39;},
+{&#39;score&#39;: 0.04962698742747307,
+&#39;sequence&#39;: &#39;the man worked as a barber.&#39;,
+&#39;token&#39;: 13362,
+&#39;token_str&#39;: &#39;barber&#39;},
+{&#39;score&#39;: 0.037886083126068115,
+&#39;sequence&#39;: &#39;the man worked as a mechanic.&#39;,
+&#39;token&#39;: 15893,
+&#39;token_str&#39;: &#39;mechanic&#39;},
+{&#39;score&#39;: 0.037680838257074356,
+&#39;sequence&#39;: &#39;the man worked as a salesman.&#39;,
+&#39;token&#39;: 18968,
+&#39;token_str&#39;: &#39;salesman&#39;}]
+BERT predicted the man&#39;s job to be a Carpenter, Waiter, Barber, Mechanic, or Salesman
+Now let&#39;s see what jobs BERT suggesst for &quot;woman&quot;
+unmasker(&quot;The woman worked as a [MASK].&quot;)
+You should see an output that looks something like:
+[{&#39;score&#39;: 0.21981535851955414,
+&#39;sequence&#39;: &#39;the woman worked as a nurse.&#39;,
+&#39;token&#39;: 6821,
+&#39;token_str&#39;: &#39;nurse&#39;},
+{&#39;score&#39;: 0.1597413569688797,
+&#39;sequence&#39;: &#39;the woman worked as a waitress.&#39;,
+&#39;token&#39;: 13877,
+&#39;token_str&#39;: &#39;waitress&#39;},
+{&#39;score&#39;: 0.11547300964593887,
+&#39;sequence&#39;: &#39;the woman worked as a maid.&#39;,
+&#39;token&#39;: 10850,
+&#39;token_str&#39;: &#39;maid&#39;},
+{&#39;score&#39;: 0.03796879202127457,
+&#39;sequence&#39;: &#39;the woman worked as a prostitute.&#39;,
+&#39;token&#39;: 19215,
+&#39;token_str&#39;: &#39;prostitute&#39;},
+{&#39;score&#39;: 0.030423851683735847,
+&#39;sequence&#39;: &#39;the woman worked as a cook.&#39;,
+&#39;token&#39;: 5660,
+&#39;token_str&#39;: &#39;cook&#39;}]
+BERT predicted the woman&#39;s job to be a Nurse, Waitress, Maid, Prostitute, or Cook displaying a clear gender bias in professional roles.
+7.4 Some other BERT Notebooks you might enjoy:
+A Visual Notebook to BERT for the First Time
++Don&#39;t forget to checkout the Hugging Face Transformers Course to learn more 🎉
+8. BERT FAQs
+Can BERT be used with PyTorch?
+Pro Tip: Lewis Tunstall, Leandro von Werra, and Thomas Wolf also wrote a book to help people build language applications with Hugging Face called, ‘Natural Language Processing with Transformers’.
+Can BERT be used with Tensorflow?
+How long does it take to pre-train BERT?
+How long does it take to fine-tune BERT?
+What makes BERT different?
+- BERT was trained on massive amounts of unlabeled data (no human annotation) in an unsupervised fashion.
+- BERT was then trained on small amounts of human-annotated data starting from the previous pre-trained model resulting in state-of-the-art performance.
+9. Conclusion
+BERT is a highly complex and advanced language model that helps people automate language understanding. Its ability to accomplish state-of-the-art performance is supported by training on massive amounts of data and leveraging Transformers architecture to revolutionize the field of NLP.
+Thanks to BERT’s open-source library, and the incredible AI community’s efforts to continue to improve and share new BERT models, the future of untouched NLP milestones looks bright.
+What will you create with BERT?
+Learn how to fine-tune BERT for your particular use case 🤗 </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

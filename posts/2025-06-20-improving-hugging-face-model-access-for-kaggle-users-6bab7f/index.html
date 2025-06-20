@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Improving Hugging Face Model Access for Kaggle Users</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Improving Hugging Face Model Access for Kaggle Users</h1> <p class="text-sm text-gray-500"> 2025/5/14 – Hugging Face Blog  <a href="https://huggingface.co/blog/kaggle-integration" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Improving Hugging Face Model Access for Kaggle Users
+Kaggle and Hugging Face users are part of one AI community. That’s why we’re excited to announce our plans to bring our platforms and communities closer to better serve AI developers everywhere.
+Beginning today, Kaggle is launching an integration that enhances visibility and discoverability for Hugging Face models directly on Kaggle.
+How to get started
+You can navigate from Hugging Face models to Kaggle and vice versa. Start by visiting a Hugging Face model page like Qwen/Qwen3-1.7B. To use it in a Kaggle Notebook, you can click on “Use this model” and select “Kaggle” to open up a Kaggle notebook with a pre-populated code snippet to load the model. You can do the same from a Hugging Face model page on Kaggle by clicking the “Code” button.
+When you run a notebook on Kaggle that references a model hosted on Hugging Face Hub, we will automatically generate a Hugging Face model page if one doesn’t exist already. You don’t need to make any special changes to your code. Additionally, when you make your notebook public, it will automatically show on the “Code” tab of the Kaggle model page.
+Discover Hugging Face models and explore all the community examples in public notebooks in one place on Kaggle at https://www.kaggle.com/models. As more Hugging Face models are used on Kaggle, the number of models and associated code examples you can explore for inspiration will grow.
+When browsing Hugging Face models on Kaggle, we want to make it easy for you to navigate back to Hugging Face to explore additional details, metadata, community usage in Hugging Face Spaces, discussion, and more. Simply click “Open in Hugging Face” on the Kaggle model page.
+How does this work with private and consent-gated Hugging Face models?
+If you use a private Hugging Face model in your Kaggle notebook, authenticate via your Hugging Face account as normal (add your HF_TOKEN in the “Add-ons &gt; Secrets” menu in the notebook editor). A Hugging Face model page won’t be generated on Kaggle.
+If you want to access a consent-gated model in your Kaggle notebook, you’ll need to request access to it using a Hugging Face account and follow the prompts on your browser&#39;s Hugging Face model page as normal. Hugging Face has documentation to guide you through this process. Otherwise, the integration will work the same as for non-gated models.
+What’s next
+We’re actively working on a solution to seamlessly use Hugging Face models in Kaggle competitions that require offline notebook submissions. While this will take a few more months to complete, we believe the wait will be worth it.
+You can read Kaggle’s position on “AI Competitions as the gold standard for empirical rigor for GenAI evaluation” to understand why it’s so important for us to get this part of the integration right! But tl;dr – Kaggle is highly sensitive to data leakage and its impact on model contamination. Our goal is to design this integration to preserve the integrity of our competitions and their vital role in the industry, while enabling seamless access for Kaggle competitors to build with the best models from Hugging Face!
+We’d love to hear your feedback in the meantime - share your thoughts and ideas here!
+Happy Kaggling! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

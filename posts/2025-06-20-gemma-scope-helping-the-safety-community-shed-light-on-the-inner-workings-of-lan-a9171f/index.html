@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Gemma Scope: helping the safety community shed light on the inner workings of language models</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Gemma Scope: helping the safety community shed light on the inner workings of language models</h1> <p class="text-sm text-gray-500"> 2024/7/31 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/gemma-scope-helping-the-safety-community-shed-light-on-the-inner-workings-of-language-models/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Models
+Gemma Scope: helping the safety community shed light on the inner workings of language models
+Announcing a comprehensive, open suite of sparse autoencoders for language model interpretability.
+To create an artificial intelligence (AI) language model, researchers build a system that learns from vast amounts of data without human guidance. As a result, the inner workings of language models are often a mystery, even to the researchers who train them. Mechanistic interpretability is a research field focused on deciphering these inner workings. Researchers in this field use sparse autoencoders as a kind of ‘microscope’ that lets them see inside a language model, and get a better sense of how it works.
+Today, we’re announcing Gemma Scope, a new set of tools to help researchers understand the inner workings of Gemma 2, our lightweight family of open models. Gemma Scope is a collection of hundreds of freely available, open sparse autoencoders (SAEs) for Gemma 2 9B and Gemma 2 2B. We&#39;re also open sourcing Mishax, a tool we built that enabled much of the interpretability work behind Gemma Scope.
+We hope today’s release enables more ambitious interpretability research. Further research has the potential to help the field build more robust systems, develop better safeguards against model hallucinations, and protect against risks from autonomous AI agents like deception or manipulation.
+Try our interactive Gemma Scope demo, courtesy of Neuronpedia.
+Interpreting what happens inside a language model
+When you ask a language model a question, it turns your text input into a series of ‘activations’. These activations map the relationships between the words you’ve entered, helping the model make connections between different words, which it uses to write an answer.
+As the model processes text input, activations at different layers in the model’s neural network represent multiple increasingly advanced concepts, known as ‘features’.
+For example, a model’s early layers might learn to recall facts like that Michael Jordan plays basketball, while later layers may recognize more complex concepts like the factuality of the text.
+However, interpretability researchers face a key problem: the model’s activations are a mixture of many different features. In the early days of mechanistic interpretability, researchers hoped that features in a neural network’s activations would line up with individual neurons, i.e., nodes of information. But unfortunately, in practice, neurons are active for many unrelated features. This means that there is no obvious way to tell which features are part of the activation.
+This is where sparse autoencoders come in.
+A given activation will only be a mixture of a small number of features, even though the language model is likely capable of detecting millions or even billions of them – i.e., the model uses features sparsely. For example, a language model will consider relativity when responding to an inquiry about Einstein and consider eggs when writing about omelettes, but probably won’t consider relativity when writing about omelettes.
+Sparse autoencoders leverage this fact to discover a set of possible features, and break down each activation into a small number of them. Researchers hope that the best way for the sparse autoencoder to accomplish this task is to find the actual underlying features that the language model uses.
+Importantly, at no point in this process do we - the researchers - tell the sparse autoencoder which features to look for. As a result, we are able to discover rich structures that we did not predict. However, because we don’t immediately know the meaning of the discovered features, we look for meaningful patterns in examples of text where the sparse autoencoder says the feature ‘fires’.
+Here’s an example in which the tokens where the feature fires are highlighted in gradients of blue according to their strength:
+What makes Gemma Scope unique
+Prior research with sparse autoencoders has mainly focused on investigating the inner workings of tiny models or a single layer in larger models. But more ambitious interpretability research involves decoding layered, complex algorithms in larger models.
+We trained sparse autoencoders at every layer and sublayer output of Gemma 2 2B and 9B to build Gemma Scope, producing more than 400 sparse autoencoders with more than 30 million learned features in total (though many features likely overlap). This tool will enable researchers to study how features evolve throughout the model and interact and compose to make more complex features.
+Gemma Scope is also trained with our new, state-of-the-art JumpReLU SAE architecture. The original sparse autoencoder architecture struggled to balance the twin goals of detecting which features are present, and estimating their strength. The JumpReLU architecture makes it easier to strike this balance appropriately, significantly reducing error.
+Training so many sparse autoencoders was a significant engineering challenge, requiring a lot of computing power. We used about 15% of the training compute of Gemma 2 9B (excluding compute for generating distillation labels), saved about 20 Pebibytes (PiB) of activations to disk (about as much as a million copies of English Wikipedia), and produced hundreds of billions of sparse autoencoder parameters in total.
+Pushing the field forward
+In releasing Gemma Scope, we hope to make Gemma 2 the best model family for open mechanistic interpretability research and to accelerate the community’s work in this field.
+So far, the interpretability community has made great progress in understanding small models with sparse autoencoders and developing relevant techniques, like causal interventions, automatic circuit analysis, feature interpretation, and evaluating sparse autoencoders. With Gemma Scope, we hope to see the community scale these techniques to modern models, analyze more complex capabilities like chain-of-thought, and find real-world applications of interpretability such as tackling problems like hallucinations and jailbreaks that only arise with larger models.
+Acknowledgements
+Gemma Scope was a collective effort of Tom Lieberum, Sen Rajamanoharan, Arthur Conmy, Lewis Smith, Nic Sonnerat, Vikrant Varma, Janos Kramar and Neel Nanda, advised by Rohin Shah and Anca Dragan. We would like to especially thank Johnny Lin, Joseph Bloom and Curt Tigges at Neuronpedia for their assistance with the interactive demo. We are grateful for the help and contributions from Phoebe Kirk, Andrew Forbes, Arielle Bier, Aliya Ahmad, Yotam Doron, Tris Warkentin, Ludovic Peran, Kat Black, Anand Rao, Meg Risdal, Samuel Albanie, Dave Orr, Matt Miller, Alex Turner, Tobi Ijitoye, Shruti Sheth, Jeremy Sie, Tobi Ijitoye, Alex Tomala, Javier Ferrando, Oscar Obeso, Kathleen Kenealy, Joe Fernandez, Omar Sanseviero and Glenn Cameron. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

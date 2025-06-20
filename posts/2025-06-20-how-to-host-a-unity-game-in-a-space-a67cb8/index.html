@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>How to host a Unity game in a Space</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 How to host a Unity game in a Space</h1> <p class="text-sm text-gray-500"> 2023/4/21 – Hugging Face Blog  <a href="https://huggingface.co/blog/unity-in-spaces" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> How to host a Unity game in a Space
+Did you know you can host a Unity game in a Hugging Face Space? No? Well, you can!
+Hugging Face Spaces are an easy way to build, host, and share demos. While they are typically used for Machine Learning demos, they can also host playable Unity games. Here are some examples:
+Here&#39;s how you can host your own Unity game in a Space.
+Step 1: Create a Space using the Static HTML template
+First, navigate to Hugging Face Spaces to create a space.
+Select the &quot;Static HTML&quot; template, give your Space a name, and create it.
+Step 2: Use Git to Clone the Space
+Clone your newly created Space to your local machine using Git. You can do this by running the following command in your terminal or command prompt:
+git clone https://huggingface.co/spaces/{your-username}/{your-space-name}
+Step 3: Open your Unity Project
+Open the Unity project you want to host in your Space.
+Step 4: Switch the Build Target to WebGL
+Navigate to File &gt; Build Settings
+and switch the Build Target to WebGL.
+Step 5: Open Player Settings
+In the Build Settings window, click the &quot;Player Settings&quot; button to open the Player Settings panel.
+Step 6: Optionally, Download the Hugging Face Unity WebGL Template
+You can enhance your game&#39;s appearance in a Space by downloading the Hugging Face Unity WebGL template, available here. Just download the repository and drop it in your project files.
+Then, in the Player Settings panel, switch the WebGL template to Hugging Face. To do so, in Player Settings, click &quot;Resolution and Presentation&quot;, then select the Hugging Face WebGL template.
+Step 7: Change the Compression Format to Disabled
+In the Player Settings panel, navigate to the &quot;Publishing Settings&quot; section and change the Compression Format to &quot;Disabled&quot;.
+Step 8: Build your Project
+Return to the Build Settings window and click the &quot;Build&quot; button. Choose a location to save your build files, and Unity will build the project for WebGL.
+Step 9: Copy the Contents of the Build Folder
+After the build process is finished, navigate to the folder containing your build files. Copy the files in the build folder to the repository you cloned in Step 2.
+Step 10: Enable Git-LFS for Large File Storage
+Navigate to your repository. Use the following commands to track large build files.
+git lfs install
+git lfs track Build/*
+Step 11: Push your Changes
+Finally, use the following Git commands to push your changes:
+git add .
+git commit -m &quot;Add Unity WebGL build files&quot;
+git push
+Done!
+Congratulations! Refresh your Space. You should now be able to play your game in a Hugging Face Space.
+We hope you found this tutorial helpful. If you have any questions or would like to get more involved in using Hugging Face for Games, join the Hugging Face Discord! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

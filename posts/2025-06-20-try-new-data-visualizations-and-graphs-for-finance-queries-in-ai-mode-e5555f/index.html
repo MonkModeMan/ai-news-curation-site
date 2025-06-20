@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Try new data visualizations and graphs for finance queries in AI Mode.</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Try new data visualizations and graphs for finance queries in AI Mode.</h1> <p class="text-sm text-gray-500"> 2025/6/5 – Google AI Blog  <a href="https://blog.google/products/search/ai-mode-data-visualization/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Today, we’re starting to roll out interactive chart visualizations in AI Mode in Labs to help bring financial data to life for questions on stocks and mutual funds.
+Now, you can compare and analyze information over a specific time period and get an interactive graph and comprehensive explanation — custom-built for your question.
+Ask to “compare the stock performance of blue chip CPG companies in 2024.” Instead of manually researching individual companies and their stock prices, AI Mode does the heavy lifting for you using Gemini’s advanced multi-step reasoning and multimodal capabilities. And ask a follow up like “did any of these companies pay back dividends?” and AI Mode understands what to research for you.
+Under the hood, our advanced models understand the intent of the question, tap into real-time and historical information and intelligently determine how to present information to help you make sense of it. Try it out today in Labs! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

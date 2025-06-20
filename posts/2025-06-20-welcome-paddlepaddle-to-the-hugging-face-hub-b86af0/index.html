@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Welcome PaddlePaddle to the Hugging Face Hub</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Welcome PaddlePaddle to the Hugging Face Hub</h1> <p class="text-sm text-gray-500"> 2023/1/17 – Hugging Face Blog  <a href="https://huggingface.co/blog/paddlepaddle" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Welcome PaddlePaddle to the Hugging Face Hub
+We are happy to share an open source collaboration between Hugging Face and PaddlePaddle on a shared mission to advance and democratize AI through open source!
+First open sourced by Baidu in 2016, PaddlePaddle enables developers of all skill levels to adopt and implement Deep Learning at scale. As of Q4 2022, PaddlePaddle is being used by more than 5.35 million developers and 200,000 enterprises, ranking first in terms of market share among Deep Learning platforms in China. PaddlePaddle features popular open source repositories such as the Paddle Deep Learning Framework, model libraries across different modalities (e.g. PaddleOCR, PaddleDetection, PaddleNLP, PaddleSpeech), PaddleSlim for model compression, FastDeploy for model deployment and many more.
+With PaddleNLP leading the way, PaddlePaddle will gradually integrate its libraries with the Hugging Face Hub. You will soon be able to play with the full suite of awesome pre-trained PaddlePaddle models across text, image, audio, video and multi-modalities on the Hub!
+Find PaddlePaddle Models
+You can find all PaddlePaddle models on the Model Hub by filtering with the PaddlePaddle library tag.
+There are already over 75 PaddlePaddle models on the Hub. As an example, you can find our multi-task Information Extraction model series UIE, State-of-the-Art Chinese Language Model ERNIE 3.0 model series, novel document pre-training model Ernie-Layout with layout knowledge enhancement in the whole workflow and so on.
+You are also welcome to check out the PaddlePaddle org on the HuggingFace Hub. In additional to the above-mentioned models, you can also explore our Spaces, including our text-to-image Ernie-ViLG, cross-modal Information Extraction engine UIE-X and awesome multilingual OCR toolkit PaddleOCR.
+Inference API and Widgets
+PaddlePaddle models are available through the Inference API, which you can access through HTTP with cURL, Python’s requests library, or your preferred method for making network requests.
+Models that support a task are equipped with an interactive widget that allows you to play with the model directly in the browser.
+Use Existing Models
+If you want to see how to load a specific model, you can click Use in paddlenlp
+(or other PaddlePaddle libraries in the future) and you will be given a working snippet that to load it!
+Share Models
+Depending on the PaddlePaddle library, you may be able to share your models by pushing to the Hub. For example, you can share PaddleNLP models by using the save_to_hf_hub
+method.
+from paddlenlp.transformers import AutoTokenizer, AutoModelForMaskedLM
+tokenizer = AutoTokenizer.from_pretrained(&quot;PaddlePaddle/ernie-3.0-base-zh&quot;, from_hf_hub=True)
+model = AutoModelForMaskedLM.from_pretrained(&quot;PaddlePaddle/ernie-3.0-base-zh&quot;, from_hf_hub=True)
+tokenizer.save_to_hf_hub(repo_id=&quot;&lt;my_org_name&gt;/&lt;my_repo_name&gt;&quot;)
+model.save_to_hf_hub(repo_id=&quot;&lt;my_org_name&gt;/&lt;my_repo_name&gt;&quot;)
+Conclusion
+PaddlePaddle is an open source Deep Learning platform that originated from industrial practice and has been open-sourcing innovative and industry-grade projects since 2016. We are excited to join the Hub to share our work with the HuggingFace community and you can expect more fun and State-of-the-Art projects from us soon! To stay up to date with the latest news, you can follow us on Twitter at @PaddlePaddle. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

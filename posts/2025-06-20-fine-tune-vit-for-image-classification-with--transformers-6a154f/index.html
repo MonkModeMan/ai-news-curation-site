@@ -1,0 +1,277 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Fine-Tune ViT for Image Classification with 🤗 Transformers</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Fine-Tune ViT for Image Classification with 🤗 Transformers</h1> <p class="text-sm text-gray-500"> 2022/2/11 – Hugging Face Blog  <a href="https://huggingface.co/blog/fine-tune-vit" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Fine-Tune ViT for Image Classification with 🤗 Transformers
+Just as transformers-based models have revolutionized NLP, we&#39;re now seeing an explosion of papers applying them to all sorts of other domains. One of the most revolutionary of these was the Vision Transformer (ViT), which was introduced in June 2021 by a team of researchers at Google Brain.
+This paper explored how you can tokenize images, just as you would tokenize sentences, so that they can be passed to transformer models for training. It&#39;s quite a simple concept, really...
+- Split an image into a grid of sub-image patches
+- Embed each patch with a linear projection
+- Each embedded patch becomes a token, and the resulting sequence of embedded patches is the sequence you pass to the model.
+It turns out that once you&#39;ve done the above, you can pre-train and fine-tune transformers just as you&#39;re used to with NLP tasks. Pretty sweet 😎.
+In this blog post, we&#39;ll walk through how to leverage 🤗 datasets
+to download and process image classification datasets, and then use them to fine-tune a pre-trained ViT with 🤗 transformers
+.
+To get started, let&#39;s first install both those packages.
+pip install datasets transformers
+Load a dataset
+Let&#39;s start by loading a small image classification dataset and taking a look at its structure.
+We&#39;ll use the beans
+dataset, which is a collection of pictures of healthy and unhealthy bean leaves. 🍃
+from datasets import load_dataset
+ds = load_dataset(&#39;beans&#39;)
+ds
+Let&#39;s take a look at the 400th example from the &#39;train&#39;
+split from the beans dataset. You&#39;ll notice each example from the dataset has 3 features:
+image
+: A PIL Imageimage_file_path
+: Thestr
+path to the image file that was loaded asimage
+labels
+: Adatasets.ClassLabel
+feature, which is an integer representation of the label. (Later you&#39;ll see how to get the string class names, don&#39;t worry!)
+ex = ds[&#39;train&#39;][400]
+ex
+{
+&#39;image&#39;: &lt;PIL.JpegImagePlugin ...&gt;,
+&#39;image_file_path&#39;: &#39;/root/.cache/.../bean_rust_train.4.jpg&#39;,
+&#39;labels&#39;: 1
+}
+Let&#39;s take a look at the image 👀
+image = ex[&#39;image&#39;]
+image
+That&#39;s definitely a leaf! But what kind? 😅
+Since the &#39;labels&#39;
+feature of this dataset is a datasets.features.ClassLabel
+, we can use it to look up the corresponding name for this example&#39;s label ID.
+First, let&#39;s access the feature definition for the &#39;labels&#39;
+.
+labels = ds[&#39;train&#39;].features[&#39;labels&#39;]
+labels
+ClassLabel(num_classes=3, names=[&#39;angular_leaf_spot&#39;, &#39;bean_rust&#39;, &#39;healthy&#39;], names_file=None, id=None)
+Now, let&#39;s print out the class label for our example. You can do that by using the int2str
+function of ClassLabel
+, which, as the name implies, allows to pass the integer representation of the class to look up the string label.
+labels.int2str(ex[&#39;labels&#39;])
+&#39;bean_rust&#39;
+Turns out the leaf shown above is infected with Bean Rust, a serious disease in bean plants. 😢
+Let&#39;s write a function that&#39;ll display a grid of examples from each class to get a better idea of what you&#39;re working with.
+import random
+from PIL import ImageDraw, ImageFont, Image
+def show_examples(ds, seed: int = 1234, examples_per_class: int = 3, size=(350, 350)):
+w, h = size
+labels = ds[&#39;train&#39;].features[&#39;labels&#39;].names
+grid = Image.new(&#39;RGB&#39;, size=(examples_per_class * w, len(labels) * h))
+draw = ImageDraw.Draw(grid)
+font = ImageFont.truetype(&quot;/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf&quot;, 24)
+for label_id, label in enumerate(labels):
+# Filter the dataset by a single label, shuffle it, and grab a few samples
+ds_slice = ds[&#39;train&#39;].filter(lambda ex: ex[&#39;labels&#39;] == label_id).shuffle(seed).select(range(examples_per_class))
+# Plot this label&#39;s examples along a row
+for i, example in enumerate(ds_slice):
+image = example[&#39;image&#39;]
+idx = examples_per_class * label_id + i
+box = (idx % examples_per_class * w, idx // examples_per_class * h)
+grid.paste(image.resize(size), box=box)
+draw.text(box, label, (255, 255, 255), font=font)
+return grid
+show_examples(ds, seed=random.randint(0, 1337), examples_per_class=3)
+From what I&#39;m seeing,
+- Angular Leaf Spot: Has irregular brown patches
+- Bean Rust: Has circular brown spots surrounded with a white-ish yellow ring
+- Healthy: ...looks healthy. 🤷♂️
+Loading ViT Image Processor
+Now we know what our images look like and better understand the problem we&#39;re trying to solve. Let&#39;s see how we can prepare these images for our model!
+When ViT models are trained, specific transformations are applied to images fed into them. Use the wrong transformations on your image, and the model won&#39;t understand what it&#39;s seeing! 🖼 ➡️ 🔢
+To make sure we apply the correct transformations, we will use a ViTImageProcessor
+initialized with a configuration that was saved along with the pretrained model we plan to use. In our case, we&#39;ll be using the google/vit-base-patch16-224-in21k model, so let&#39;s load its image processor from the Hugging Face Hub.
+from transformers import ViTImageProcessor
+model_name_or_path = &#39;google/vit-base-patch16-224-in21k&#39;
+processor = ViTImageProcessor.from_pretrained(model_name_or_path)
+You can see the image processor configuration by printing it.
+ViTImageProcessor {
+&quot;do_normalize&quot;: true,
+&quot;do_resize&quot;: true,
+&quot;image_mean&quot;: [
+0.5,
+0.5,
+0.5
+],
+&quot;image_std&quot;: [
+0.5,
+0.5,
+0.5
+],
+&quot;resample&quot;: 2,
+&quot;size&quot;: 224
+}
+To process an image, simply pass it to the image processor&#39;s call function. This will return a dict containing pixel values
+, which is the numeric representation to be passed to the model.
+You get a NumPy array by default, but if you add the return_tensors=&#39;pt&#39;
+argument, you&#39;ll get back torch
+tensors instead.
+processor(image, return_tensors=&#39;pt&#39;)
+Should give you something like...
+{
+&#39;pixel_values&#39;: tensor([[[[ 0.2706, 0.3255, 0.3804, ...]]]])
+}
+...where the shape of the tensor is (1, 3, 224, 224)
+.
+Processing the Dataset
+Now that you know how to read images and transform them into inputs, let&#39;s write a function that will put those two things together to process a single example from the dataset.
+def process_example(example):
+inputs = processor(example[&#39;image&#39;], return_tensors=&#39;pt&#39;)
+inputs[&#39;labels&#39;] = example[&#39;labels&#39;]
+return inputs
+process_example(ds[&#39;train&#39;][0])
+{
+&#39;pixel_values&#39;: tensor([[[[-0.6157, -0.6000, -0.6078, ..., ]]]]),
+&#39;labels&#39;: 0
+}
+While you could call ds.map
+and apply this to every example at once, this can be very slow, especially if you use a larger dataset. Instead, you can apply a transform to the dataset. Transforms are only applied to examples as you index them.
+First, though, you&#39;ll need to update the last function to accept a batch of data, as that&#39;s what ds.with_transform
+expects.
+ds = load_dataset(&#39;beans&#39;)
+def transform(example_batch):
+# Take a list of PIL images and turn them to pixel values
+inputs = processor([x for x in example_batch[&#39;image&#39;]], return_tensors=&#39;pt&#39;)
+# Don&#39;t forget to include the labels!
+inputs[&#39;labels&#39;] = example_batch[&#39;labels&#39;]
+return inputs
+You can directly apply this to the dataset using ds.with_transform(transform)
+.
+prepared_ds = ds.with_transform(transform)
+Now, whenever you get an example from the dataset, the transform will be applied in real time (on both samples and slices, as shown below)
+prepared_ds[&#39;train&#39;][0:2]
+This time, the resulting pixel_values
+tensor will have shape (2, 3, 224, 224)
+.
+{
+&#39;pixel_values&#39;: tensor([[[[-0.6157, -0.6000, -0.6078, ..., ]]]]),
+&#39;labels&#39;: [0, 0]
+}
+Training and Evaluation
+The data is processed and you are ready to start setting up the training pipeline. This blog post uses 🤗&#39;s Trainer, but that&#39;ll require us to do a few things first:
+Define a collate function.
+Define an evaluation metric. During training, the model should be evaluated on its prediction accuracy. You should define a
+compute_metrics
+function accordingly.Load a pretrained checkpoint. You need to load a pretrained checkpoint and configure it correctly for training.
+Define the training configuration.
+After fine-tuning the model, you will correctly evaluate it on the evaluation data and verify that it has indeed learned to correctly classify the images.
+Define our data collator
+Batches are coming in as lists of dicts, so you can just unpack + stack those into batch tensors.
+Since the collate_fn
+will return a batch dict, you can **unpack
+the inputs to the model later. ✨
+import torch
+def collate_fn(batch):
+return {
+&#39;pixel_values&#39;: torch.stack([x[&#39;pixel_values&#39;] for x in batch]),
+&#39;labels&#39;: torch.tensor([x[&#39;labels&#39;] for x in batch])
+}
+Define an evaluation metric
+The accuracy metric from evaluate
+can easily be used to compare the predictions with the labels. Below, you can see how to use it within a compute_metrics
+function that will be used by the Trainer
+.
+import numpy as np
+from evaluate import load
+metric = load(&quot;accuracy&quot;)
+def compute_metrics(p):
+return metric.compute(predictions=np.argmax(p.predictions, axis=1), references=p.label_ids)
+Let&#39;s load the pretrained model. We&#39;ll add num_labels
+on init so the model creates a classification head with the right number of units. We&#39;ll also include the id2label
+and label2id
+mappings to have human-readable labels in the Hub widget (if you choose to push_to_hub
+).
+from transformers import ViTForImageClassification
+labels = ds[&#39;train&#39;].features[&#39;labels&#39;].names
+model = ViTForImageClassification.from_pretrained(
+model_name_or_path,
+num_labels=len(labels),
+id2label={str(i): c for i, c in enumerate(labels)},
+label2id={c: str(i) for i, c in enumerate(labels)}
+)
+Almost ready to train! The last thing needed before that is to set up the training configuration by defining TrainingArguments
+.
+Most of these are pretty self-explanatory, but one that is quite important here is remove_unused_columns=False
+. This one will drop any features not used by the model&#39;s call function. By default it&#39;s True
+because usually it&#39;s ideal to drop unused feature columns, making it easier to unpack inputs into the model&#39;s call function. But, in our case, we need the unused features (&#39;image&#39; in particular) in order to create &#39;pixel_values&#39;.
+What I&#39;m trying to say is that you&#39;ll have a bad time if you forget to set remove_unused_columns=False
+.
+from transformers import TrainingArguments
+training_args = TrainingArguments(
+output_dir=&quot;./vit-base-beans&quot;,
+per_device_train_batch_size=16,
+evaluation_strategy=&quot;steps&quot;,
+num_train_epochs=4,
+fp16=True,
+save_steps=100,
+eval_steps=100,
+logging_steps=10,
+learning_rate=2e-4,
+save_total_limit=2,
+remove_unused_columns=False,
+push_to_hub=False,
+report_to=&#39;tensorboard&#39;,
+load_best_model_at_end=True,
+)
+Now, all instances can be passed to Trainer and we are ready to start training!
+from transformers import Trainer
+trainer = Trainer(
+model=model,
+args=training_args,
+data_collator=collate_fn,
+compute_metrics=compute_metrics,
+train_dataset=prepared_ds[&quot;train&quot;],
+eval_dataset=prepared_ds[&quot;validation&quot;],
+tokenizer=processor,
+)
+Train 🚀
+train_results = trainer.train()
+trainer.save_model()
+trainer.log_metrics(&quot;train&quot;, train_results.metrics)
+trainer.save_metrics(&quot;train&quot;, train_results.metrics)
+trainer.save_state()
+Evaluate 📊
+metrics = trainer.evaluate(prepared_ds[&#39;validation&#39;])
+trainer.log_metrics(&quot;eval&quot;, metrics)
+trainer.save_metrics(&quot;eval&quot;, metrics)
+Here were my evaluation results - Cool beans! Sorry, had to say it.
+***** eval metrics *****
+epoch = 4.0
+eval_accuracy = 0.985
+eval_loss = 0.0637
+eval_runtime = 0:00:02.13
+eval_samples_per_second = 62.356
+eval_steps_per_second = 7.97
+Finally, if you want, you can push your model up to the hub. Here, we&#39;ll push it up if you specified push_to_hub=True
+in the training configuration. Note that in order to push to hub, you&#39;ll have to have git-lfs installed and be logged into your Hugging Face account (which can be done via huggingface-cli login
+).
+kwargs = {
+&quot;finetuned_from&quot;: model.config._name_or_path,
+&quot;tasks&quot;: &quot;image-classification&quot;,
+&quot;dataset&quot;: &#39;beans&#39;,
+&quot;tags&quot;: [&#39;image-classification&#39;],
+}
+if training_args.push_to_hub:
+trainer.push_to_hub(&#39;🍻 cheers&#39;, **kwargs)
+else:
+trainer.create_model_card(**kwargs)
+The resulting model has been shared to nateraw/vit-base-beans. I&#39;m assuming you don&#39;t have pictures of bean leaves laying around, so I added some examples for you to give it a try! 🚀 </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

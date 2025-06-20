@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>How we built one of the most ambitious datasets in brain activity research</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 How we built one of the most ambitious datasets in brain activity research</h1> <p class="text-sm text-gray-500"> 2025/6/9 – Google AI Blog  <a href="https://blog.google/technology/research/zapbench-zebrafish-brain-mapping/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> How we built one of the most ambitious datasets in brain activity research
+For almost a decade, Michał Januszewski has been thinking about what fish are thinking about.
+Michał is part of Google Research, which has been working with collaborators at HHMI Janelia and Harvard University to build one of the most ambitious datasets in brain activity research yet: a dataset that tracks both the neural activity and nanoscale structure of an entire brain of single larval zebrafish — which could lead to major breakthroughs for how we understand our own brains.
+“For years, our team has been really focusing on what’s called connectomics, which deals with the structural mapping of brains — we take very high-resolution pictures of small fragments of brains and try to identify all cells and all the connections between them,” Michał says. “That gives you a static snapshot of the brain as it is at any given moment in time, but doesn’t tell you what the brain is doing when it&#39;s actually alive and thinking.”
+So Michał&#39;s team looked to build a new, multimodal dataset that could predict and show neural activity of an organism as it thinks. They chose to start with the zebrafish, which checked several key boxes: It is a vertebrate animal, with more complex brain functions than, say, an insect, and its brain is small enough that the team could get a dataset of the entire brain, instead of just a tiny portion of it.
+And — perhaps most importantly — newly hatched zebrafish are almost entirely transparent, allowing the team to use a specialized laser rig to scan nearly two hours of brain activity for more than 70,000 neurons in a live fish’s brain as it reacts to various patterns and stimuli being projected around it.
+In April, Google Research released that data as a first-of-its-kind benchmark, called ZAPBench (Zebrafish Activity Prediction Benchmark), which can help advance neuroscience by enabling the development of more accurate AI models that can predict brain activity.
+Researchers used a light sheet microscope to record brain activity in a larval zebrafish.
+Researchers at Google have created plenty of AI model benchmarks to drive improvements for models in other fields, like WeatherBench 2 for improving forecasts, or the One Billion Word Benchmark for language models. ZAPBench, however, fills a unique need. While it can be easy to double check the accuracy of something like a weather prediction from an AI model by, say, sticking your head out a window, there’s no simple way to test predictive models for brain activity, due to the difficulty in obtaining scan data in the first place.
+“Neuroscience researchers have been building models for how the brain works, but it&#39;s been relatively rare to be able to put them to the test for how well they can actually predict brain activity,” says Research Scientist Viren Jain. ”With ZAPBench, anybody can create models and evaluate them, both against the benchmark and other models.” The team at Google has already seen some interesting results in their own tests, including how models tended to make mistakes in predictions in specific areas of the brain, but were more accurate at predicting activity in others.
+The originally recorded brain activity data (left), and a predicted brain activity image that ZAPBench is able to help benchmark (right).
+Creating ZAPBench is just the first step. The Google Research team is also building on its existing work to map the connectome of the tens of thousands of neurons of the exact same larval zebrafish brain whose activity was imaged. The hope is that by pairing the connectome of the specific specimen’s brain together with the activity of that brain, we’ll be able to find new insights into how brains work on a basic level — both for fish, and one day, even for humans.
+“The long-term goal here is to figure out how the brain operates at a really mechanistic level,” Viren says. “And if we can develop a model that’s better at predicting how all these different components drive brain activity, it’ll significantly advance the state of and our confidence in basic models of how the brain works — which could drive applications in medicine, brain computer interfaces or any number of helpful applications in the future.” </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

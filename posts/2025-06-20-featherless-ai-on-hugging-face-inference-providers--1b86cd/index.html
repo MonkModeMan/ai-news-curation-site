@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Featherless AI on Hugging Face Inference Providers 🔥</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Featherless AI on Hugging Face Inference Providers 🔥</h1> <p class="text-sm text-gray-500"> 2025/6/12 – Hugging Face Blog  <a href="https://huggingface.co/blog/inference-providers-featherless" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Featherless AI on Hugging Face Inference Providers 🔥
+We&#39;re thrilled to share that Featherless AI is now a supported Inference Provider on the Hugging Face Hub! Featherless AI joins our growing ecosystem, enhancing the breadth and capabilities of serverless inference directly on the Hub’s model pages. Inference Providers are also seamlessly integrated into our client SDKs (for both JS and Python), making it super easy to use a wide variety of models with your preferred providers.
+Featherless AI supports a wide variety of text and conversational models, including the latest open-source models from DeepSeek, Meta, Google, Qwen, and much more.
+Featherless AI is a serverless AI inference provider with unique model loading and GPU orchestration abilities that makes an exceptionally large catalog of models available for users. Providers often offer either a low cost of access to a limited set of models, or an unlimited range of models with users managing servers and the associated costs of operation. Featherless provides the best of both worlds offering unmatched model range and variety but with serverless pricing. Find the full list of supported models on the models page.
+We&#39;re super excited to see what you&#39;ll build with this new provider!
+Read more about how to use Featherless as an Inference Provider in its dedicated documentation page.
+How it works
+In the website UI
+- In your user account settings, you are able to:
+- Set your own API keys for the providers you’ve signed up with. If no custom key is set, your requests will be routed through HF. Learn more about request types in the docs.
+- Order providers by preference. This applies to the widget and code snippets in the model pages.
+- As mentioned, there are two modes when calling Inference Providers:
+- Custom key (calls go directly to the inference provider, using your own API key of the corresponding inference provider)
+- Routed by HF (in that case, you don&#39;t need a token from the provider, and the charges are applied directly to your HF account rather than the provider&#39;s account)
+- Model pages showcase third-party inference providers (the ones that are compatible with the current model, sorted by user preference)
+From the client SDKs
+from Python, using huggingface_hub
+The following example shows how to use DeepSeek-R1 using Featherless AI as the inference provider. You can use a Hugging Face token for automatic routing through Hugging Face, or your own Featherless AI API key if you have one.
+Install or upgrade huggingface_hub
+to ensure you have version v0.33.0 or better: pip install --upgrade huggingface-hub
+import os
+from huggingface_hub import InferenceClient
+client = InferenceClient(
+provider=&quot;featherless-ai&quot;,
+api_key=os.environ[&quot;HF_TOKEN&quot;]
+)
+messages = [
+{
+&quot;role&quot;: &quot;user&quot;,
+&quot;content&quot;: &quot;What is the capital of France?&quot;
+}
+]
+completion = client.chat.completions.create(
+model=&quot;deepseek-ai/DeepSeek-R1-0528&quot;,
+messages=messages,
+)
+print(completion.choices[0].message)
+from JS using @huggingface/inference
+import { InferenceClient } from &quot;@huggingface/inference&quot;;
+const client = new InferenceClient(process.env.HF_TOKEN);
+const chatCompletion = await client.chatCompletion({
+model: &quot;deepseek-ai/DeepSeek-R1-0528&quot;,
+messages: [
+{
+role: &quot;user&quot;,
+content: &quot;What is the capital of France?&quot;
+}
+],
+provider: &quot;featherless-ai&quot;,
+});
+console.log(chatCompletion.choices[0].message);
+Billing
+For direct requests, i.e. when you use the key from an inference provider, you are billed by the corresponding provider. For instance, if you use a Featherless AI API key you&#39;re billed on your Featherless AI account.
+For routed requests, i.e. when you authenticate via the Hugging Face Hub, you&#39;ll only pay the standard provider API rates. There&#39;s no additional markup from us, we just pass through the provider costs directly. (In the future, we may establish revenue-sharing agreements with our provider partners.)
+Important Note ‼️ PRO users get $2 worth of Inference credits every month. You can use them across providers. 🔥
+Subscribe to the Hugging Face PRO plan to get access to Inference credits, ZeroGPU, Spaces Dev Mode, 20x higher limits, and more.
+We also provide free inference with a small quota for our signed-in free users, but please upgrade to PRO if you can!
+Feedback and next steps
+We would love to get your feedback! Share your thoughts and/or comments here: https://huggingface.co/spaces/huggingface/HuggingDiscussions/discussions/49 </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

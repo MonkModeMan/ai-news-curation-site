@@ -1,0 +1,41 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Argilla 2.4: Easily Build Fine-Tuning and Evaluation datasets on the Hub — No Code Required</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Argilla 2.4: Easily Build Fine-Tuning and Evaluation datasets on the Hub — No Code Required</h1> <p class="text-sm text-gray-500"> 2024/11/4 – Hugging Face Blog  <a href="https://huggingface.co/blog/argilla-ui-hub" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Argilla 2.4: Easily Build Fine-Tuning and Evaluation Datasets on the Hub — No Code Required
+We are incredibly excited to share the most impactful feature since Argilla joined Hugging Face: you can prepare your AI datasets without any code, getting started from any Hub dataset! Using Argilla’s UI, you can easily import a dataset from the Hugging Face Hub, define questions, and start collecting human feedback.
+Not familiar with Argilla? Argilla is a free, open-source data-centric tool. Using Argilla, AI developers and domain experts can collaborate and build high-quality datasets. Argilla is part of the Hugging Face family and fully integrated with the Hub. Want to know more? Here’s an intro blog post.
+Why is this new feature important to you and the community?
+- The Hugging Face hub contains 230k datasets you can use as a foundation for your AI project.
+- It simplifies collecting human feedback from the Hugging Face community or specialized teams.
+- It democratizes dataset creation for users with extensive knowledge about a specific domain who are unsure about writing code.
+Use cases
+This new feature democratizes building high-quality datasets on the Hub:
+- If you have published an open dataset and want the community to contribute, import it into a public Argilla Space and share the URL with the world!
+- If you want to start annotating a new dataset from scratch, upload a CSV to the Hub, import it into your Argilla Space, and start labeling!
+- If you want to curate an existing Hub dataset for fine-tuning or evaluating your model, import the dataset into an Argilla Space and start curating!
+- If you want to improve an existing Hub dataset to benefit the community, import it into an Argilla Space and start giving feedback!
+How it works
+First, you need to deploy Argilla. The recommended way is to deploy on Spaces following this guide. The default deployment comes with Hugging Face OAuth enabled, meaning your Space will be open for annotation contributions from any Hub user. OAuth is perfect for use cases when you want the community to contribute to your dataset. If you want to restrict annotation to you and other collaborators, check this guide for additional configuration options.
+Once Argilla is running, sign in and click the “Import dataset from Hugging Face” button on the Home page. You can start with one of our example datasets or input the repo id of the dataset you want to use.
+In this first version, the Hub dataset must be public. If you are interested in support for private datasets, we’d love to hear from you on GitHub.
+Argilla automatically suggests an initial configuration based on the dataset’s features, so you don’t need to start from scratch, but you can add questions or remove unnecessary fields. Fields should include the data you want feedback on, like text, chats, or images. Questions are the feedback you wish to collect, like labels, ratings, rankings, or text. All changes are shown in real time, so you can get a clear idea of the Argilla dataset you’re configuring.
+Once you’re happy with the result, click “Create dataset” to import the dataset with your configuration. Now you’re ready to give feedback!
+You can try this for yourself by following the quickstart guide. It takes under 5 minutes!
+This new workflow streamlines the import of datasets from the Hub, but you can still import datasets using Argilla’s Python SDK if you need further customization.
+We’d love to hear your thoughts and first experiences. Let us know on GitHub or the HF Discord! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

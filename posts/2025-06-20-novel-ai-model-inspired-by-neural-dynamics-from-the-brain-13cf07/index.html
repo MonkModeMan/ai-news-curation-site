@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Novel AI model inspired by neural dynamics from the brain</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Novel AI model inspired by neural dynamics from the brain</h1> <p class="text-sm text-gray-500"> 2025/5/2 – MIT  <a href="https://news.mit.edu/2025/novel-ai-model-inspired-neural-dynamics-from-brain-0502" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Researchers from MIT’s Computer Science and Artificial Intelligence Laboratory (CSAIL) have developed a novel artificial intelligence model inspired by neural oscillations in the brain, with the goal of significantly advancing how machine learning algorithms handle long sequences of data.
+AI often struggles with analyzing complex information that unfolds over long periods of time, such as climate trends, biological signals, or financial data. One new type of AI model, called &quot;state-space models,&quot; has been designed specifically to understand these sequential patterns more effectively. However, existing state-space models often face challenges — they can become unstable or require a significant amount of computational resources when processing long data sequences.
+To address these issues, CSAIL researchers T. Konstantin Rusch and Daniela Rus have developed what they call “linear oscillatory state-space models” (LinOSS), which leverage principles of forced harmonic oscillators — a concept deeply rooted in physics and observed in biological neural networks. This approach provides stable, expressive, and computationally efficient predictions without overly restrictive conditions on the model parameters.
+&quot;Our goal was to capture the stability and efficiency seen in biological neural systems and translate these principles into a machine learning framework,&quot; explains Rusch. &quot;With LinOSS, we can now reliably learn long-range interactions, even in sequences spanning hundreds of thousands of data points or more.&quot;
+The LinOSS model is unique in ensuring stable prediction by requiring far less restrictive design choices than previous methods. Moreover, the researchers rigorously proved the model’s universal approximation capability, meaning it can approximate any continuous, causal function relating input and output sequences.
+Empirical testing demonstrated that LinOSS consistently outperformed existing state-of-the-art models across various demanding sequence classification and forecasting tasks. Notably, LinOSS outperformed the widely-used Mamba model by nearly two times in tasks involving sequences of extreme length.
+Recognized for its significance, the research was selected for an oral presentation at ICLR 2025 — an honor awarded to only the top 1 percent of submissions. The MIT researchers anticipate that the LinOSS model could significantly impact any fields that would benefit from accurate and efficient long-horizon forecasting and classification, including health-care analytics, climate science, autonomous driving, and financial forecasting.
+&quot;This work exemplifies how mathematical rigor can lead to performance breakthroughs and broad applications,&quot; Rus says. &quot;With LinOSS, we’re providing the scientific community with a powerful tool for understanding and predicting complex systems, bridging the gap between biological inspiration and computational innovation.&quot;
+The team imagines that the emergence of a new paradigm like LinOSS will be of interest to machine learning practitioners to build upon. Looking ahead, the researchers plan to apply their model to an even wider range of different data modalities. Moreover, they suggest that LinOSS could provide valuable insights into neuroscience, potentially deepening our understanding of the brain itself.
+Their work was supported by the Swiss National Science Foundation, the Schmidt AI2050 program, and the U.S. Department of the Air Force Artificial Intelligence Accelerator. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

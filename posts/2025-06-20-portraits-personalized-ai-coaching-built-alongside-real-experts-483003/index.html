@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Portraits: personalized AI coaching built alongside real experts</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Portraits: personalized AI coaching built alongside real experts</h1> <p class="text-sm text-gray-500"> 2025/6/5 – Google AI Blog  <a href="https://blog.google/technology/google-labs/portraits/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Portraits: personalized AI coaching built alongside real experts
+Portraits, a new experiment from Google Labs, lets you interact conversationally with AI representations of trusted experts built in partnership with the experts themselves. Our first Portrait features Kim Scott, bestselling author of “Radical Candor,” and offers AI-powered coaching inspired by her renowned communication and leadership principles.
+Imagine having direct access to Kim&#39;s guidance to navigate tough workplace situations or practice difficult conversations. Simply ask your questions, and the Portrait will use Gemini’s understanding and reasoning capabilities to generate a relevant and insightful response, drawing directly from Kim&#39;s content and speaking in her voice via an illustrated avatar.
+Portraits are unique because they are directly linked to real-world trusted experts, like Kim Scott, who have provided their own knowledge and voices. The foundation is the creator&#39;s authentic content, which ensures conversations stay focused on their specific areas of expertise.
+We’ve conducted extensive testing and implemented user feedback mechanisms to proactively identify and address potential problematic scenarios. It’s an early experiment, so your feedback will help us shape the product.
+Available in the U.S. to users 18 years of age and older, head over to labs.google/portraits to try Kim Scott&#39;s Portrait today. If you’d like to partner with us on a Portrait of your own, share your interest through our form. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

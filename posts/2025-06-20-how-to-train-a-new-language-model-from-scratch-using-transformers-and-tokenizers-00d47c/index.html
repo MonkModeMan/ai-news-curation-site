@@ -1,0 +1,273 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>How to train a new language model from scratch using Transformers and Tokenizers</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 How to train a new language model from scratch using Transformers and Tokenizers</h1> <p class="text-sm text-gray-500"> 2020/2/14 – Hugging Face Blog  <a href="https://huggingface.co/blog/how-to-train" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> How to train a new language model from scratch using Transformers and Tokenizers
+Over the past few months, we made several improvements to our
+transformers
+and tokenizers
+libraries, with the goal of making it easier than ever to train a new language model from scratch.
+In this post we’ll demo how to train a “small” model (84 M parameters = 6 layers, 768 hidden size, 12 attention heads) – that’s the same number of layers &amp; heads as DistilBERT – on Esperanto. We’ll then fine-tune the model on a downstream task of part-of-speech tagging.
+Esperanto is a constructed language with a goal of being easy to learn. We pick it for this demo for several reasons:
+- it is a relatively low-resource language (even though it’s spoken by ~2 million people) so this demo is less boring than training one more English model 😁
+- its grammar is highly regular (e.g. all common nouns end in -o, all adjectives in -a) so we should get interesting linguistic results even on a small dataset.
+- finally, the overarching goal at the foundation of the language is to bring people closer (fostering world peace and international understanding) which one could argue is aligned with the goal of the NLP community 💚
+N.B. You won’t need to understand Esperanto to understand this post, but if you do want to learn it, Duolingo has a nice course with 280k active learners.
+Our model is going to be called… wait for it… EsperBERTo 😂
+1. Find a dataset
+First, let us find a corpus of text in Esperanto. Here we’ll use the Esperanto portion of the OSCAR corpus from INRIA. OSCAR is a huge multilingual corpus obtained by language classification and filtering of Common Crawl dumps of the Web.
+The Esperanto portion of the dataset is only 299M, so we’ll concatenate with the Esperanto sub-corpus of the Leipzig Corpora Collection, which is comprised of text from diverse sources like news, literature, and wikipedia.
+The final training corpus has a size of 3 GB, which is still small – for your model, you will get better results the more data you can get to pretrain on.
+2. Train a tokenizer
+We choose to train a byte-level Byte-pair encoding tokenizer (the same as GPT-2), with the same special tokens as RoBERTa. Let’s arbitrarily pick its size to be 52,000.
+We recommend training a byte-level BPE (rather than let’s say, a WordPiece tokenizer like BERT) because it will start building its vocabulary from an alphabet of single bytes, so all words will be decomposable into tokens (no more &lt;unk&gt;
+tokens!).
+#! pip install tokenizers
+from pathlib import Path
+from tokenizers import ByteLevelBPETokenizer
+paths = [str(x) for x in Path(&quot;./eo_data/&quot;).glob(&quot;**/*.txt&quot;)]
+# Initialize a tokenizer
+tokenizer = ByteLevelBPETokenizer()
+# Customize training
+tokenizer.train(files=paths, vocab_size=52_000, min_frequency=2, special_tokens=[
+&quot;&lt;s&gt;&quot;,
+&quot;&lt;pad&gt;&quot;,
+&quot;&lt;/s&gt;&quot;,
+&quot;&lt;unk&gt;&quot;,
+&quot;&lt;mask&gt;&quot;,
+])
+# Save files to disk
+tokenizer.save_model(&quot;.&quot;, &quot;esperberto&quot;)
+And here’s a slightly accelerated capture of the output:
+On our dataset, training took about ~5 minutes.
+🔥🔥 Wow, that was fast! ⚡️🔥
+We now have both a vocab.json
+, which is a list of the most frequent tokens ranked by frequency, and a merges.txt
+list of merges.
+{
+&quot;&lt;s&gt;&quot;: 0,
+&quot;&lt;pad&gt;&quot;: 1,
+&quot;&lt;/s&gt;&quot;: 2,
+&quot;&lt;unk&gt;&quot;: 3,
+&quot;&lt;mask&gt;&quot;: 4,
+&quot;!&quot;: 5,
+&quot;\&quot;&quot;: 6,
+&quot;#&quot;: 7,
+&quot;$&quot;: 8,
+&quot;%&quot;: 9,
+&quot;&amp;&quot;: 10,
+&quot;&#39;&quot;: 11,
+&quot;(&quot;: 12,
+&quot;)&quot;: 13,
+# ...
+}
+# merges.txt
+l a
+Ġ k
+o n
+Ġ la
+t a
+Ġ e
+Ġ d
+Ġ p
+# ...
+What is great is that our tokenizer is optimized for Esperanto. Compared to a generic tokenizer trained for English, more native words are represented by a single, unsplit token. Diacritics, i.e. accented characters used in Esperanto – ĉ
+, ĝ
+, ĥ
+, ĵ
+, ŝ
+, and ŭ
+– are encoded natively. We also represent sequences in a more efficient manner. Here on this corpus, the average length of encoded sequences is ~30% smaller as when using the pretrained GPT-2 tokenizer.
+Here’s how you can use it in tokenizers
+, including handling the RoBERTa special tokens – of course, you’ll also be able to use it directly from transformers
+.
+from tokenizers.implementations import ByteLevelBPETokenizer
+from tokenizers.processors import BertProcessing
+tokenizer = ByteLevelBPETokenizer(
+&quot;./models/EsperBERTo-small/vocab.json&quot;,
+&quot;./models/EsperBERTo-small/merges.txt&quot;,
+)
+tokenizer._tokenizer.post_processor = BertProcessing(
+(&quot;&lt;/s&gt;&quot;, tokenizer.token_to_id(&quot;&lt;/s&gt;&quot;)),
+(&quot;&lt;s&gt;&quot;, tokenizer.token_to_id(&quot;&lt;s&gt;&quot;)),
+)
+tokenizer.enable_truncation(max_length=512)
+print(
+tokenizer.encode(&quot;Mi estas Julien.&quot;)
+)
+# Encoding(num_tokens=7, ...)
+# tokens: [&#39;&lt;s&gt;&#39;, &#39;Mi&#39;, &#39;Ġestas&#39;, &#39;ĠJuli&#39;, &#39;en&#39;, &#39;.&#39;, &#39;&lt;/s&gt;&#39;]
+3. Train a language model from scratch
+Update: The associated Colab notebook uses our new Trainer
+directly, instead of through a script. Feel free to pick the approach you like best.
+We will now train our language model using the run_language_modeling.py
+script from transformers
+(newly renamed from run_lm_finetuning.py
+as it now supports training from scratch more seamlessly). Just remember to leave --model_name_or_path
+to None
+to train from scratch vs. from an existing model or checkpoint.
+We’ll train a RoBERTa-like model, which is a BERT-like with a couple of changes (check the documentation for more details).
+As the model is BERT-like, we’ll train it on a task of Masked language modeling, i.e. the predict how to fill arbitrary tokens that we randomly mask in the dataset. This is taken care of by the example script.
+We just need to do two things:
+- implement a simple subclass of
+Dataset
+that loads data from our text files- Depending on your use case, you might not even need to write your own subclass of Dataset, if one of the provided examples (
+TextDataset
+andLineByLineTextDataset
+) works – but there are lots of custom tweaks that you might want to add based on what your corpus looks like.
+- Depending on your use case, you might not even need to write your own subclass of Dataset, if one of the provided examples (
+- Choose and experiment with different sets of hyperparameters.
+Here’s a simple version of our EsperantoDataset.
+from torch.utils.data import Dataset
+class EsperantoDataset(Dataset):
+def __init__(self, evaluate: bool = False):
+tokenizer = ByteLevelBPETokenizer(
+&quot;./models/EsperBERTo-small/vocab.json&quot;,
+&quot;./models/EsperBERTo-small/merges.txt&quot;,
+)
+tokenizer._tokenizer.post_processor = BertProcessing(
+(&quot;&lt;/s&gt;&quot;, tokenizer.token_to_id(&quot;&lt;/s&gt;&quot;)),
+(&quot;&lt;s&gt;&quot;, tokenizer.token_to_id(&quot;&lt;s&gt;&quot;)),
+)
+tokenizer.enable_truncation(max_length=512)
+# or use the RobertaTokenizer from `transformers` directly.
+self.examples = []
+src_files = Path(&quot;./data/&quot;).glob(&quot;*-eval.txt&quot;) if evaluate else Path(&quot;./data/&quot;).glob(&quot;*-train.txt&quot;)
+for src_file in src_files:
+print(&quot;🔥&quot;, src_file)
+lines = src_file.read_text(encoding=&quot;utf-8&quot;).splitlines()
+self.examples += [x.ids for x in tokenizer.encode_batch(lines)]
+def __len__(self):
+return len(self.examples)
+def __getitem__(self, i):
+# We’ll pad at the batch level.
+return torch.tensor(self.examples[i])
+If your dataset is very large, you can opt to load and tokenize examples on the fly, rather than as a preprocessing step.
+Here is one specific set of hyper-parameters and arguments we pass to the script:
+--output_dir ./models/EsperBERTo-small-v1
+--model_type roberta
+--mlm
+--config_name ./models/EsperBERTo-small
+--tokenizer_name ./models/EsperBERTo-small
+--do_train
+--do_eval
+--learning_rate 1e-4
+--num_train_epochs 5
+--save_total_limit 2
+--save_steps 2000
+--per_gpu_train_batch_size 16
+--evaluate_during_training
+--seed 42
+As usual, pick the largest batch size you can fit on your GPU(s).
+🔥🔥🔥 Let’s start training!! 🔥🔥🔥
+Here you can check our Tensorboard for one particular set of hyper-parameters:
+Our example scripts log into the Tensorboard format by default, under
+runs/
+. Then to view your board just runtensorboard dev upload --logdir runs
+– this will set up tensorboard.dev, a Google-managed hosted version that lets you share your ML experiment with anyone.
+4. Check that the LM actually trained
+Aside from looking at the training and eval losses going down, the easiest way to check whether our language model is learning anything interesting is via the FillMaskPipeline
+.
+Pipelines are simple wrappers around tokenizers and models, and the &#39;fill-mask&#39; one will let you input a sequence containing a masked token (here, &lt;mask&gt;
+) and return a list of the most probable filled sequences, with their probabilities.
+from transformers import pipeline
+fill_mask = pipeline(
+&quot;fill-mask&quot;,
+model=&quot;./models/EsperBERTo-small&quot;,
+tokenizer=&quot;./models/EsperBERTo-small&quot;
+)
+# The sun &lt;mask&gt;.
+# =&gt;
+result = fill_mask(&quot;La suno &lt;mask&gt;.&quot;)
+# {&#39;score&#39;: 0.2526160776615143, &#39;sequence&#39;: &#39;&lt;s&gt; La suno brilis.&lt;/s&gt;&#39;, &#39;token&#39;: 10820}
+# {&#39;score&#39;: 0.0999930202960968, &#39;sequence&#39;: &#39;&lt;s&gt; La suno lumis.&lt;/s&gt;&#39;, &#39;token&#39;: 23833}
+# {&#39;score&#39;: 0.04382849484682083, &#39;sequence&#39;: &#39;&lt;s&gt; La suno brilas.&lt;/s&gt;&#39;, &#39;token&#39;: 15006}
+# {&#39;score&#39;: 0.026011141017079353, &#39;sequence&#39;: &#39;&lt;s&gt; La suno falas.&lt;/s&gt;&#39;, &#39;token&#39;: 7392}
+# {&#39;score&#39;: 0.016859788447618484, &#39;sequence&#39;: &#39;&lt;s&gt; La suno pasis.&lt;/s&gt;&#39;, &#39;token&#39;: 4552}
+Ok, simple syntax/grammar works. Let’s try a slightly more interesting prompt:
+fill_mask(&quot;Jen la komenco de bela &lt;mask&gt;.&quot;)
+# This is the beginning of a beautiful &lt;mask&gt;.
+# =&gt;
+# {
+# &#39;score&#39;:0.06502299010753632
+# &#39;sequence&#39;:&#39;&lt;s&gt; Jen la komenco de bela vivo.&lt;/s&gt;&#39;
+# &#39;token&#39;:1099
+# }
+# {
+# &#39;score&#39;:0.0421181358397007
+# &#39;sequence&#39;:&#39;&lt;s&gt; Jen la komenco de bela vespero.&lt;/s&gt;&#39;
+# &#39;token&#39;:5100
+# }
+# {
+# &#39;score&#39;:0.024884626269340515
+# &#39;sequence&#39;:&#39;&lt;s&gt; Jen la komenco de bela laboro.&lt;/s&gt;&#39;
+# &#39;token&#39;:1570
+# }
+# {
+# &#39;score&#39;:0.02324388362467289
+# &#39;sequence&#39;:&#39;&lt;s&gt; Jen la komenco de bela tago.&lt;/s&gt;&#39;
+# &#39;token&#39;:1688
+# }
+# {
+# &#39;score&#39;:0.020378097891807556
+# &#39;sequence&#39;:&#39;&lt;s&gt; Jen la komenco de bela festo.&lt;/s&gt;&#39;
+# &#39;token&#39;:4580
+# }
+“Jen la komenco de bela tago”, indeed!
+With more complex prompts, you can probe whether your language model captured more semantic knowledge or even some sort of (statistical) common sense reasoning.
+5. Fine-tune your LM on a downstream task
+We now can fine-tune our new Esperanto language model on a downstream task of Part-of-speech tagging.
+As mentioned before, Esperanto is a highly regular language where word endings typically condition the grammatical part of speech. Using a dataset of annotated Esperanto POS tags formatted in the CoNLL-2003 format (see example below), we can use the run_ner.py
+script from transformers
+.
+POS tagging is a token classification task just as NER so we can just use the exact same script.
+Again, here’s the hosted Tensorboard for this fine-tuning. We train for 3 epochs using a batch size of 64 per GPU.
+Training and eval losses converge to small residual values as the task is rather easy (the language is regular) – it’s still fun to be able to train it end-to-end 😃.
+This time, let’s use a TokenClassificationPipeline
+:
+from transformers import TokenClassificationPipeline, pipeline
+MODEL_PATH = &quot;./models/EsperBERTo-small-pos/&quot;
+nlp = pipeline(
+&quot;ner&quot;,
+model=MODEL_PATH,
+tokenizer=MODEL_PATH,
+)
+# or instantiate a TokenClassificationPipeline directly.
+nlp(&quot;Mi estas viro kej estas tago varma.&quot;)
+# {&#39;entity&#39;: &#39;PRON&#39;, &#39;score&#39;: 0.9979867339134216, &#39;word&#39;: &#39; Mi&#39;}
+# {&#39;entity&#39;: &#39;VERB&#39;, &#39;score&#39;: 0.9683094620704651, &#39;word&#39;: &#39; estas&#39;}
+# {&#39;entity&#39;: &#39;VERB&#39;, &#39;score&#39;: 0.9797462821006775, &#39;word&#39;: &#39; estas&#39;}
+# {&#39;entity&#39;: &#39;NOUN&#39;, &#39;score&#39;: 0.8509314060211182, &#39;word&#39;: &#39; tago&#39;}
+# {&#39;entity&#39;: &#39;ADJ&#39;, &#39;score&#39;: 0.9996201395988464, &#39;word&#39;: &#39; varma&#39;}
+Looks like it worked! 🔥
+For a more challenging dataset for NER, @stefan-it recommended that we could train on the silver standard dataset from WikiANN
+6. Share your model 🎉
+Finally, when you have a nice model, please think about sharing it with the community:
+- upload your model using the CLI:
+transformers-cli upload
+- write a README.md model card and add it to the repository under
+model_cards/
+. Your model card should ideally include:- a model description,
+- training params (dataset, preprocessing, hyperparameters),
+- evaluation results,
+- intended uses &amp; limitations
+- whatever else is helpful! 🤓
+TADA!
+➡️ Your model has a page on https://huggingface.co/models and everyone can load it using AutoModel.from_pretrained(&quot;username/model_name&quot;)
+.
+If you want to take a look at models in different languages, check https://huggingface.co/models </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Gemini 2.5 Pro Preview: even better coding performance</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Gemini 2.5 Pro Preview: even better coding performance</h1> <p class="text-sm text-gray-500"> 2025/5/6 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/gemini-25-pro-preview-even-better-coding-performance/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> We’ve seen developers doing amazing things with Gemini 2.5 Pro, so we decided to release an updated version a couple of weeks early to get into developers hands sooner.
+Today we’re excited to release Gemini 2.5 Pro Preview (I/O edition). This update features even stronger coding capabilities, for you to start building with before Google I/O later this month. Expect meaningful improvements for front-end and UI development, alongside improvements in fundamental coding tasks such as transforming and editing code, and creating sophisticated agentic workflows.
+“We found Gemini 2.5 Pro to be the best frontier model when it comes to &quot;capability over latency&quot; ratio. I look forward to rolling it out on Replit Agent whenever a latency-sensitive task needs to be accomplished with a high degree of reliability.”
+– Michele Catasta, President, Replit
+Gemini 2.5 Pro now ranks #1 on the WebDev Arena leaderboard, which measures human preference for a model’s ability to build aesthetically pleasing and functional web apps. Drawing on this leading capability, Gemini 2.5 Pro powers Cursor’s innovative code agent and empowers our collaborations with companies like Cognition and Replit. Together, we&#39;re pushing the frontiers of agentic programming to unlock new possibilities for developers.
+“The updated Gemini 2.5 Pro achieves leading performance on our junior-dev evals. It was the first-ever model that solved one of our evals involving a larger refactor of a request routing backend. It felt like a more senior developer because it was able to make correct judgement calls and choose good abstractions.”
+– Silas Alberti, Founding Team, Cognition
+Gemini 2.5 Pro’s deep understanding of code, combined with powerful reasoning, continues to make Gemini 2.5 Pro the go-to model for developers. We’re particularly excited about how this model can be used in the following cases.
+Gemini 2.5 Pro delivers state-of-the-art video understanding, scoring 84.8% on the VideoMME benchmark. Combining this with coding enables new flows that were previously not possible with previous versions. For example, the Video to Learning App in Google AI Studio demonstrates how Gemini 2.5 Pro creates an interactive learning app based on a single YouTube video. With improved video understanding and complete UI, the updated Gemini 2.5 Pro model delivers a more functional experience than the previous simple example.
+Link to Youtube Video (visible only when JS is disabled)
+Gemini 2.5 Pro is strong at front-end web development, helping you get more done. Implementing new features means manually diving into design files and inspecting components to match style properties like colors, fonts, padding, margins, and borders then manually writing the CSS code needed to replicate those visual properties accurately. Now imagine using Gemini 2.5 Pro in an IDE and having the model generate new features, like adding a video player in the style of the other apps in the Gemini 95 starter app.
+Link to Youtube Video (visible only when JS is disabled)
+Bringing ideas to life with both functionality and a beautiful UI is made easier with Gemini 2.5 Pro. The new dictation starter app, built using the updated model, is a great example of this in action. Pay attention to some of the details like the wavelength animations, responsive design, and subtle button hover effects. By default, the model has a real taste for aesthetic web development while maintaining its steerability, helping developers quickly take a concept to a working web app. Gemini 2.5 Pro was able to design and code the microphone UI animation for the dictation starter app.
+Link to Youtube Video (visible only when JS is disabled)
+You can build with Gemini 2.5 Pro with the Gemini API in Google AI Studio, and enterprise customers can use Vertex AI.
+For developers already using Gemini 2.5 Pro, this new version will not only improve coding performance but will also address key developer feedback including reducing errors in function calling and improving function calling trigger rates. The previous iteration (03-25) now points to the most recent version (05-06), so no action is required to use the improved model, and it continues to be available at the same price. We have also updated the model card with the new version of 2.5 Pro .
+We can’t wait to see the amazing apps you build! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

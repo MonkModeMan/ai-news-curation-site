@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Identifying AI-generated images with SynthID</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Identifying AI-generated images with SynthID</h1> <p class="text-sm text-gray-500"> 2023/8/29 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/identifying-ai-generated-images-with-synthid/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Science
+Identifying AI-generated images with SynthID
+New tool helps watermark and identify synthetic images created by Imagen
+AI-generated images are becoming more popular every day. But how can we better identify them, especially when they look so realistic?
+Today, in partnership with Google Cloud, we’re launching a beta version of SynthID, a tool for watermarking and identifying AI-generated images. This technology embeds a digital watermark directly into the pixels of an image, making it imperceptible to the human eye, but detectable for identification.
+SynthID is being released to a limited number of Vertex AI customers using Imagen, one of our latest text-to-image models that uses input text to create photorealistic images.
+Generative AI technologies are rapidly evolving, and computer generated imagery, also known as ‘synthetic imagery’, is becoming harder to distinguish from those that have not been created by an AI system.
+While generative AI can unlock huge creative potential, it also presents new risks, like enabling creators to spread false information — both intentionally or unintentionally. Being able to identify AI-generated content is critical to empowering people with knowledge of when they’re interacting with generated media, and for helping prevent the spread of misinformation.
+We’re committed to connecting people with high-quality information, and upholding trust between creators and users across society. Part of this responsibility is giving users more advanced tools for identifying AI-generated images so their images — and even some edited versions — can be identified at a later date.
+Google Cloud is the first cloud provider to offer a tool for creating AI-generated images responsibly and identifying them with confidence. This technology is grounded in our approach to developing and deploying responsible AI, and was developed by Google DeepMind and refined in partnership with Google Research.
+SynthID isn’t foolproof against extreme image manipulations, but it does provide a promising technical approach for empowering people and organisations to work with AI-generated content responsibly. This tool could also evolve alongside other AI models and modalities beyond imagery such as audio, video, and text.
+New type of watermark for AI images
+Watermarks are designs that can be layered on images to identify them. From physical imprints on paper to translucent text and symbols seen on digital photos today, they’ve evolved throughout history.
+Traditional watermarks aren’t sufficient for identifying AI-generated images because they’re often applied like a stamp on an image and can easily be edited out. For example, discrete watermarks found in the corner of an image can be cropped out with basic editing techniques.
+Finding the right balance between imperceptibility and robustness to image manipulations is difficult. Highly visible watermarks, often added as a layer with a name or logo across the top of an image, also present aesthetic challenges for creative or commercial purposes. Likewise, some previously developed imperceptible watermarks can be lost through simple editing techniques like resizing.
+We designed SynthID so it doesn&#39;t compromise image quality, and allows the watermark to remain detectable, even after modifications like adding filters, changing colours, and saving with various lossy compression schemes — most commonly used for JPEGs.
+SynthID uses two deep learning models — for watermarking and identifying — that have been trained together on a diverse set of images. The combined model is optimised on a range of objectives, including correctly identifying watermarked content and improving imperceptibility by visually aligning the watermark to the original content.
+Robust and scalable approach
+SynthID allows Vertex AI customers to create AI-generated images responsibly and to identify them with confidence. While this technology isn’t perfect, our internal testing shows that it’s accurate against many common image manipulations.
+SynthID&#39;s combined approach:
+- Watermarking: SynthID can add an imperceptible watermark to synthetic images produced by Imagen.
+- Identification: By scanning an image for its digital watermark, SynthID can assess the likelihood of an image being created by Imagen.
+This tool provides three confidence levels for interpreting the results of watermark identification. If a digital watermark is detected, part of the image is likely generated by Imagen.
+SynthID contributes to the broad suite of approaches for identifying digital content. One of the most widely used methods of identifying content is through metadata, which provides information such as who created it and when. This information is stored with the image file. Digital signatures added to metadata can then show if an image has been changed.
+When the metadata information is intact, users can easily identify an image. However, metadata can be manually removed or even lost when files are edited. Since SynthID’s watermark is embedded in the pixels of an image, it’s compatible with other image identification approaches that are based on metadata, and remains detectable even when metadata is lost.
+What’s next?
+To build AI-generated content responsibly, we’re committed to developing safe, secure, and trustworthy approaches at every step of the way — from image generation and identification to media literacy and information security.
+These approaches need to be robust and adaptable as generative models advance and expand to other mediums. We hope our SynthID technology can work together with a broad range of solutions for creators and users across society, and we’re continuing to evolve SynthID by gathering feedback from users, enhancing its capabilities, and exploring new features.
+SynthID could be expanded for use across other AI models and we’re excited about the potential of integrating it into more Google products and making it available to third parties in the near future — empowering people and organisations to responsibly work with AI-generated content.
+Note: The model used for producing synthetic images in this blog may be different from the model used on Imagen and Vertex AI.
+Acknowledgements
+This project was led by Sven Gowal and Pushmeet Kohli, with key research and engineering contributions from (listed alphabetically): Rudy Bunel, Jamie Hayes, Sylvestre-Alvise Rebuffi, Florian Stimberg, David Stutz, and Meghana Thotakuri.
+Thanks to Nidhi Vyas and Zahra Ahmed for driving product delivery; Chris Gamble for helping initiate the project; Ian Goodfellow, Chris Bregler and Oriol Vinyals for their advice. Other contributors include Paul Bernard, Miklos Horvath, Simon Rosen, Olivia Wiles, and Jessica Yung. Thanks also to many others who contributed across Google DeepMind and Google, including our partners at Google Research and Google Cloud. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

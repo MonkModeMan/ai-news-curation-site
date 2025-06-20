@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Bringing serverless GPU inference to Hugging Face users</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Bringing serverless GPU inference to Hugging Face users</h1> <p class="text-sm text-gray-500"> 2024/4/2 – Hugging Face Blog  <a href="https://huggingface.co/blog/cloudflare-workers-ai" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Bringing serverless GPU inference to Hugging Face users
+Today, we are thrilled to announce the launch of Deploy on Cloudflare Workers AI, a new integration on the Hugging Face Hub. Deploy on Cloudflare Workers AI makes using open models as a serverless API easy, powered by state-of-the-art GPUs deployed in Cloudflare edge data centers. Starting today, we are integrating some of the most popular open models on Hugging Face into Cloudflare Workers AI, powered by our production solutions, like Text Generation Inference.
+With Deploy on Cloudflare Workers AI, developers can build robust Generative AI applications without managing GPU infrastructure and servers and at a very low operating cost: only pay for the compute you use, not for idle capacity.
+Generative AI for Developers
+This new experience expands upon the strategic partnership we announced last year to simplify the access and deployment of open Generative AI models. One of the main problems developers and organizations face is the scarcity of GPU availability and the fixed costs of deploying servers to start building. Deploy on Cloudflare Workers AI offers an easy, low-cost solution to these challenges, providing serverless access to popular Hugging Face Models with a pay-per-request pricing model.
+Let&#39;s take a look at a concrete example. Imagine you develop an RAG Application that gets ~1000 requests per day, with an input of 1k tokens and an output of 100 tokens using Meta Llama 2 7B. The LLM inference production costs would amount to about $1 a day.
+&quot;We&#39;re excited to bring this integration to life so quickly. Putting the power of Cloudflare&#39;s global network of serverless GPUs into the hands of developers, paired with the most popular open source models on Hugging Face, will open the doors to lots of exciting innovation by our community around the world,&quot; said John Graham-Cumming, CTO, Cloudflare
+How it works
+Using Hugging Face Models on Cloudflare Workers AI is super easy. Below, you will find step-by-step instructions on how to use Hermes 2 Pro on Mistral 7B, the newest model from Nous Research.
+You can find all available models in this Cloudflare Collection.
+Note: You need access to a Cloudflare Account and API Token.
+You can find the Deploy on Cloudflare option on all available model pages, including models like Llama, Gemma or Mistral.
+Open the “Deploy” menu, and select “Cloudflare Workers AI” - this will open an interface that includes instructions on how to use this model and send requests.
+Note: If the model you want to use does not have a “Cloudflare Workers AI” option, it is currently not supported. We are working on extending the availability of models together with Cloudflare. You can reach out to us at api-enterprise@huggingface.co with your request.
+The integration can currently be used via two options: using the Workers AI REST API or directly in Workers with the Cloudflare AI SDK. Select your preferred option and copy the code into your environment. When using the REST API, you need to make sure the ACCOUNT_ID
+and API_TOKEN
+variables are defined.
+That’s it! Now you can start sending requests to Hugging Face Models hosted on Cloudflare Workers AI. Make sure to use the correct prompt &amp; template expected by the model.
+We’re just getting started
+We are excited to collaborate with Cloudflare to make AI more accessible to developers. We will work with the Cloudflare team to make more models and experiences available to you! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

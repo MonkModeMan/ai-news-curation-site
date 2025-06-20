@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>FastRTCを使って爆速でVoicebotを構築する</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 FastRTCを使って爆速でVoicebotを構築する</h1> <p class="text-sm text-gray-500"> 2025/4/16 – AI Shift  <a href="https://www.ai-shift.co.jp/techblog/5680" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> こんにちは、 AIチームの戸田です
+今回はPythonでリアルタイムなAIアプリケーションを作る際に役立つライブラリ、FastRTCを使って簡単なVoicebotを構築してみたいと思います。
+FastRTC
+FastRTCは、Pythonでリアルタイムの音声およびビデオストリーミングアプリケーションを構築するためのライブラリです。
+VoicebotのようなリアルタイムなAIアプリケーションを作るとなると、 WebRTC や websockets などの技術が必要になります。しかしこれらのノウハウは様々な情報源に散らばっており、習得が困難です。近年は生成AIによるコード生成も使えますが、WebRTCやwebsocketsを利用したPythonコードとなると、現在はまだ正しいコードの生成に苦労する印象です。
+FastRTCは、特にこういった知識が専門ではない機械学習エンジニアがリアルタイムAIアプリケーションをPythonで開発する際の障壁を取り除くことを目指しています。
+作成したアプリケーションはGradioのUIやTwilioのIP電話として簡単に公開することができます。IP電話で繋ぐ際はサンプリング周波数の変更などの音声形式の処理が必要なのですが、こういった煩雑な処理も内部で担ってくれているので便利です。今回はIP電話でLLMと会話するアプリケーションを作ってみます。
+実装
+ライブラリはpipでインストールできます
+pip install fastrtc
+Cookbookに乗っているサンプルコードを参考に、レストラン予約を行うVoicebotを構築してみたいと思います。ロールプレイングでDB接続などは行いません。
+import base64
+import asyncio
+import numpy as np
+import openai
+from fastrtc import (
+AdditionalOutputs,
+AsyncStreamHandler,
+Stream,
+get_twilio_turn_credentials,
+wait_for_item,
+)
+from gradio.utils import get_space
+from openai.types.beta.realtime import ResponseAudioTranscriptDoneEvent, ResponseOutputItemDoneEvent
+SAMPLE_RATE = 24000
+SYS_PROMPT = &quot;&quot;&quot;あなたは、レストラン「AI-SHIFT」の予約受付担当です。
+以下の制約条件と入力文、会話履歴を考慮して、お客様からの予約の問い合わせに対応してください。
+発話は短く簡潔に、ヒアリングは一項目ずつ行い、一度に複数の質問をしないでください。
+# 制約条件
+* レストラン名: AI-SHIFT
+* 営業時間:
+* 平日: 11:00-22:00
+* 土日祝: 10:00-23:00
+* 定休日: 年末年始
+* 予約可能な人数: 1名様から4名様まで
+* お客様の名前、予約日時、人数、その他要望をお伺いします。
+* お客様が予約を完了するまで、会話を続けてください。
+* 会話終了後、予約内容を復唱して確認して下さい。
+&quot;&quot;&quot;
+class OpenAIHandler(AsyncStreamHandler):
+def __init__(
+self,
+) -&gt; None:
+super().__init__(
+expected_layout=&quot;mono&quot;,
+output_sample_rate=SAMPLE_RATE,
+output_frame_size=480,
+input_sample_rate=SAMPLE_RATE,
+)
+self.connection = None
+self.output_queue = asyncio.Queue()
+self.function_call = False
+def copy(self):
+return OpenAIHandler()
+async def start_up(
+self,
+):
+self.client = openai.AsyncOpenAI()
+async with self.client.beta.realtime.connect(
+model=&quot;gpt-4o-mini-realtime-preview-2024-12-17&quot;
+) as conn:
+await conn.session.update(
+session={
+&quot;turn_detection&quot;: {&quot;type&quot;: &quot;server_vad&quot;},
+&quot;instructions&quot;: SYS_PROMPT,
+}
+)
+self.connection = conn
+async for event in self.connection:
+if event.type == &quot;response.audio_transcript.done&quot;:
+print(event)
+await self.output_queue.put(AdditionalOutputs(event))
+if event.type == &quot;response.audio.delta&quot;:
+await self.output_queue.put(
+(
+self.output_sample_rate,
+np.frombuffer(
+base64.b64decode(event.delta), dtype=np.int16
+).reshape(1, -1),
+),
+)
+async def receive(self, frame: tuple[int, np.ndarray]) -&gt; None:
+if not self.connection:
+return
+_, array = frame
+array = array.squeeze()
+audio_message = base64.b64encode(array.tobytes()).decode(&quot;utf-8&quot;)
+await self.connection.input_audio_buffer.append(audio=audio_message)
+async def emit(self) -&gt; tuple[int, np.ndarray] | AdditionalOutputs | None:
+return await wait_for_item(self.output_queue)
+async def shutdown(self) -&gt; None:
+if self.connection:
+await self.connection.close()
+self.connection = None
+stream = Stream(
+OpenAIHandler(),
+mode=&quot;send-receive&quot;,
+modality=&quot;audio&quot;,
+concurrency_limit=1, # 同時接続数
+time_limit=90, # 1回の通話の制限時間
+)
+stream.fastphone()
+全て合わせても100行ちょっとです。これだけの少量のコードでVoicebotが構築できてしまいます。
+起動すると以下のような出力がされます。
+提示された電話番号に電話をかけるとコードを要求されるので、プッシュボタン（IVR）で電話番号の右側に提示されている6桁のコードを入力します。成功すると
+INFO: (&#39;172.31.47.62&#39;, 0) - &quot;WebSocket /telephone/handler&quot; [accepted]
+INFO: connection open
+のような表示がされ、設定したレストラン予約対話が可能です。
+電話番号は毎月3分のみ利用できるFastRTC側で用意されたものになっていますが、自身のTwilioアカウントと連携して任意の番号を設定することも可能です。本記事では扱わないのでこちらのドキュメントをご参照ください。
+今回はOpenAIのRealtime APIを利用した双方向通信のリアルタイム音声会話の例を示しましたが、FastRTCではVADについても標準機能を搭載しているので、VADで発話区間を抽出→STTモデルで文字起こし→ LLMで返答生成→返答をTTSモデルで音声として出力、といったパイプライン型の対話システムも構築できます。Realtime APIは現状では制御が難しく、hallucinationの懸念もあるため、より複雑な業務用途ではパイプライン型の方が適している場合も多いです。
+展開方法
+今回は電話応答のVoicebotの実装でしたが、FastRTCはGradioベースのUIやFastAPIのエンドポイントも簡単に実装することができるので、ユースケースに合わせて展開することができます。stream.fastphone()
+の部分を以下のように変更してください。
+Gradio
+stream.ui.launch()
+FastAPI
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse, StreamingResponse
+app = FastAPI()
+stream.mount(app)
+# sample streaming endpoint
+@app.get(&quot;/outputs&quot;)
+def _(webrtc_id: str):
+async def output_stream():
+async for output in stream.output_stream(webrtc_id):
+chatbot = output.args[0]
+yield f&quot;event: output\ndata: {json.dumps(chatbot[-1])}\n\n&quot;
+return StreamingResponse(output_stream(), media_type=&quot;text/event-stream&quot;)
+他の応用方法
+ドキュメントには他にも様々なサンプル実装があるので、それらを参考に色々試してみるのも良さそうです。私が興味を惹かれたのはYoloによるObject Detectionの例です。
+GeminiのLive APIなど映像を扱えるマルチモーダルな LLMが公開されているものの、Streamingで動画像を扱う経験が無く、ハードルが高かったのですが、FastRTCを通せばかなり楽に実装できそうに見えました。
+おわりに
+FastRTCを使うことで、WebRTCやwebsocketsなどの複雑な技術スタックを考慮することなく、Pythonだけで簡単にリアルタイムな音声対話システムを構築できることがわかりました。
+5年前にAI Messenger Voicebotを開発し始めた頃は、ただ電話を繋ぐだけでもかなり苦労したことを覚えています。当時は音声の送受信、VAD、STT、TTSのそれぞれを個別に実装し、それらを連携させるためのコードを書く必要がありました。 加えてLLMも普及していなかった（GPT-3が発表されたくらい）ので対話管理のための処理も考える必要がありました。
+今やわずか100数行のコードでリアルタイム音声対話システムが実現できる時代になりました。AI開発の民主化が急速に進んでいることを実感します。
+最後までお読みいただき、ありがとうございました！ </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

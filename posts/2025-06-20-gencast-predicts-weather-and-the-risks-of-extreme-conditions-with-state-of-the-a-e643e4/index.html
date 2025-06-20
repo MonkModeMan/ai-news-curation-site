@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>GenCast predicts weather and the risks of extreme conditions with state-of-the-art accuracy</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 GenCast predicts weather and the risks of extreme conditions with state-of-the-art accuracy</h1> <p class="text-sm text-gray-500"> 2024/12/4 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/gencast-predicts-weather-and-the-risks-of-extreme-conditions-with-sota-accuracy/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Science
+GenCast predicts weather and the risks of extreme conditions with state-of-the-art accuracy
+New AI model advances the prediction of weather uncertainties and risks, delivering faster, more accurate forecasts up to 15 days ahead
+Weather impacts all of us — shaping our decisions, our safety, and our way of life. As climate change drives more extreme weather events, accurate and trustworthy forecasts are more essential than ever. Yet, weather cannot be predicted perfectly, and forecasts are especially uncertain beyond a few days.
+Because a perfect weather forecast is not possible, scientists and weather agencies use probabilistic ensemble forecasts, where the model predicts a range of likely weather scenarios. Such ensemble forecasts are more useful than relying on a single forecast, as they provide decision makers with a fuller picture of possible weather conditions in the coming days and weeks and how likely each scenario is.
+Today, in a paper published in Nature, we present GenCast, our new high resolution (0.25°) AI ensemble model. GenCast provides better forecasts of both day-to-day weather and extreme events than the top operational system, the European Centre for Medium-Range Weather Forecasts’ (ECMWF) ENS, up to 15 days in advance. We’ll be releasing our model’s code, weights, and forecasts, to support the wider weather forecasting community.
+The evolution of AI weather models
+GenCast marks a critical advance in AI-based weather prediction that builds on our previous weather model, which was deterministic, and provided a single, best estimate of future weather. By contrast, a GenCast forecast comprises an ensemble of 50 or more predictions, each representing a possible weather trajectory.
+GenCast is a diffusion model, the type of generative AI model that underpins the recent, rapid advances in image, video and music generation. However, GenCast differs from these, in that it’s adapted to the spherical geometry of the Earth, and learns to accurately generate the complex probability distribution of future weather scenarios when given the most recent state of the weather as input.
+To train GenCast, we provided it with four decades of historical weather data from ECMWF’s ERA5 archive. This data includes variables such as temperature, wind speed, and pressure at various altitudes. The model learned global weather patterns, at 0.25° resolution, directly from this processed weather data.
+Setting a new standard for weather forecasting
+To rigorously evaluate GenCast&#39;s performance, we trained it on historical weather data up to 2018, and tested it on data from 2019. GenCast showed better forecasting skill than ECMWF’s ENS, the top operational ensemble forecasting system that many national and local decisions depend upon every day.
+We comprehensively tested both systems, looking at forecasts of different variables at different lead times — 1320 combinations in total. GenCast was more accurate than ENS on 97.2% of these targets, and on 99.8% at lead times greater than 36 hours.
+An ensemble forecast expresses uncertainty by making multiple predictions that represent different possible scenarios. If most predictions show a cyclone hitting the same area, uncertainty is low. But if they predict different locations, uncertainty is higher. GenCast strikes the right balance, avoiding both overstating or understating its confidence in its forecasts.
+It takes a single Google Cloud TPU v5 just 8 minutes to produce one 15-day forecast in GenCast’s ensemble, and every forecast in the ensemble can be generated simultaneously, in parallel. Traditional physics-based ensemble forecasts such as those produced by ENS, at 0.2° or 0.1° resolution, take hours on a supercomputer with tens of thousands of processors.
+Advanced forecasts for extreme weather events
+More accurate forecasts of risks of extreme weather can help officials safeguard more lives, avert damage, and save money. When we tested GenCast’s ability to predict extreme heat and cold, and high wind speeds, GenCast consistently outperformed ENS.
+Now consider tropical cyclones, also known as hurricanes and typhoons. Getting better and more advanced warnings of where they’ll strike land is invaluable. GenCast delivers superior predictions of the tracks of these deadly storms.
+Better forecasts could also play a key role in other aspects of society, such as renewable energy planning. For example, improvements in wind-power forecasting directly increase the reliability of wind-power as a source of sustainable energy, and will potentially accelerate its adoption. In a proof-of-principle experiment that analyzed predictions of the total wind power generated by groupings of wind farms all over the world, GenCast was more accurate than ENS.
+Next generation forecasting and climate understanding at Google
+GenCast is part of Google’s growing suite of next-generation AI-based weather models, including Google DeepMind’s AI-based deterministic medium-range forecasts, and Google Research’s NeuralGCM, SEEDS, and floods models. These models are starting to power user experiences on Google Search and Maps, and improving the forecasting of precipitation, wildfires, flooding and extreme heat.
+We deeply value our partnerships with weather agencies, and will continue working with them to develop AI-based methods that enhance their forecasting. Meanwhile, traditional models remain essential for this work. For one thing, they supply the training data and initial weather conditions required by models such as GenCast. This cooperation between AI and traditional meteorology highlights the power of a combined approach to improve forecasts and better serve society.
+To foster wider collaboration and help accelerate research and development in the weather and climate community, we’ve made GenCast an open model and released its code and weights, as we did for our deterministic medium-range global weather forecasting model.
+We&#39;ll soon be releasing real-time and historical forecasts from GenCast, and previous models, which will enable anyone to integrate these weather inputs into their own models and research workflows.
+We are eager to engage with the wider weather community, including academic researchers, meteorologists, data scientists, renewable energy companies, and organizations focused on food security and disaster response. Such partnerships offer deep insights and constructive feedback, as well as invaluable opportunities for commercial and non-commercial impact, all of which are critical to our mission to apply our models to benefit humanity.
+Acknowledgements
+We would like to recognize Raia Hadsell for supporting this work. We are grateful to Molly Beck for providing legal support; Ben Gaiarin, Roz Onions and Chris Apps for providing licensing support; Matthew Chantry, Peter Dueben and the dedicated team at the ECMWF for their help and feedback; and to our Nature reviewers for their careful and constructive feedback.
+This work reflects the contributions of the paper’s co-authors: Ilan Price, Alvaro Sanchez-Gonzalez, Ferran Alet, Tom Andersson, Andrew El-Kadi, Dominic Masters, Timo Ewalds, Jacklynn Stott, Shakir Mohamed, Peter Battaglia, Remi Lam, and Matthew Willson. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

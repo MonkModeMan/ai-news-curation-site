@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing NPC-Playground, a 3D playground to interact with LLM-powered NPCs</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing NPC-Playground, a 3D playground to interact with LLM-powered NPCs</h1> <p class="text-sm text-gray-500"> 2024/6/5 – Hugging Face Blog  <a href="https://huggingface.co/blog/npc-gigax-cubzh" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing NPC-Playground, a 3D playground to interact with LLM-powered NPCs
+AI-powered NPCs (Non-Playable Characters) are one of the most important breakthroughs brought about by the use of LLMs in games.
+LLMs, or Large Language Models, make it possible to design &quot;intelligent&quot; in-game characters that can engage in realistic conversations with the player, perform complex actions and follow instructions, dramatically enhancing the player&#39;s experience. AI-powered NPCs represent a huge advancement vs rule-based and heuristics systems.
+Today, we are excited to introduce NPC-Playground, a demo created by Cubzh and Gigax where you can interact with LLM-powered NPCs and see for yourself what the future holds!
+You can play with the demo directly on your browser 👉 here
+In this 3D demo, you can interact with the NPCs and teach them new skills with just a few lines of Lua scripting!
+The Tech Stack
+To create this, the teams used three main tools:
+Cubzh: the cross-platform UGC (User Generated Content) game engine.
+Gigax: the engine for smart NPCs.
+Hugging Face Spaces: the most convenient online environment to host and iterate on game concepts in an open-source fashion.
+What is Cubzh?
+Cubzh is a cross-platform UGC game engine, that aims to provide an open-source alternative to Roblox.
+It offers a rich gaming environment where users can create their own game experiences and play with friends.
+In Cubzh, you can:
+Create your own world items and avatars.
+Build fast, using community-made voxel items (+25K so far in the library) and open-source Lua modules.
+Code games using a simple yet powerful Lua scripting API.
+Cubzh is in public Alpha. You can download and play Cubzh for free on Desktop via Steam, Epic Game Store, or on Mobile via Apple&#39;s App Store, Google Play Store or even play directly from your browser.
+In this demo, Cubzh serves as the game engine running directly within a Hugging Face Space. You can easily clone it to experiment with custom scripts and NPC personas!
+What is Gigax?
+Gigax is the platform game developers use to run LLM-powered NPCs at scale.
+Gigax has fine-tuned (trained) large language models for NPC interactions, using the &quot;function calling&quot; principle.
+It&#39;s easier to think about this in terms of input/output flow:
+On input, the model reads a text description (prompt) of a 3D scene, alongside a description of recent events and a list of actions available for the NPCs (e.g.,
+&lt;say&gt;
+,&lt;jump&gt;
+,&lt;attack&gt;
+, etc.).The model then outputs one of these actions using parameters that refer to 3D entities that exist in the scene, e.g.
+say NPC1 &quot;Hello, Captain!&quot;
+.
+Gigax has open-sourced their stack! You can clone their inference stack on Github.
+For this demo, their models are hosted in the cloud, but you can download them yourself on the 🤗 Hub:
+The NPC-Playground Demo
+Interact with LLM-powered NPCs in our 3D Playground, in your browser: huggingface.co/spaces/cubzh/ai-npcs.
+Just clone the repository and modify cubzh.lua
+to teach NPCs new skills with a few lines of Lua scripting!
+Make your own demo 🔥
+Playing with the demo is just the first step! If you&#39;re interested in customizing it, check out our comprehensive ML for Games Course tutorial for step-by-step instructions and resources.
+The tutorial 👉 here
+In addition, you can check the documentation to learn more on how to tweak NPC behavior and teach NPCs new skills.
+We can&#39;t wait to see the amazing demos you&#39;re going to make 🔥. Share your demo on LinkedIn and X, and tag us @cubzh_ @gigax @huggingface we&#39;ll repost it 🤗.
+--
+The collaboration between Cubzh and Gigax has demonstrated how advanced AI can transform NPC interactions, making them more engaging and lifelike.
+If you want to dive more into Cubzh and Gigax don’t hesitate to join their communities:
+And to stay updated on the latest updates on Machine Learning for Games, don&#39;t forget to join the 🤗 Discord </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

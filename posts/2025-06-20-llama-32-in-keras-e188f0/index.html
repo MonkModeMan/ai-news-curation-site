@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Llama 3.2 in Keras</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Llama 3.2 in Keras</h1> <p class="text-sm text-gray-500"> 2024/10/21 – Hugging Face Blog  <a href="https://huggingface.co/blog/keras-llama-32" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Llama 3.2 in Keras
+This is going to be the shortest blog post ever.
+Question: Llama 3.2 landed two weeks ago on Hugging Face / Transformers. When will it be available in Keras?
+Answer: It has been working from day 1 😀. There is nothing to wait for.
+Yes, Keras Llama3 can be loaded from any standard (i.e. safetensors) Hugging Face checkpoint, including the 3.2 checkpoints. If a conversion is required, it happens on the fly. Try this:
+!pip install keras_hub
+from keras_hub import models.Llama3CausalLM
+model = Llama3CausalLM.from_preset(&quot;hf://meta-llama/Llama-3.2-1B-Instruct&quot;, dtype=&quot;bfloat16&quot;)
+model.generate(&quot;Hi there!&quot;)
+Here is a Colab to try this out. Enjoy! 🤗
+OK, OK, I&#39;m being told that if I want to publish a blog post, I have to fill the space. Here are a couple of additional things to know about Keras.
+Keras is multi-backend
+Keras is the time-tested modeling library for JAX, PyTorch and TensorFlow. You might have noticed this line in the demo Colab:
+import os
+os.environ[&quot;KERAS_BACKEND&quot;] = &quot;jax&quot; # or &quot;torch&quot;, or &quot;tensorflow&quot;
+It has to appear before import keras
+and controls if the model is running on JAX, PyTorch or TensorFlow. Very handy to try your favorite models on JAX with XLA compilation 🚀.
+What is keras-hub?
+Keras is a modeling library and keras-hub is its collection of pre-trained models. It was previously called KerasNLP and KerasCV. The rename is in progress. It has all the popular pre-trained models (Llama3, Gemma, StableDiffusion, Segment Anything, ...) with their canonical implementation in Keras.
+LLMs in Keras come &quot;batteries included&quot;
+I mean, &quot;tokenizer included&quot;. model.generate()
+just works on strings:
+model.generate(&quot;Hi there!&quot;)
+&gt; &quot;Hi there! I&#39;m looking for information on how to ...
+Same thing for training. You can train on a set of strings directly:
+model.fit(strings) # list or dataset of input strings
+Chatting with an LLM
+Instruction-tuned variants of popular LLMs can be used for turn-by-turn conversations. Here, Llama-3.2-1B-Instruct understands the following conversation tagging (see meta docs).
+&lt;|start_header_id|&gt;system&lt;|end_header_id|&gt;You are a helpful assistant&lt;|eot_id|&gt;\n
+\n
+&lt;|start_header_id|&gt;user&lt;|end_header_id|&gt;Hello_&lt;|eot_id|&gt;\n
+\n
+&lt;|start_header_id|&gt;assistant&lt;|end_header_id|&gt;\n
+\n
+The conversation, once formatted in this way, can be fed directly to model.generate()
+.
+For convenience, the demo Colab implements a helper class called ChatState
+that does the necessary string concats automatically.
+Lower level access: Tokenizer, Backbone
+If you don&#39;t like &quot;batteries included&quot; and want to get to the underlying tokenizer and model, they are easily accessible:
+# tokenizer
+model.preprocessor.tokenizer
+# the model itself
+model.backbone
+# You can even load them separately from the same preset
+backbone = keras_hub.models.Llama3CausalLM.from_preset(&quot;hf://meta-llama/Llama-3.2-1B-Instruct&quot;, dtype=&quot;float16&quot;)
+tokenizer = keras_hub.models.Llama3Tokenizer.from_preset(&quot;hf://meta-llama/Llama-3.2-1B-Instruct&quot;)
+Wait, Tokenizer, Preprocessor? I&#39;m confused
+The Tokenizer just transforms text into integer vectors. Here &quot;Hello&quot; translates into a single token:
+tokenizer(&quot;Hello&quot;)
+&gt; Array([9906], dtype=int32)
+The Preprocessor is a catch-all concept for doing all the data transformations a model requires. This could be, for example, image resizing or augmentation for tasks involving images, or text tokenization like here for a text model. For the CausalLM task, the preprocessor takes care of three additional details:
+- adding the text start and text end tokens expected by the model
+- padding the token sequences and generating a mask
+- generating &quot;expected outputs&quot; for training and fine-tuning. For CausalLM tasks this is the input string shifted by one.
+tokens = model.preprocessor(&quot;Hello&quot;)
+tokens[0] # 128000 and 128009 are the start and end text tokens
+&gt; {&#39;token_ids&#39;: Array([128000, 9906, 128009, 0, 0, 0], dtype=int32), &#39;padding_mask&#39;: Array([True, True, True, False, False, False], dtype=bool)}
+tokens[1] # input sequence shifted by one
+&gt; [9906, 128009, 0, 0, 0, 0]
+# feeding the model manually
+model.backbone(model.preprocessor([&quot;Hello&quot;, &quot;Hi!&quot;])[0]) # raw logits as output
+&gt; [[[ 0.9805 0.1664 0.625 ... -0.834 -0.264 0.05203]
+...]]
+# More typically you would use Keras built-in functions model.generate, model.fit, model.predict, model.evaluate
+Keras has a built-in trainer
+Just call model.fit(ds)
+on your training dataset. This trainer is compatible with the various distributed training, mixed precision, quantization or LoRA/QLoRA options available in Keras. It&#39;s also totally optional. You can write a custom training loop if you want.
+For a complete example, see the demo Colab where we fine-tune Llama 3.2 to speak like a pirate:
+You can upload to the Hub
+Once you are happy with your fine-tuned model, upload it directly from Keras using:
+model.save_to_preset(&quot;./pirate-llama&quot;)
+# Use your own repo here
+keras_hub.upload_preset(
+uri = &quot;hf://martin-gorner/llama-3.2-1B-pirate-instruct&quot;,
+preset = &quot;./pirate-llama&quot;)
+The uploaded model is visible here.
+Distributed model parallelism for inference or training
+Demo Colab for this section: Llama 3.1 Keras model parallel
+Some of you are wondering, why use Keras when one can already work with LLMs on Hugging Face using Transformers? Answer: even if you don&#39;t care about Keras&#39; flexibility and usability as a modeling framework (you should!), Keras is your quickest path to advanced model parallelism thanks to JAX and its powerful XLA compiler.
+Let&#39;s pick an 8B parameters model to demonstrate: meta-llama/Llama-3.1-8B-Instruct (demo Colab here). Without quantization, this model is too large for any single accelerator. With Keras, you can load it sharded across multiple accelerators, GPU or TPU. If you are uncertain about the &quot;correct&quot; weight shardings, most models provide sensible defaults. Here, call keras_hub.models.Llama3Backbone.get_layout_map(device_mesh)
+:
+devices = keras.distribution.list_devices() # 8 TPU cores: let&#39;s do a 2x4 mesh
+device_mesh = keras.distribution.DeviceMesh((2, 4), [&quot;batch&quot;, &quot;model&quot;], devices)
+layout_map = keras_hub.models.Llama3Backbone.get_layout_map(device_mesh) # defaults
+distrib = keras.distribution.ModelParallel(layout_map=layout_map, batch_dim_name=&quot;batch&quot;)
+keras.distribution.set_distribution(distrib)
+# Now load the model, distributed across the accelerators
+model = keras_hub.models.Llama3CausalLM.from_preset(&quot;hf://meta-llama/Llama-3.1-8B-Instruct&quot;)
+And if you don&#39;t trust the default layout map provided by the model, you can define your own. In this example running on a &quot;small&quot; TPU setup with only 8 cores, the following layout map is a bit faster than the default (54s/epoch rather than 62s/epoch):
+layout_map = keras.distribution.LayoutMap(device_mesh)
+layout_map[&quot;token_embedding/embeddings&quot;] = (&quot;model&quot;, None)
+layout_map[&quot;token_embedding/reverse_embeddings&quot;] = (&quot;model&quot;, None)
+layout_map[&quot;self_attention.*(query|key|value).kernel&quot;] = (&quot;model&quot;, None, None)
+layout_map[&quot;self_attention.*attention_output.kernel&quot;] = (&quot;model&quot;, None, None)
+layout_map[&quot;feedforward_intermediate_dense.kernel&quot;] = (None, &quot;model&quot;)
+layout_map[&quot;feedforward_gate_dense.kernel&quot;] = (None, &quot;model&quot;)
+layout_map[&quot;feedforward_output_dense.kernel&quot;] = (&quot;model&quot;, None)
+Check out the demo Colab here which fine-tunes the larger 8B Llama on pirate-speak, in just under 8 min on a Google TPU v5e (available in JupyterLab on Hugging Face Spaces. The fine-tuned model is here. And if you need a short model explainer about model parallelism and Keras, I have you covered here. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

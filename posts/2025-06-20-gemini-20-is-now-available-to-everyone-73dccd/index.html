@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Gemini 2.0 is now available to everyone</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Gemini 2.0 is now available to everyone</h1> <p class="text-sm text-gray-500"> 2025/2/5 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/gemini-2-0-is-now-available-to-everyone/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Gemini 2.0 is now available to everyone
+In December, we kicked off the agentic era by releasing an experimental version of Gemini 2.0 Flash — our highly efficient workhorse model for developers with low latency and enhanced performance. Earlier this year, we updated 2.0 Flash Thinking Experimental in Google AI Studio, which improved its performance by combining Flash’s speed with the ability to reason through more complex problems.
+And last week, we made an updated 2.0 Flash available to all users of the Gemini app on desktop and mobile, helping everyone discover new ways to create, interact and collaborate with Gemini.
+Today, we’re making the updated Gemini 2.0 Flash generally available via the Gemini API in Google AI Studio and Vertex AI. Developers can now build production applications with 2.0 Flash.
+We’re also releasing an experimental version of Gemini 2.0 Pro, our best model yet for coding performance and complex prompts. It is available in Google AI Studio and Vertex AI, and in the Gemini app for Gemini Advanced users.
+We’re releasing a new model, Gemini 2.0 Flash-Lite, our most cost-efficient model yet, in public preview in Google AI Studio and Vertex AI.
+Finally, 2.0 Flash Thinking Experimental will be available to Gemini app users in the model dropdown on desktop and mobile.
+All of these models will feature multimodal input with text output on release, with more modalities ready for general availability in the coming months. More information, including specifics about pricing, can be found in the Google for Developers blog. Looking ahead, we’re working on more updates and improved capabilities for the Gemini 2.0 family of models.
+2.0 Flash: a new update for general availability
+First introduced at I/O 2024, the Flash series of models is popular with developers as a powerful workhorse model, optimal for high-volume, high-frequency tasks at scale and highly capable of multimodal reasoning across vast amounts of information with a context window of 1 million tokens. We’ve been thrilled to see its reception by the developer community.
+2.0 Flash is now generally available to more people across our AI products, alongside improved performance in key benchmarks, with image generation and text-to-speech coming soon.
+Try Gemini 2.0 Flash in the Gemini app or the Gemini API in Google AI Studio and Vertex AI. Pricing details can be found in the Google for Developers blog.
+2.0 Pro Experimental: our best model yet for coding performance and complex prompts
+As we’ve continued to share early, experimental versions of Gemini 2.0 like Gemini-Exp-1206, we’ve gotten excellent feedback from developers about its strengths and best use cases, like coding.
+Today, we’re releasing an experimental version of Gemini 2.0 Pro that responds to that feedback. It has the strongest coding performance and ability to handle complex prompts, with better understanding and reasoning of world knowledge, than any model we’ve released so far. It comes with our largest context window at 2 million tokens, which enables it to comprehensively analyze and understand vast amounts of information, as well as the ability to call tools like Google Search and code execution.
+Gemini 2.0 Pro is available now as an experimental model to developers in Google AI Studio and Vertex AI and to Gemini Advanced users in the model drop-down on desktop and mobile.
+2.0 Flash-Lite: our most cost-efficient model yet
+We’ve gotten a lot of positive feedback on the price and speed of 1.5 Flash. We wanted to keep improving quality, while still maintaining cost and speed. So today, we’re introducing 2.0 Flash-Lite, a new model that has better quality than 1.5 Flash, at the same speed and cost. It outperforms 1.5 Flash on the majority of benchmarks.
+Like 2.0 Flash, it has a 1 million token context window and multimodal input. For example, it can generate a relevant one-line caption for around 40,000 unique photos, costing less than a dollar in Google AI Studio’s paid tier.
+Gemini 2.0 Flash-Lite is available in Google AI Studio and Vertex AI in public preview.
+Our responsibility and safety work
+As the Gemini model family becomes more capable, we’ll continue to invest in robust measures that enable safe and secure use. For example, our Gemini 2.0 lineup was built with new reinforcement learning techniques that use Gemini itself to critique its responses. This resulted in more accurate and targeted feedback and improved the model&#39;s ability to handle sensitive prompts, in turn.
+We’re also leveraging automated red teaming to assess safety and security risks, including those posed by risks from indirect prompt injection, a type of cybersecurity attack which involves attackers hiding malicious instructions in data that is likely to be retrieved by an AI system. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

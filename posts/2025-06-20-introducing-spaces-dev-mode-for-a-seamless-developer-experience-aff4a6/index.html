@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing Spaces Dev Mode for a seamless developer experience</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing Spaces Dev Mode for a seamless developer experience</h1> <p class="text-sm text-gray-500"> 2024/5/21 – Hugging Face Blog  <a href="https://huggingface.co/blog/spaces-dev-mode" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing Spaces Dev Mode for a seamless developer experience
+Hugging Face Spaces makes it easy for you to create and deploy AI-powered demos in minutes. Over 500,000 Spaces have been created by the Hugging Face community and it keeps growing! As part of Hugging Face Spaces, we recently released support for “Dev Mode”, to make your experience of building Spaces even more seamless.
+Spaces Dev Mode lets you connect with VS Code or SSH directly to your Space. In a click, you can connect to your Space, and start editing your code, removing the need to push your local changes to the Space repository using git. Let&#39;s see how to setup this feature in your Space’s settings 🔥
+Enable Dev Mode
+Spaces Dev Mode is currently in beta, and available to PRO subscribers. To learn more about Spaces Dev Mode, check out the documentation. After creating your space, navigate to Settings.
+Scroll down in the Settings and click on “Enable Dev Mode”. Your Space will automatically Restart.
+Connect to VS Code
+Once your Space is in a Running state, you can connect to VS Code locally or in your browser in one click! You can also use SSH to set up the connection to your Space in another IDE.
+For example, let’s change the color theme of this Gradio Space. After editing the code, no need to push your changes and rebuild the Space container to test it. Go directly in your Space and click “Refresh”.
+That’s it! Once you’re satisfied with your changes, you can commit and merge to persist them.
+Go build your first Spaces here! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

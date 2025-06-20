@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>LangGraph CodeActをE2Bの安全な仮想環境で動かす</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 LangGraph CodeActをE2Bの安全な仮想環境で動かす</h1> <p class="text-sm text-gray-500"> 2025/4/17 – AI Shift  <a href="https://www.ai-shift.co.jp/techblog/5652" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> こんにちは、 AIチームの戸田です
+今回は先日LangChainから発表されたLangGraph CodeActをE2Bの仮想環境で動かしてみようと思います。CodeActは最近注目を集めているAI AgentのTool連携における新しいパラダイムで、Function Callingのような従来のツール使用方法とは一風変わった手法です。本記事ではCodeActを安全に実行するための方法と、その可能性について紹介します。
+CodeActとは
+CodeActは、AI AgentがToolを利用する際の新しいアプローチです。従来のAI Agentでは、事前に定義された関数を呼び出して処理を行うのが一般的でした。しかし、CodeActでは、AI Agent自身がタスク達成に必要なPythonコードをその場で生成し、実行します。 これには以下のような利点があります:
+- 柔軟性の向上: 事前定義関数に縛られず、状況に応じた処理が可能
+- ステップ数の削減: 複雑な処理を一度のコード生成・実行で完結できる
+- メンテナンスコストの低減: ツールセットを網羅的に定義する必要がない
+LangChainチームは、近年話題になっているManusというAI Agentに触発されてこの機能を追加したと述べています。
+また、LLMの運用ツールとして有名なLangSmithとの連携も可能で、どのようなコードが生成され、実行されたのかを詳細に追跡できるのが強みです。
+ちなみにこのCodeActという概念は、以前「CodeAgent」としてご紹介したsmolagentsの提唱する概念と同じ流れを汲んでいます。まだ新しい分野のため呼び名が定まっていないようです。
+本記事ではLangChainの定義に合わせてCodeActと呼称させていただきます。
+セキュリティリスクと安全な実行環境
+CodeActの大きな特徴である「自動コード生成と実行」は、同時に大きな懸念をもたらします。具体的には以下が挙げられます:
+- 予期せぬ動作: 生成されたコードが意図しない挙動をする可能性
+- システムアクセス: ローカルファイルやネットワークに無制限にアクセスするリスク
+- リソース消費: 無限ループや高負荷処理によるシステム不安定化
+- 悪意あるコード: 悪意のある操作を実行してしまうリスク
+これらのリスクを軽減するために、今回はE2Bというサンドボックス環境でCodeActを実行してみます。E2Bは隔離された仮想環境でコードを実行でき、ホストシステムを保護しながら安全にAIコードを試せるサービスです。E2Bについては以前書いた記事（１、２）をご参照いただければと思います。
+環境セットアップと実装
+必要なライブラリのインストール
+まずは必要なライブラリをインストールします
+LangGraph CodeActは、LangGraph上に構築されており、以下のコードでインストールできます。
+# LangGraph CodeActのインストール
+pip install langchain langgraph langgraph-codeact
+# E2B仮想環境のインストール
+pip install e2b-code-interpreter
+環境変数の設定
+各サービスを利用するための環境変数を設定します。各ドキュメント（LangSmith、E2B、OpenAI）を参考に、以下のものを設定してください
+# LangSmithの設定
+LANGSMITH_API_KEY=
+LANGSMITH_TRACING=
+LANGSMITH_ENDPOINT=
+LANGSMITH_PROJECT=
+# E2Bの設定
+E2B_API_KEY=
+# OpenAI APIの設定
+OPENAI_API_KEY=
+LangGraph CodeActの処理フロー
+LangGraph CodeActの基本的な処理の流れをシンプルに示すと以下のようになります。
+- ユーザーの要望(query)が入力される
+- call_modelノードが要望を解決するためのPythonコードを生成
+- sandboxノードが生成されたコードを実行
+- 実行結果をもとにqueryが達成できているか評価
+- 達成できていなければ、フィードバックをもとにcall_modelノードが再度コードを生成
+- queryが達成されるまで繰り返し
+実装コード
+以下のコードでLangGraphでCodeActを使ったAI Agent実装します
+from langchain.chat_models import init_chat_model
+from langgraph_codeact import create_codeact
+from langgraph.checkpoint.memory import MemorySaver
+model = init_chat_model(&quot;gpt-4o&quot;, model_provider=&quot;openai&quot;)
+tools = ... # ユーザーが定義した関数をリストで渡す
+eval_fn = ... # コード実行関数
+code_act = create_codeact(model, tools, eval_fn)
+agent = code_act.compile(checkpointer=MemorySaver())
+toolsは特に渡したい関数が無ければ空のリストを渡せば良いです。またcall_modelノードとsandboxノードのやり取りで、過去の履歴を参照させるためにMemorySaverを設定しています。
+ここで重要になってくるのはコードを実行するためのeval_fnです。こちらはLLMが生成したコード文字列を受け取って実行して結果を返す関数になります。READMEにあるサンプルコードを参考にeval_fnを定義しますが、そのままだと手元の環境でコードを実行してしまうので、E2Bのサンドボックス環境で実行するように変更します。
+import io
+import contextlib
+from e2b_code_interpreter import Sandbox
+def my_eval_fn(code: str, _locals: dict[str, Any]) -&gt; tuple[str, dict[str, Any]]:
+&quot;&quot;&quot;
+code: 実行するPythonコード
+_locals: コード実行時のローカル変数
+&quot;&quot;&quot;
+try:
+with contextlib.redirect_stdout(io.StringIO()) as f:
+sbx = Sandbox() # 仮想環境を作る
+execution = sbx.run_code(code, envs=_locals) # 仮想環境でPythonコードを実行
+# 実行結果を表示
+print(&quot;Execution Results:&quot;)
+print(execution.logs.stdout[0])
+result = f.getvalue()
+if not result:
+result = &quot;&lt;code ran, no output printed to stdout&gt;&quot;
+except Exception as e:
+result = f&quot;Error during execution: {repr(e)}&quot;
+return result, _locals
+今回の検証では使用しませんが、_localsには環境変数、例えば外部APIのAPI Keyなどを辞書形式で設定することができるようです。
+実行テスト
+こちらのコードをeval_fnに設定することでCodeActを行うAgentの設定が完了しました。以前smolagentを試した時と同様、フィボナッチ数の118番目を聞いてみようと思います。
+messages = [{
+&quot;role&quot;: &quot;user&quot;,
+&quot;content&quot;: &quot;Could you give me the 118th number in the Fibonacci sequence?&quot;,
+}]
+out = agent.invoke(
+{&quot;messages&quot;: messages},
+config={&quot;configurable&quot;: {&quot;thread_id&quot;: 1}},
+)
+print(out[&quot;messages&quot;][-1].content)
+# The 118th Fibonacci number is 1264937032042997393488322. Let me know if you need help with anything else!
+結果として正しい値が得られました。
+では、この過程でどのようなコードが生成され実行されたのか、LangSmithで確認してみましょう。
+前回smolagentが生成したものと全く同じコードが生成されているのがわかります。
+前回の記事では、smolagentを使ってWebスクレイピングのタスクも実行しました。今回もWebスクレイピングを依頼するqueryを試してみましょう。messagesのcontentを以下のように変更して実行すると結果が得られます。
+- &quot;content&quot;: &quot;Could you give me the 118th number in the Fibonacci sequence?&quot;,
++ &quot;content&quot;: &quot;Could you get me the title of the page at url &#39;https://www.ai-shift.co.jp/techblog/5333&#39;?&quot;,
+.
+.
+.
+# 結果:
+# The title of the page is: &quot;【AI Shift Advent Calendar 2024】2024年のTech Blog/対外発表の振り返り | 株式会社AI Shift&quot;
+こちらも前回の記事と同様、BeautifulSoupを使ったスクレイピングを行うコードが生成されました。
+smolagentsと異なる点として、smolagentsはrequestsとbeautifulsoupなどのimportして使えるライブラリのインストールを明に示す必要があったのに対し、CodeActではそれが必要ないことが挙げられます。実行環境にインストールされているものであれば、そのまま使用することができるので便利とも言えますし、想定外の挙動をする可能性もあるので危険とも言えます。ここは実行環境のE2Bの方で使用できるライブラリを制限するなどの対応が必要かもしれません。
+まとめ
+今回はLangGraph CodeActをE2Bの仮想環境で動かし、AIによるコード生成・実行の新しい可能性を探りました。
+CodeActアプローチの最大の魅力は、AI Agentがタスク解決のために必要なコードを自律的に作成し実行できる点です。これにより、従来のように事前に全ての機能を定義しておく必要がなくなり、より柔軟で創造的な問題解決が可能になります。
+一方で、自動コード実行にはセキュリティ上の懸念が伴うため、E2Bのようなサンドボックス環境の活用が重要です。今回示したように、E2Bを用いることで、生成AIの能力を安全に引き出すことができます。
+現状ではE2B環境の実行を手動設定する必要があるなど、機能面で改善の余地はありますが、LangChainエコシステムと統合されている点やLangSmithによる実行ログの詳細な追跡は非常に強力です。今後のアップデートでより統合された体験が提供されることを期待しています。
+最後までお読みいただき、ありがとうございました！ </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

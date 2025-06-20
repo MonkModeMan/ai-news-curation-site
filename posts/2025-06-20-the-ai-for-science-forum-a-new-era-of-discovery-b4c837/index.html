@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>The AI for Science Forum: A new era of discovery</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 The AI for Science Forum: A new era of discovery</h1> <p class="text-sm text-gray-500"> 2024/11/18 – DeepMind Blog  <a href="https://deepmind.google/discover/blog/the-ai-for-science-forum-a-new-era-of-discovery/" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> A new era of discovery
+James Manyika’s opening remarks from the AI for Science Forum.
+AI is revolutionizing the landscape of scientific research, enabling advancements at a pace that was once unimaginable — from accelerating drug discovery to designing new materials for clean energy technologies. The AI for Science Forum — co-hosted by Google DeepMind and the Royal Society — brought together the scientific community, policymakers, and industry leaders to explore the transformative potential of AI to drive scientific breakthroughs, address the world&#39;s most pressing challenges, and lead to a new era of discovery. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

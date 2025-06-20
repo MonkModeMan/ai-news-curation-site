@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Bringing the Artificial Analysis LLM Performance Leaderboard to Hugging Face</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Bringing the Artificial Analysis LLM Performance Leaderboard to Hugging Face</h1> <p class="text-sm text-gray-500"> 2024/5/3 – Hugging Face Blog  <a href="https://huggingface.co/blog/leaderboard-artificial-analysis" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Bringing the Artificial Analysis LLM Performance Leaderboard to Hugging Face
+Building applications with LLMs requires considering more than just quality: for many use-cases, speed and price are equally or more important.
+For consumer applications and chat experiences, speed and responsiveness are critical to user engagement. Users expect near-instant responses, and delays can directly lead to reduced engagement. When building more complex applications involving tool use or agentic systems, speed and cost become even more important, and can become the limiting factor on overall system capability. The time taken by sequential requests to LLMs can quickly stack up for each user request adding to the cost.
+This is why Artificial Analysis (@ArtificialAnlys) developed a leaderboard evaluating price, speed and quality across &gt;100 serverless LLM API endpoints, now coming to Hugging Face.
+Find the leaderboard here!
+The LLM Performance Leaderboard
+The LLM Performance Leaderboard aims to provide comprehensive metrics to help AI engineers make decisions on which LLMs (both open &amp; proprietary) and API providers to use in AI-enabled applications.
+When making decisions regarding which AI technologies to use, engineers need to consider quality, price and speed (latency &amp; throughput). The LLM Performance Leaderboard brings all three together to enable decision making in one place across both proprietary &amp; open models.
+Source: LLM Performance Leaderboard
+Metric coverage
+The metrics reported are:
+- Quality: a simplified index for comparing model quality and accuracy, calculated based on metrics such as MMLU, MT-Bench, HumanEval scores, as reported by the model authors, and Chatbot Arena ranking.
+- Context window: the maximum number of tokens an LLM can work with at any one time (including both input and output tokens).
+- Pricing: the prices charged by a provider to query the model for inference. We report input/output per-token pricing, as well as &quot;blended&quot; pricing to compare hosting providers with a single metric. We blend input and output pricing at a 3:1 ratio (i.e., an assumption that the length of input is 3x longer than the output).
+- Throughput: how fast an endpoint outputs tokens during inference, measured in tokens per second (often referred to as tokens/s or &quot;TPS&quot;). We report the median, P5, P25, P75 and P95 values measured over the prior 14 days.
+- Latency: how long the endpoint takes to respond after the request has been sent, known as Time to First Token (&quot;TTFT&quot;) and measured in seconds. We report the median, P5, P25, P75 and P95 values measured over the prior 14 days.
+For further definitions, see our full methodology page.
+Test Workloads
+The leaderboard allows exploration of performance under several different workloads (6 combinations in total):
+- varying the prompt length: ~100 tokens, ~1k tokens, ~10k tokens.
+- running parallel queries: 1 query, 10 parallel queries.
+Methodology
+We test every API endpoint on the leaderboard 8 times per day, and leaderboard figures represent the median measurement of the last 14 days. We also have percentile breakdowns within the collapsed tabs.
+Quality metrics are currently collected on a per-model basis and show results reports by model creators, but watch this space as we begin to share results from our independent quality evaluations across each endpoint.
+For further definitions, see our full methodology page.
+Highlights (May 2024, see the leaderboard for the latest)
+- The language models market has exploded in complexity over the last year. Launches that have shaken up the market just within the last two months include proprietary models like Anthropic&#39;s Claude 3 series and open models such as Databricks&#39; DBRX, Cohere&#39;s Command R Plus, Google&#39;s Gemma, Microsoft&#39;s Phi-3, Mistral&#39;s Mixtral 8x22B and Meta&#39;s Llama 3.
+- Price and speed vary considerably between models and providers. From Claude 3 Opus to Llama 3 8B, there is a 300x pricing spread - that&#39;s more than two orders of magnitude!
+- API providers have increased the speed of launching models. Within 48 hours, 7 providers were offering the Llama 3 models. Speaking to the demand for new, open-source models and the competitive dynamics between API providers.
+- Key models to highlight across quality segments:
+- High quality, typically higher price &amp; slower: GPT-4 Turbo and Claude 3 Opus
+- Moderate quality, price &amp; speed: Llama 3 70B, Mixtral 8x22B, Command R+, Gemini 1.5 Pro, DBRX
+- Lower quality, but with much faster speed and lower pricing available: Llama 3 8B, Claude 3 Haiku, Mixtral 8x7B
+Our chart of Quality vs. Throughput (tokens/s) shows the range of options with different quality and performance characteristics.
+Source: artificialanalysis.ai/models
+Use Case Example: Speed and Price can be as important as Quality
+In some cases, design patterns involving multiple requests with faster and cheaper models can result in not only lower cost but better overall system quality compared to using a single larger model.
+For example, consider a chatbot that needs to browse the web to find relevant information from recent news articles. One approach would be to use a large, high-quality model like GPT-4 Turbo to run a search then read and process the top handful of articles. Another would be to use a smaller, faster model like Llama 3 8B to read and extract highlights from dozens web pages in parallel, and then use GPT-4 Turbo to assess and summarize the most relevant results. The second approach will be more cost effective, even after accounting for reading 10x more content, and may result in higher quality results.
+Get in touch
+Please follow us on Twitter and LinkedIn for updates. We&#39;re available via message on either, as well as on our website and via email. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

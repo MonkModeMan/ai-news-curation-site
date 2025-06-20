@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Hyperparameter Search with Transformers and Ray Tune</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Hyperparameter Search with Transformers and Ray Tune</h1> <p class="text-sm text-gray-500"> 2020/11/2 – Hugging Face Blog  <a href="https://huggingface.co/blog/ray-tune" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Hyperparameter Search with Transformers and Ray Tune
+A guest blog post by Richard Liaw from the Anyscale team
+With cutting edge research implementations, thousands of trained models easily accessible, the Hugging Face transformers library has become critical to the success and growth of natural language processing today.
+For any machine learning model to achieve good performance, users often need to implement some form of parameter tuning. Yet, nearly everyone (1, 2) either ends up disregarding hyperparameter tuning or opting to do a simplistic grid search with a small search space.
+However, simple experiments are able to show the benefit of using an advanced tuning technique. Below is a recent experiment run on a BERT model from Hugging Face transformers on the RTE dataset. Genetic optimization techniques like PBT can provide large performance improvements compared to standard hyperparameter optimization techniques.
+| Algorithm | Best Val Acc. | Best Test Acc. | Total GPU min | Total $ cost |
+| Grid Search | 74% | 65.4% | 45 min | $2.30 |
+| Bayesian Optimization +Early Stop | 77% | 66.9% | 104 min | $5.30 |
+| Population-based Training | 78% | 70.5% | 48 min | $2.45 |
+If you’re leveraging Transformers, you’ll want to have a way to easily access powerful hyperparameter tuning solutions without giving up the customizability of the Transformers framework.
+In the Transformers 3.1 release, Hugging Face Transformers and Ray Tune teamed up to provide a simple yet powerful integration. Ray Tune is a popular Python library for hyperparameter tuning that provides many state-of-the-art algorithms out of the box, along with integrations with the best-of-class tooling, such as Weights and Biases and tensorboard.
+To demonstrate this new Hugging Face + Ray Tune integration, we leverage the Hugging Face Datasets library to fine tune BERT on MRPC.
+To run this example, please first run:
+pip install &quot;ray[tune]&quot; transformers datasets scipy sklearn torch
+Simply plug in one of Ray’s standard tuning algorithms by just adding a few lines of code.
+from datasets import load_dataset, load_metric
+from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
+Trainer, TrainingArguments)
+tokenizer = AutoTokenizer.from_pretrained(&#39;distilbert-base-uncased&#39;)
+dataset = load_dataset(&#39;glue&#39;, &#39;mrpc&#39;)
+metric = load_metric(&#39;glue&#39;, &#39;mrpc&#39;)
+def encode(examples):
+outputs = tokenizer(
+examples[&#39;sentence1&#39;], examples[&#39;sentence2&#39;], truncation=True)
+return outputs
+encoded_dataset = dataset.map(encode, batched=True)
+def model_init():
+return AutoModelForSequenceClassification.from_pretrained(
+&#39;distilbert-base-uncased&#39;, return_dict=True)
+def compute_metrics(eval_pred):
+predictions, labels = eval_pred
+predictions = predictions.argmax(axis=-1)
+return metric.compute(predictions=predictions, references=labels)
+# Evaluate during training and a bit more often
+# than the default to be able to prune bad trials early.
+# Disabling tqdm is a matter of preference.
+training_args = TrainingArguments(
+&quot;test&quot;, evaluation_strategy=&quot;steps&quot;, eval_steps=500, disable_tqdm=True)
+trainer = Trainer(
+args=training_args,
+tokenizer=tokenizer,
+train_dataset=encoded_dataset[&quot;train&quot;],
+eval_dataset=encoded_dataset[&quot;validation&quot;],
+model_init=model_init,
+compute_metrics=compute_metrics,
+)
+# Default objective is the sum of all metrics
+# when metrics are provided, so we have to maximize it.
+trainer.hyperparameter_search(
+direction=&quot;maximize&quot;,
+backend=&quot;ray&quot;,
+n_trials=10 # number of trials
+)
+By default, each trial will utilize 1 CPU, and optionally 1 GPU if available.
+You can leverage multiple GPUs for a parallel hyperparameter search
+by passing in a resources_per_trial
+argument.
+You can also easily swap different parameter tuning algorithms such as HyperBand, Bayesian Optimization, Population-Based Training:
+To run this example, first run: pip install hyperopt
+from ray.tune.suggest.hyperopt import HyperOptSearch
+from ray.tune.schedulers import ASHAScheduler
+trainer = Trainer(
+args=training_args,
+tokenizer=tokenizer,
+train_dataset=encoded_dataset[&quot;train&quot;],
+eval_dataset=encoded_dataset[&quot;validation&quot;],
+model_init=model_init,
+compute_metrics=compute_metrics,
+)
+best_trial = trainer.hyperparameter_search(
+direction=&quot;maximize&quot;,
+backend=&quot;ray&quot;,
+# Choose among many libraries:
+# https://docs.ray.io/en/latest/tune/api_docs/suggestion.html
+search_alg=HyperOptSearch(metric=&quot;objective&quot;, mode=&quot;max&quot;),
+# Choose among schedulers:
+# https://docs.ray.io/en/latest/tune/api_docs/schedulers.html
+scheduler=ASHAScheduler(metric=&quot;objective&quot;, mode=&quot;max&quot;))
+It also works with Weights and Biases out of the box!
+Try it out today:
+pip install -U ray
+pip install -U transformers datasets
+- Check out the Hugging Face documentation and Discussion thread
+- End-to-end example of using Hugging Face hyperparameter search for text classification
+If you liked this blog post, be sure to check out:
+- Transformers + GLUE + Ray Tune example
+- Our Weights and Biases report on Hyperparameter Optimization for Transformers
+- The simplest way to serve your NLP model from scratch </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>

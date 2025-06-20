@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Photonic processor could streamline 6G wireless signal processing</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.BoXAN-Xr.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Photonic processor could streamline 6G wireless signal processing</h1> <p class="text-sm text-gray-500"> 2025/6/11 – MIT  <a href="https://news.mit.edu/2025/photonic-processor-could-streamline-6g-wireless-signal-processing-0611" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
+元記事
+</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> As more connected devices demand an increasing amount of bandwidth for tasks like teleworking and cloud computing, it will become extremely challenging to manage the finite amount of wireless spectrum available for all users to share.
+Engineers are employing artificial intelligence to dynamically manage the available wireless spectrum, with an eye toward reducing latency and boosting performance. But most AI methods for classifying and processing wireless signals are power-hungry and can’t operate in real-time.
+Now, MIT researchers have developed a novel AI hardware accelerator that is specifically designed for wireless signal processing. Their optical processor performs machine-learning computations at the speed of light, classifying wireless signals in a matter of nanoseconds.
+The photonic chip is about 100 times faster than the best digital alternative, while converging to about 95 percent accuracy in signal classification. The new hardware accelerator is also scalable and flexible, so it could be used for a variety of high-performance computing applications. At the same time, it is smaller, lighter, cheaper, and more energy-efficient than digital AI hardware accelerators.
+The device could be especially useful in future 6G wireless applications, such as cognitive radios that optimize data rates by adapting wireless modulation formats to the changing wireless environment.
+By enabling an edge device to perform deep-learning computations in real-time, this new hardware accelerator could provide dramatic speedups in many applications beyond signal processing. For instance, it could help autonomous vehicles make split-second reactions to environmental changes or enable smart pacemakers to continuously monitor the health of a patient’s heart.
+“There are many applications that would be enabled by edge devices that are capable of analyzing wireless signals. What we’ve presented in our paper could open up many possibilities for real-time and reliable AI inference. This work is the beginning of something that could be quite impactful,” says Dirk Englund, a professor in the MIT Department of Electrical Engineering and Computer Science, principal investigator in the Quantum Photonics and Artificial Intelligence Group and the Research Laboratory of Electronics (RLE), and senior author of the paper.
+He is joined on the paper by lead author Ronald Davis III PhD ’24; Zaijun Chen, a former MIT postdoc who is now an assistant professor at the University of Southern California; and Ryan Hamerly, a visiting scientist at RLE and senior scientist at NTT Research. The research appears today in Science Advances.
+Light-speed processing
+State-of-the-art digital AI accelerators for wireless signal processing convert the signal into an image and run it through a deep-learning model to classify it. While this approach is highly accurate, the computationally intensive nature of deep neural networks makes it infeasible for many time-sensitive applications.
+Optical systems can accelerate deep neural networks by encoding and processing data using light, which is also less energy intensive than digital computing. But researchers have struggled to maximize the performance of general-purpose optical neural networks when used for signal processing, while ensuring the optical device is scalable.
+By developing an optical neural network architecture specifically for signal processing, which they call a multiplicative analog frequency transform optical neural network (MAFT-ONN), the researchers tackled that problem head-on.
+The MAFT-ONN addresses the problem of scalability by encoding all signal data and performing all machine-learning operations within what is known as the frequency domain — before the wireless signals are digitized.
+The researchers designed their optical neural network to perform all linear and nonlinear operations in-line. Both types of operations are required for deep learning.
+Thanks to this innovative design, they only need one MAFT-ONN device per layer for the entire optical neural network, as opposed to other methods that require one device for each individual computational unit, or “neuron.”
+“We can fit 10,000 neurons onto a single device and compute the necessary multiplications in a single shot,” Davis says.
+The researchers accomplish this using a technique called photoelectric multiplication, which dramatically boosts efficiency. It also allows them to create an optical neural network that can be readily scaled up with additional layers without requiring extra overhead.
+Results in nanoseconds
+MAFT-ONN takes a wireless signal as input, processes the signal data, and passes the information along for later operations the edge device performs. For instance, by classifying a signal’s modulation, MAFT-ONN would enable a device to automatically infer the type of signal to extract the data it carries.
+One of the biggest challenges the researchers faced when designing MAFT-ONN was determining how to map the machine-learning computations to the optical hardware.
+“We couldn’t just take a normal machine-learning framework off the shelf and use it. We had to customize it to fit the hardware and figure out how to exploit the physics so it would perform the computations we wanted it to,” Davis says.
+When they tested their architecture on signal classification in simulations, the optical neural network achieved 85 percent accuracy in a single shot, which can quickly converge to more than 99 percent accuracy using multiple measurements. MAFT-ONN only required about 120 nanoseconds to perform entire process.
+“The longer you measure, the higher accuracy you will get. Because MAFT-ONN computes inferences in nanoseconds, you don’t lose much speed to gain more accuracy,” Davis adds.
+While state-of-the-art digital radio frequency devices can perform machine-learning inference in a microseconds, optics can do it in nanoseconds or even picoseconds.
+Moving forward, the researchers want to employ what are known as multiplexing schemes so they could perform more computations and scale up the MAFT-ONN. They also want to extend their work into more complex deep learning architectures that could run transformer models or LLMs.
+This work was funded, in part, by the U.S. Army Research Laboratory, the U.S. Air Force, MIT Lincoln Laboratory, Nippon Telegraph and Telephone, and the National Science Foundation. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
+← 一覧へ戻る
+</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
+      const base = document.getElementById('baseScript')?.dataset.base || '';
+      console.log("✅ base:", base);
+
+      const params = new URL(window.location.href).searchParams;
+      const fromPage = params.get("fromPage") || "1";
+      const fromSort = params.get("fromSort") || "date";
+
+      const backLink = document.getElementById("backLink");
+      if (backLink) {
+        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
+        console.log("✅ backLink.href:", backLink.href);
+      } else {
+        console.warn("⚠️ backLink not found");
+      }
+    </script> </body> </html>
