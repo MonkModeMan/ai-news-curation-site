@@ -1,6 +1,17 @@
-<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>SmolVLA: Efficient Vision-Language-Action Model trained on Lerobot Community Data</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.D9FskRcQ.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 SmolVLA: Efficient Vision-Language-Action Model trained on Lerobot Community Data</h1> <p class="text-sm text-gray-500"> 2025/6/3 – Hugging Face Blog  <a href="https://huggingface.co/blog/smolvla" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
-元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> SmolVLA: Efficient Vision-Language-Action Model trained on Lerobot Community Data
+---
+title: 'SmolVLA: Efficient Vision-Language-Action Model trained on Lerobot Community
+  Data'
+description: ''
+pubDate: Tue, 03 Jun 2025 00:00:00 GMT
+source: Hugging Face Blog
+tags:
+- huggingface
+- transformers
+- nlp
+url: https://huggingface.co/blog/smolvla
+---
+
+SmolVLA: Efficient Vision-Language-Action Model trained on Lerobot Community Data
 🧭TL;DR
 Today, we introduce SmolVLA, a compact (450M), open-source Vision-Language-Action model for robotics that runs on consumer hardware.
 - Pretrained only on compatibly licensed, open-source community-shared datasets under the lerobot tag.
@@ -40,12 +51,12 @@ Despite using fewer than 30k training episodes—an order of magnitude less than
 To make real-time robotics easier to use, we introduce an asynchronous inference stack. This technology separates how robots perform actions from how they understand what they see and hear. Because of this separation, robots can respond more quickly in fast-changing environments.
 Figure 2. SmolVLA takes as input a sequence of RGB images from multiple cameras, the robot’s current sensorimotor state, and a natural language instruction. The VLM encodes these into contextual features, which condition the action expert to generate a continuous sequence of actions.
 🚀 How to Use SmolVLA?
-SmolVLA is designed to be easy to use and integrate—whether you&#39;re finetuning on your own data or plugging it into an existing robotics stack.
+SmolVLA is designed to be easy to use and integrate—whether you're finetuning on your own data or plugging it into an existing robotics stack.
 Install
 First, install the required dependencies:
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
-pip install -e &quot;.[smolvla]&quot;
+pip install -e ".[smolvla]"
 Finetune the pretrained model
 Use smolvla_base
 , our pretrained 450M model, with the lerobot training framework:
@@ -55,7 +66,7 @@ python lerobot/scripts/train.py \
 --batch_size=64 \
 --steps=20000 # 10% of training budget
 Train from scratch
-If you&#39;d like to build from the architecture (pretrained VLM + action expert) rather than a pretrained checkpoint:
+If you'd like to build from the architecture (pretrained VLM + action expert) rather than a pretrained checkpoint:
 python lerobot/scripts/train.py \
 --policy.type=smolvla \
 --dataset.repo_id=lerobot/svla_so100_stacking \
@@ -64,7 +75,7 @@ python lerobot/scripts/train.py \
 You can also load SmolVLAPolicy
 directly:
 from lerobot.common.policies.smolvla.modeling_smolvla import SmolVLAPolicy
-policy = SmolVLAPolicy.from_pretrained(&quot;lerobot/smolvla_base&quot;)
+policy = SmolVLAPolicy.from_pretrained("lerobot/smolvla_base")
 Method
 SmolVLA is not only a lightweight yet capable model, but also a method for training and evaluating generalist robotics policies. In this section, we introduce the model architecture behind SmolVLA and the asynchronous inference setup used for evaluation, which has proven to be more adaptable and capable of faster recovery.
 SmolVLA consists of two core components: a Vision-Language Model (VLM) that processes multimodal inputs and an action expert that outputs robot control commands. Below, we share the details of the main components of SmolVLA architecture and the Asynchronous Inference. More details can be found in our technical report.
@@ -94,7 +105,7 @@ In SmolVLA, CA ensures that actions are well-conditioned on perception and instr
 Asynchronous Inference
 Figure 3. Asynchronous inference. Illustration of the asynchronous inference stack. Note that the policy can be run on a remote server, possibly with GPUs.
 Modern visuomotor policies output action chunks—sequences of actions to execute. There are two ways to manage them:
-- Synchronous (sync): The robot executes a chunk, then pauses while the next one is computed. Simple, but causes a delay where the robot can&#39;t react to new inputs.
+- Synchronous (sync): The robot executes a chunk, then pauses while the next one is computed. Simple, but causes a delay where the robot can't react to new inputs.
 - Asynchronous (async): While executing the current chunk, the robot already sends the latest observation to a Policy Server (possibly hosted on GPU) for the next chunk. This avoids idle time and improves reactivity.
 Our async stack decouples action execution from chunk prediction, resulting in higher adaptability, and the complete lack of execution lags at runtime. It relies on the following key mechanisms:
 - 1. Early trigger: When the queue length falls below a threshold (e.g., 70%), we send an observation to a Policy Server, calling for a new action chunk.
@@ -102,7 +113,7 @@ Our async stack decouples action execution from chunk prediction, resulting in h
 - 3. Chunk fusion: Overlapping actions from successive chunks are stitched with a simple merge rule to avoid jitter.
 We are really excited about releasing asynchronous inference because it guarantees greater adaptability and improved performance without changing the model. In short, async inference keeps the robot responsive by overlapping execution and remote prediction.
 Community Datasets
-While vision and language models thrive on web-scale datasets like LAION, ImageNet, and Common Crawl, robotics lacks a comparable resource. There’s no “Internet of robots.” Instead, data is fragmented across robot types, sensors, control schemes, and formats—forming disconnected &quot;data islands&quot;. In our previous post, we explored how this fragmentation could be resolved through open, collaborative efforts. Just as ImageNet catalyzed breakthroughs in computer vision by providing a large, diverse benchmark, we believe that community-driven robotics datasets can play the same foundational role for generalist robot policies.
+While vision and language models thrive on web-scale datasets like LAION, ImageNet, and Common Crawl, robotics lacks a comparable resource. There’s no “Internet of robots.” Instead, data is fragmented across robot types, sensors, control schemes, and formats—forming disconnected "data islands". In our previous post, we explored how this fragmentation could be resolved through open, collaborative efforts. Just as ImageNet catalyzed breakthroughs in computer vision by providing a large, diverse benchmark, we believe that community-driven robotics datasets can play the same foundational role for generalist robot policies.
 SmolVLA is our first step toward that vision: It is pretrained on a curated mix of publicly available, community-contributed datasets designed to reflect real-world variation. Rather than optimizing for dataset size alone, we focus on diversity: a range of behaviors, camera viewpoints, and embodiments that promote transfer and generalization.
 All training data used in SmolVLA comes from LeRobot Community Datasets , robotics datasets shared on the Hugging Face Hub under the lerobot
 tag. Collected in diverse settings, from labs to living rooms, these datasets represent an open, decentralized effort to scale real-world robot data.
@@ -144,7 +155,7 @@ Finally, we evaluate SmolVLA under synchronous and asynchronous inference modes.
 This results in more responsive and robust real-world performance, especially in dynamic environments with shifting objects or external disturbances.
 Figure 5. Asynchronous vs. Synchronous Inference in Real-World Tasks. (a) Task success rates (%), (b) average completion time(s), and (c) number of tasks completed within a fixed time window.
 Conclusion
-SmolVLA is our contribution to building robotics foundation models that are open, efficient, and reproducible. Despite its small size, it matches or outperforms larger, proprietary models across a range of real-world and simulated tasks. By relying solely on community-contributed datasets and affordable hardware, SmolVLA lowers the barrier to entry for researchers, educators, and hobbyists alike. But this is just the beginning. SmolVLA is more than just a model — it&#39;s part of a growing open-source movement toward scalable, collaborative robotics.
+SmolVLA is our contribution to building robotics foundation models that are open, efficient, and reproducible. Despite its small size, it matches or outperforms larger, proprietary models across a range of real-world and simulated tasks. By relying solely on community-contributed datasets and affordable hardware, SmolVLA lowers the barrier to entry for researchers, educators, and hobbyists alike. But this is just the beginning. SmolVLA is more than just a model — it's part of a growing open-source movement toward scalable, collaborative robotics.
 Call to Action:
 - 🔧 Try it out! Finetune SmolVLA on your own data, deploy it on affordable hardware, or benchmark it against your current stack and share it on twitter/linkedin.
 - 🤖 Upload the dataset! Got a robot? Collect and share your data using the lerobot format. Help expand the community dataset that powers SmolVLA.
@@ -152,21 +163,4 @@ Call to Action:
 - 📊 Contribute. Improve datasets, report issues, suggest new ideas. Every contribution helps.
 - 🌍 Spread the word. Share SmolVLA with fellow researchers, developers, or educators interested in efficient, real-time robotic policies.
 - 📫 Stay in touch: Follow the LeRobot organization and Discord server for updates, tutorials, and new releases.
-Together, we can make real-world robotics more capable, more affordable, and more open. ✨ </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
-← 一覧へ戻る
-</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
-      const base = document.getElementById('baseScript')?.dataset.base || '';
-      console.log("✅ base:", base);
-
-      const params = new URL(window.location.href).searchParams;
-      const fromPage = params.get("fromPage") || "1";
-      const fromSort = params.get("fromSort") || "date";
-
-      const backLink = document.getElementById("backLink");
-      if (backLink) {
-        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
-        console.log("✅ backLink.href:", backLink.href);
-      } else {
-        console.warn("⚠️ backLink not found");
-      }
-    </script> </body> </html>
+Together, we can make real-world robotics more capable, more affordable, and more open. ✨

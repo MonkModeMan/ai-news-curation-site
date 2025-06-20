@@ -1,6 +1,16 @@
-<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Introducing Training Cluster as a Service - a new collaboration with NVIDIA</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.D9FskRcQ.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Introducing Training Cluster as a Service - a new collaboration with NVIDIA</h1> <p class="text-sm text-gray-500"> 2025/6/11 – Hugging Face Blog  <a href="https://huggingface.co/blog/nvidia-training-cluster" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
-元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Introducing Training Cluster as a Service - a new collaboration with NVIDIA
+---
+title: Introducing Training Cluster as a Service - a new collaboration with NVIDIA
+description: ''
+pubDate: Wed, 11 Jun 2025 00:00:00 GMT
+source: Hugging Face Blog
+tags:
+- huggingface
+- transformers
+- nlp
+url: https://huggingface.co/blog/nvidia-training-cluster
+---
+
+Introducing Training Cluster as a Service - a new collaboration with NVIDIA
 Today at GTC Paris, we are excited to announce Training Cluster as a Service in collaboration with NVIDIA, to make large GPU clusters more easily accessible for research organizations all over the world, so they can train the foundational models of tomorrow in every domain.
 Making GPU Clusters Accessible
 Many Gigawatt-size GPU supercluster projects are being built to train the next gen of AI models. This can make it seem that the compute gap between the “GPU poor” and the “GPU rich” is quickly widening. But the GPUs are out there, as hyperscalers, regional and AI-native cloud providers all quickly expand their capacity.
@@ -21,11 +31,11 @@ AI offers new ways to research the causes of rare genetic diseases and to develo
 -- Diego di Bernardo, Coordinator of the Genomic Medicine program at TIGEM
 Advancing AI for Mathematics with Numina
 Numina is a non-profit organization building open-source, open-dataset AI for reasoning in math - and won the 2024 AIMO progress prize.
-We are tracking well on our objective to build open alternatives to the best closed-source models, such as Deepmind&#39;s AlphaProof. Computing resources is our bottleneck today - with Training Cluster as a Service we will be able to reach our goal!
+We are tracking well on our objective to build open alternatives to the best closed-source models, such as Deepmind's AlphaProof. Computing resources is our bottleneck today - with Training Cluster as a Service we will be able to reach our goal!
 -- Yann Fleureau, cofounder of Project Numina
 Advancing Material Science with Mirror Physics
 Mirror Physics is a startup creating frontier AI systems for chemistry and materials science.
-Together with the MACE team, we&#39;re working to push the limits of AI for chemistry. With Training Cluster as a Service, we&#39;re producing high-fidelity chemical models at unprecedented scale. This is going to be a significant step forward for the field.
+Together with the MACE team, we're working to push the limits of AI for chemistry. With Training Cluster as a Service, we're producing high-fidelity chemical models at unprecedented scale. This is going to be a significant step forward for the field.
 -- Sam Walton Norwood, CEO and founder at Mirror
 Powering the Diversity of AI Research
 Training Cluster as a Service is a new collaboration between Hugging Face and NVIDIA to make AI compute more readily available to the global community of AI researchers.
@@ -39,21 +49,4 @@ Today at GTC Paris, NVIDIA announced many new contributions for Hugging Face use
 - NVIDIA DGX Cloud Lepton connects Europe’s developers to global NVIDIA compute ecosystem
 - NVIDIA AI customers can now deploy over 100k Hugging Face models with NIM
 - Hugging Face users can build custom Physical AI models with NVIDIA Cosmos Predict-2
-- NVIDIA Isaac GR00T N1.5 lands on Hugging Face to power humanoids robots </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
-← 一覧へ戻る
-</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
-      const base = document.getElementById('baseScript')?.dataset.base || '';
-      console.log("✅ base:", base);
-
-      const params = new URL(window.location.href).searchParams;
-      const fromPage = params.get("fromPage") || "1";
-      const fromSort = params.get("fromSort") || "date";
-
-      const backLink = document.getElementById("backLink");
-      if (backLink) {
-        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
-        console.log("✅ backLink.href:", backLink.href);
-      } else {
-        console.warn("⚠️ backLink not found");
-      }
-    </script> </body> </html>
+- NVIDIA Isaac GR00T N1.5 lands on Hugging Face to power humanoids robots

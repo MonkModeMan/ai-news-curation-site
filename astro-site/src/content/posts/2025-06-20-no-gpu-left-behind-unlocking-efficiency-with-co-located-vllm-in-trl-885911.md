@@ -1,6 +1,16 @@
-<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>No GPU left behind: Unlocking Efficiency with Co-located vLLM in TRL</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.D9FskRcQ.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 No GPU left behind: Unlocking Efficiency with Co-located vLLM in TRL</h1> <p class="text-sm text-gray-500"> 2025/6/3 – Hugging Face Blog  <a href="https://huggingface.co/blog/vllm-colocate" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
-元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> No GPU left behind: Unlocking Efficiency with Co-located vLLM in TRL
+---
+title: 'No GPU left behind: Unlocking Efficiency with Co-located vLLM in TRL'
+description: ''
+pubDate: Tue, 03 Jun 2025 00:00:00 GMT
+source: Hugging Face Blog
+tags:
+- huggingface
+- transformers
+- nlp
+url: https://huggingface.co/blog/vllm-colocate
+---
+
+No GPU left behind: Unlocking Efficiency with Co-located vLLM in TRL
 🚀 Introduction
 TRL supports training LLMs using GRPO, an online learning algorithm recently introduced in the DeepSeekMath paper. In GRPO, the model learns from its own outputs: it generates responses during training, receives feedback, and uses that feedback to improve itself over time.
 This makes generation a critical step in the training loop — and also a major bottleneck. To speed up generation, TRL integrates with vLLM. This combination lets you train powerful models more efficiently in GRPO setup. However, there’s a catch.
@@ -15,7 +25,7 @@ This “ping-pong” between training and generation causes:
 - Wasted GPU time on both sides
 - Increased demand for extra GPUs just to run inference
 - Reduced overall throughput and higher cost
-In online learning methods like GRPO — where generation happens constantly — this inefficiency becomes even more painful. You spend more on hardware, but don&#39;t get the performance you&#39;d expect.
+In online learning methods like GRPO — where generation happens constantly — this inefficiency becomes even more painful. You spend more on hardware, but don't get the performance you'd expect.
 So, the key question becomes: Can we share the same GPUs for both training and generation, instead of separating them?
 💡 The Opportunity
 The main issue was that training and inference ran on separate GPUs, leading to idle time and underutilization. The natural solution? Run both on the same GPUs. Instead of having vLLM operate as a standalone server in its own process and devices, what if vLLM could run alongside the training code, within the same distributed process group? This would let us launch a single distributed job where training and inference share the same devices, switching between tasks efficiently without wasting resources.
@@ -26,7 +36,7 @@ Unified Execution: By embedding vLLM in the same process group, both training an
 Skip HTTP Communication: No need for REST API calls or networking — vLLM runs inline with the training loop, avoiding overhead and latency.
 Torchrun Compatibility: Works seamlessly with
 torchrun
-, so it&#39;s easy to scale across nodes with minimal config changes.TP and DP Support: Compatible with Tensor Parallelism and Data Parallelism, making it suitable for large-scale training runs.
+, so it's easy to scale across nodes with minimal config changes.TP and DP Support: Compatible with Tensor Parallelism and Data Parallelism, making it suitable for large-scale training runs.
 SPMD Execution Pattern: Uses a Single Program, Multiple Data (SPMD) model, where each GPU runs its own instance of the engine in sync. Ideal for distributed multi-GPU, multi-node setups.
 Simplified Deployment: You no longer need to maintain a separate server script — vLLM is launched and controlled directly inside your training job.
 Enhanced Throughput: By avoiding idle GPUs and eliminating inter-process communication, the system delivers faster training and generation, especially important in online learning setups like GRPO.
@@ -63,12 +73,12 @@ max_num_seqs=self.args.per_device_train_batch_size
 * self.vllm_tensor_parallel_size
 * self.args.gradient_accumulation_steps,
 max_model_len=self.max_prompt_length + self.max_completion_length,
-distributed_executor_backend=&quot;external_launcher&quot;,
+distributed_executor_backend="external_launcher",
 # Feed identical seed for tp groups to ensure sampling results are the same across workers
 seed=self.accelerator.process_index // self.vllm_tensor_parallel_size,
 )
 Co-located vLLM respects the torch.distributed process group and rank structure. This allows vLLM to be initialized alongside training without conflict and makes TP/DP setups work seamlessly:
-if self.vllm_tensor_parallel_size &gt; 1:
+if self.vllm_tensor_parallel_size > 1:
 # Create subgroups of ranks for TP, each group with `vllm_tensor_parallel_size` ranks.
 self.tp_group, _ = torch.distributed.new_subgroups_by_enumeration(
 [
@@ -77,25 +87,25 @@ for i in range(self.accelerator.num_processes // self.vllm_tensor_parallel_size)
 ]
 )
 Co-located vLLM no longer relies on REST APIs — it runs directly in memory and communicates via native Python calls:
-if self.vllm_tensor_parallel_size &gt; 1:
+if self.vllm_tensor_parallel_size > 1:
 orig_size = len(prompts_text)
 gathered_prompts = [None for _ in range(self.vllm_tensor_parallel_size)]
 torch.distributed.all_gather_object(gathered_prompts, prompts_text, group=self.tp_group)
 all_prompts_text = [p for sublist in gathered_prompts for p in sublist]
 else:
 all_prompts_text = prompts_text
-with profiling_context(self, &quot;vLLM.generate&quot;):
+with profiling_context(self, "vLLM.generate"):
 all_outputs = self.llm.generate(all_prompts_text, sampling_params=sampling_params, use_tqdm=False)
 completion_ids = [output.token_ids for outputs in all_outputs for output in outputs.outputs]
-if self.vllm_tensor_parallel_size &gt; 1:
+if self.vllm_tensor_parallel_size > 1:
 local_rank_in_group = torch.distributed.get_rank(group=self.tp_group)
 tp_slice = slice(local_rank_in_group * orig_size, (local_rank_in_group + 1) * orig_size)
 completion_ids = completion_ids[tp_slice]
-To use this setup, simply set vllm_mode=&quot;colocate&quot; in your GRPO configuration:
+To use this setup, simply set vllm_mode="colocate" in your GRPO configuration:
 training_args = GRPOConfig(
 ...,
 use_vllm=True,
-vllm_mode=&quot;colocate&quot;,
+vllm_mode="colocate",
 )
 Note: Depending on the model size and the overall GPU memory requirements for training, you may need to adjust the vllm_gpu_memory_utilization parameter in
 GRPOConfig
@@ -121,7 +131,7 @@ Experiment 4: 7B Model — Varying Tensor Parallelism (TP)
 - With 7B, more TP improves throughput, reaching up to 1.73× speedup.
 - Larger models benefit from sharding in co-located setups.
 📊 Scaling to 72B Model
-When training large models like Qwen2.5-Math-72B, it&#39;s important to use the right strategies to make training efficient, scalable, and stable across many GPUs and nodes. In our setup, we combined co-located vLLM with several key optimizations to make this work efficiently.
+When training large models like Qwen2.5-Math-72B, it's important to use the right strategies to make training efficient, scalable, and stable across many GPUs and nodes. In our setup, we combined co-located vLLM with several key optimizations to make this work efficiently.
 Sleep Mode in vLLM
 When using co-located training, managing GPU memory is crucial so that both training and inference can run smoothly on the same devices. To support this, we added vLLM’s sleep()
 API into the GRPO training loop.
@@ -143,9 +153,9 @@ ZeRO helps scale large models by distributing memory across GPUs. Stage 3 goes f
 - Optimizer states
 This is essential for models that can’t fit on a single GPU. With ZeRO Stage 3, each GPU handles only a portion of the model.
 Additional options we enable:
-&quot;offload_optimizer&quot;: {&quot;device&quot;: &quot;cpu&quot;}
-Moves optimizer states to CPU to free GPU memory — critical in co-located setups.&quot;overlap_comm&quot;: true
-Enables communication overlap with computation, speeding up training.&quot;contiguous_gradients&quot;: true
+"offload_optimizer": {"device": "cpu"}
+Moves optimizer states to CPU to free GPU memory — critical in co-located setups."overlap_comm": true
+Enables communication overlap with computation, speeding up training."contiguous_gradients": true
 Allocates gradients in a single memory block, improving memory access and reducing fragmentation.
 These optimizations help train 72B models efficiently, and ensure colocation remains stable under tight memory constraints.
 Accelerate Integration
@@ -164,8 +174,8 @@ Reward Curve
 Training reward plots for co-locate and plain setups are nearly identical, demonstrating that:
 Math500 Benchmark
 We evaluated three models: Base model, Co-locate-trained model, Plain-trained model on the Math500 benchmark. Both trained models outperform the base, and the co-locate model performs on par with the plain-trained model — confirming that colocation does not compromise downstream performance.
-🎓 Challenges &amp; Lessons Learned &amp; next steps
-Through our work on scaling GRPO training with co-located vLLM, we&#39;ve faced several critical challenges and learned important lessons about efficiency, flexibility, and system design when training large models.
+🎓 Challenges & Lessons Learned & next steps
+Through our work on scaling GRPO training with co-located vLLM, we've faced several critical challenges and learned important lessons about efficiency, flexibility, and system design when training large models.
 Challenges
 Tensor Parallelism Bug in vLLM ≥ 0.8.0. Tensor Parallelism (TP) with external_launcher stopped working in vLLM version 0.8.0 and above. This was tracked under Issue #15895. To identify the breaking point, we followed the approach described in this vLLM developer blog post, which provides wheels for every commit. After bisecting, we identified the breaking commit as cc10281. The root cause was determinism — the newer versions required explicitly setting the random seed. Once the seed was set, the issue went away.
 Level 2 Sleep Buffer Bug. Initially, level 2 sleep didn’t work correctly when we tried to reload weights using load_weights. This issue was tracked in Issue #16564. The problem was that model buffers (like running mean/var in BatchNorm) weren’t restored after waking up from sleep. The fix came with PR #16889, which added logic to explicitly restore buffers when waking up from level 2 sleep. We now keep a copy of the original buffers and manually reapply them after loading new weights.
@@ -173,7 +183,7 @@ Segmentation Fault on Exit. There’s still an open issue with vLLM sleep causin
 These challenges were not blockers, but they required careful debugging, version control, and a deeper understanding of how vLLM manages memory and parallelism under the hood.
 Lessons Learned
 Co-located inference dramatically improves GPU utilization. By allowing training and generation to share the same GPUs, we eliminate idle time and reduce hardware requirements — achieving higher throughput even with fewer GPUs.
-vLLM&#39;s sleep() feature is essential for large-scale colocation. It enables fine-grained control over memory usage, allowing training to fully reclaim GPU memory between generation steps — a key enabler for models like Qwen2.5-72B.
+vLLM's sleep() feature is essential for large-scale colocation. It enables fine-grained control over memory usage, allowing training to fully reclaim GPU memory between generation steps — a key enabler for models like Qwen2.5-72B.
 DeepSpeed ZeRO Stage 3 is essential for training large models. It allows extremely large networks to fit into memory by distributing model weights, gradients, and optimizer states across multiple GPUs. In our experience, enabling contiguous_gradients helped reduce memory fragmentation, while offloading the optimizer to the CPU freed up critical GPU memory — both of which were especially helpful in colocated setups.
 Colocation is powerful but comes with trade-offs. It works best when GPU memory is carefully managed, often requiring manual tuning of memory usage parameters like vllm_gpu_memory_utilization. While it offers clear throughput benefits and reduces idle GPU time, colocation may not be ideal for models with tight memory budgets or when memory fragmentation is not well controlled. When done right, though, it unlocks significant efficiency gains.
 TP/DP compatibility, Accelerate, and torchrun support make deployment seamless. Despite the complexity of the underlying architecture, the entire system can be launched and scaled with standard distributed tools.
@@ -188,16 +198,16 @@ Below is an example to try out GRPO training with co-located vLLM.
 from datasets import load_dataset
 from trl import GRPOConfig, GRPOTrainer
 # Load dataset
-dataset = load_dataset(&quot;trl-lib/tldr&quot;, split=&quot;train&quot;)
+dataset = load_dataset("trl-lib/tldr", split="train")
 # Define the reward function
 def reward_len(completions, **kwargs):
 return [-abs(20 - len(completion)) for completion in completions]
 # Define training arguments
 training_args = GRPOConfig(
-output_dir=&quot;Qwen2-0.5B-GRPO&quot;,
+output_dir="Qwen2-0.5B-GRPO",
 logging_steps=1,
 use_vllm=True,
-vllm_mode=&quot;colocate&quot;,
+vllm_mode="colocate",
 vllm_tensor_parallel_size=1,
 vllm_gpu_memory_utilization=0.3,
 max_prompt_length=512,
@@ -211,26 +221,9 @@ report_to=None
 )
 # Create and run the trainer
 trainer = GRPOTrainer(
-model=&quot;Qwen/Qwen2-0.5B-Instruct&quot;,
+model="Qwen/Qwen2-0.5B-Instruct",
 reward_funcs=reward_len,
 args=training_args,
 train_dataset=dataset,
 )
-trainer.train() </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
-← 一覧へ戻る
-</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
-      const base = document.getElementById('baseScript')?.dataset.base || '';
-      console.log("✅ base:", base);
-
-      const params = new URL(window.location.href).searchParams;
-      const fromPage = params.get("fromPage") || "1";
-      const fromSort = params.get("fromSort") || "date";
-
-      const backLink = document.getElementById("backLink");
-      if (backLink) {
-        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
-        console.log("✅ backLink.href:", backLink.href);
-      } else {
-        console.warn("⚠️ backLink not found");
-      }
-    </script> </body> </html>
+trainer.train()

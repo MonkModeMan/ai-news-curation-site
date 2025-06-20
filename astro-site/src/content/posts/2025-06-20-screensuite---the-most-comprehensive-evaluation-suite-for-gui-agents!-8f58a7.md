@@ -1,6 +1,16 @@
-<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>ScreenSuite - The most comprehensive evaluation suite for GUI Agents!</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.D9FskRcQ.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 ScreenSuite - The most comprehensive evaluation suite for GUI Agents!</h1> <p class="text-sm text-gray-500"> 2025/6/6 – Hugging Face Blog  <a href="https://huggingface.co/blog/screensuite" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
-元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> ScreenSuite - The most comprehensive evaluation suite for GUI Agents!
+---
+title: ScreenSuite - The most comprehensive evaluation suite for GUI Agents!
+description: ''
+pubDate: Fri, 06 Jun 2025 00:00:00 GMT
+source: Hugging Face Blog
+tags:
+- huggingface
+- transformers
+- nlp
+url: https://huggingface.co/blog/screensuite
+---
+
+ScreenSuite - The most comprehensive evaluation suite for GUI Agents!
 Releasing ScreenSuite, the most comprehensive evaluation suite for GUI Agents!
 TL;DR
 Over the past few weeks, we’ve been working tirelessly on making GUI agents more open, accessible and easy to integrate. Along the way, we created the largest benchmarking suite for GUI agents performances 👉 let us introduce ScreenSuite.
@@ -10,7 +20,7 @@ GUI Agents in action - courtesy of OSWorld
 In short, an AI Agent is a robot that acts in the virtual world. (more thorough definition here)
 In particular, a “GUI Agent” is an agent that lives in a GUI. Think “an agent that can do clicks and navigate on my desktop or my phone”, à la Claude Computer Use.
 This means in essence that the AI model powering the agent will be given a task like “Fill the rest of this Excel column”, along with screen captures of the GUI. Using this information, it will then decide to take action on the system : click(x=130, y=540)
-to open a web browser, type(”Value for XYZ in 2025&quot;)
+to open a web browser, type(”Value for XYZ in 2025")
 , scroll(down=2)
 to read further… To see a GUI agent in action, you can try our Open Computer Agent, powered by Qwen2.5-VL-72B.
 A good GUI agent will be able to navigate a computer just like we would, thus unlocking all computer tasks : scrolling through Google Maps, editing a file, buying an item online. This involves a variety of capabilities that can be hard to evaluate.
@@ -69,21 +79,4 @@ Running consistent and meaningful evaluations easily allows the community to qui
 We hope to see much more capable open models in the coming month that can run a wide range of tasks reliably and even run locally!
 To support this effort:
 - ⭐️ Go star the ScreenSuite repo and give us feedback in issues/PRs!
-- 👉 Follow the smolagents org to stay up-to-date. </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
-← 一覧へ戻る
-</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
-      const base = document.getElementById('baseScript')?.dataset.base || '';
-      console.log("✅ base:", base);
-
-      const params = new URL(window.location.href).searchParams;
-      const fromPage = params.get("fromPage") || "1";
-      const fromSort = params.get("fromSort") || "date";
-
-      const backLink = document.getElementById("backLink");
-      if (backLink) {
-        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
-        console.log("✅ backLink.href:", backLink.href);
-      } else {
-        console.warn("⚠️ backLink not found");
-      }
-    </script> </body> </html>
+- 👉 Follow the smolagents org to stay up-to-date.

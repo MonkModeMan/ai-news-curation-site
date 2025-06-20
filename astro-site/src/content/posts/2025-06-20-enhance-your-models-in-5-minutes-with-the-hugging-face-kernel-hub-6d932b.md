@@ -1,26 +1,36 @@
-<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Enhance Your Models in 5 Minutes with the Hugging Face Kernel Hub</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.D9FskRcQ.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Enhance Your Models in 5 Minutes with the Hugging Face Kernel Hub</h1> <p class="text-sm text-gray-500"> 2025/6/12 – Hugging Face Blog  <a href="https://huggingface.co/blog/hello-hf-kernels" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
-元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> 🏎️ Enhance Your Models in 5 Minutes with the Hugging Face Kernel Hub
+---
+title: Enhance Your Models in 5 Minutes with the Hugging Face Kernel Hub
+description: ''
+pubDate: Thu, 12 Jun 2025 00:00:00 GMT
+source: Hugging Face Blog
+tags:
+- huggingface
+- transformers
+- nlp
+url: https://huggingface.co/blog/hello-hf-kernels
+---
+
+🏎️ Enhance Your Models in 5 Minutes with the Hugging Face Kernel Hub
 Boost your model performance with pre-optimized kernels, easily loaded from the Hub.
-Today, we&#39;ll explore an exciting development from Hugging Face: the Kernel Hub! As ML practitioners, we know that maximizing performance often involves diving deep into optimized code, custom CUDA kernels, or complex build systems. The Kernel Hub simplifies this process dramatically!
+Today, we'll explore an exciting development from Hugging Face: the Kernel Hub! As ML practitioners, we know that maximizing performance often involves diving deep into optimized code, custom CUDA kernels, or complex build systems. The Kernel Hub simplifies this process dramatically!
 Below is a short example of how to use a kernel in your code.
 import torch
 from kernels import get_kernel
 # Download optimized kernels from the Hugging Face hub
-activation = get_kernel(&quot;kernels-community/activation&quot;)
+activation = get_kernel("kernels-community/activation")
 # Random tensor
-x = torch.randn((10, 10), dtype=torch.float16, device=&quot;cuda&quot;)
+x = torch.randn((10, 10), dtype=torch.float16, device="cuda")
 # Run the kernel
 y = torch.empty_like(x)
 activation.gelu_fast(y, x)
 print(y)
-In the next sections we&#39;ll cover the following topics:
+In the next sections we'll cover the following topics:
 - What is the Kernel Hub? - Understanding the core concept.
 - How to use the Kernel Hub - A quick code example.
 - Adding a Kernel to a Simple Model - A practical integration using RMSNorm.
 - Reviewing Performance Impact - Benchmarking the RMSNorm difference.
 - Real world use cases - Examples of how the kernels library is being used in other projects.
-We&#39;ll introduce these concepts quickly – the core idea can be grasped in about 5 minutes (though experimenting and benchmarking might take a bit longer!).
+We'll introduce these concepts quickly – the core idea can be grasped in about 5 minutes (though experimenting and benchmarking might take a bit longer!).
 1. What is the Kernel Hub?
 The Kernel Hub (👈 Check it out!) allows Python libraries and applications to load optimized compute kernels directly from the Hugging Face Hub. Think of it like the Model Hub, but for low-level, high-performance code snippets (kernels) that accelerate specific operations, often on GPUs.
 Examples include advanced attention mechanisms (like FlashAttention for dramatic speedups and memory savings). Custom quantization kernels (enabling efficient computation with lower-precision data types like INT8 or INT4). Specialized kernels required for complex architectures like Mixture of Experts (MoE) layers, which involve intricate routing and computation patterns. As well as activation functions, and normalization layers (like LayerNorm or RMSNorm).
@@ -28,7 +38,7 @@ Instead of manually managing complex dependencies, wrestling with compilation fl
 library to instantly fetch and run pre-compiled, optimized kernels.
 For example, to enable FlashAttention you need just one line—no builds, no flags:
 from kernels import get_kernel
-flash_attention = get_kernel(&quot;kernels-community/flash-attn&quot;)
+flash_attention = get_kernel("kernels-community/flash-attn")
 kernels
 detects your exact Python, PyTorch, and CUDA versions, then downloads the matching pre‑compiled binary—typically in seconds (or a minute or two on a slow connection).
 By contrast, compiling FlashAttention yourself requires:
@@ -49,53 +59,53 @@ As many machine learning developers know, managing dependencies and building low
 Spend more time building great models and less time fighting build systems!
 2. How to Use the Kernel Hub (Basic Example)
 Using the Kernel Hub is designed to be straightforward. The kernels
-library provides the main interface. Here&#39;s a quick example that loads an optimized GELU activation function kernel. (Later on, we&#39;ll see another example about how to integrate a kernel in our model).
+library provides the main interface. Here's a quick example that loads an optimized GELU activation function kernel. (Later on, we'll see another example about how to integrate a kernel in our model).
 File: activation_validation_example.py
 # /// script
 # dependencies = [
-# &quot;numpy&quot;,
-# &quot;torch&quot;,
-# &quot;kernels&quot;,
+# "numpy",
+# "torch",
+# "kernels",
 # ]
 # ///
 import torch
 import torch.nn.functional as F
 from kernels import get_kernel
-DEVICE = &quot;cuda&quot;
+DEVICE = "cuda"
 # Make reproducible
 torch.manual_seed(42)
 # Download optimized activation kernels from the Hub
-activation_kernels = get_kernel(&quot;kernels-community/activation&quot;)
+activation_kernels = get_kernel("kernels-community/activation")
 # Create a random tensor on the GPU
 x = torch.randn((4, 4), dtype=torch.float16, device=DEVICE)
 # Prepare an output tensor
 y = torch.empty_like(x)
 # Run the fast GELU kernel
 activation_kernels.gelu_fast(y, x)
-# Get expected output using PyTorch&#39;s built-in GELU
+# Get expected output using PyTorch's built-in GELU
 expected = F.gelu(x)
-# Compare the kernel output with PyTorch&#39;s result
+# Compare the kernel output with PyTorch's result
 torch.testing.assert_close(y, expected, rtol=1e-2, atol=1e-2)
-print(&quot;✅ Kernel output matches PyTorch GELU!&quot;)
+print("✅ Kernel output matches PyTorch GELU!")
 # Optional: print both tensors for inspection
-print(&quot;\nInput tensor:&quot;)
+print("\nInput tensor:")
 print(x)
-print(&quot;\nFast GELU kernel output:&quot;)
+print("\nFast GELU kernel output:")
 print(y)
-print(&quot;\nPyTorch GELU output:&quot;)
+print("\nPyTorch GELU output:")
 print(expected)
 # List available functions in the loaded kernel module
-print(&quot;\nAvailable functions in &#39;kernels-community/activation&#39;:&quot;)
+print("\nAvailable functions in 'kernels-community/activation':")
 print(dir(activation_kernels))
 (Note: If you have uv
 installed, you can save this script as script.py
 and run uv run script.py
 to automatically handle dependencies.)
-What&#39;s happening here?
+What's happening here?
 - Import
 get_kernel
 : This function is the entry point to the Kernel Hub via thekernels
-library. get_kernel(&quot;kernels-community/activation&quot;)
+library. get_kernel("kernels-community/activation")
 : This line looks for theactivation
 kernel repository under thekernels-community
 organization. It downloads, caches, and loads the appropriate pre-compiled kernel binary.- Prepare Tensors: We create input (
@@ -104,23 +114,23 @@ x
 ) tensors on the GPU. activation_kernels.gelu_fast(y, x)
 : We call the specific optimized function (gelu_fast
 ) provided by the loaded kernel module.- Verification: We check the output.
-This simple example shows how easily you can fetch and execute highly optimized code. Now let&#39;s look at a more practical integration using RMS Normalization.
+This simple example shows how easily you can fetch and execute highly optimized code. Now let's look at a more practical integration using RMS Normalization.
 3. Add a Kernel to a Simple Model
-Let&#39;s integrate an optimized RMS Normalization kernel into a basic model. We&#39;ll use the LlamaRMSNorm
+Let's integrate an optimized RMS Normalization kernel into a basic model. We'll use the LlamaRMSNorm
 implementation provided in the kernels-community/triton-layer-norm
 repository (note: this repo contains various normalization kernels) and compare it against a baseline PyTorch implementation of RMSNorm.
 First, define a simple RMSNorm module in PyTorch and a baseline model using it:
 File: rmsnorm_baseline.py
 # /// script
 # dependencies = [
-# &quot;numpy&quot;,
-# &quot;torch&quot;,
-# &quot;kernels&quot;,
+# "numpy",
+# "torch",
+# "kernels",
 # ]
 # ///
 import torch
 import torch.nn as nn
-DEVICE = &quot;cuda&quot;
+DEVICE = "cuda"
 DTYPE = torch.float16 # Use float16 for better kernel performance potential
 # Simple PyTorch implementation of RMSNorm for baseline comparison
 class RMSNorm(nn.Module):
@@ -169,16 +179,16 @@ BaselineModel(input_size, hidden_size, output_size, eps=eps_val)
 )
 dummy_input = torch.randn(32, input_size, device=DEVICE, dtype=DTYPE) # Batch of 32
 output = baseline_model(dummy_input)
-print(&quot;Baseline RMSNorm model output shape:&quot;, output.shape)
-Now, let&#39;s create a version using the LlamaRMSNorm
+print("Baseline RMSNorm model output shape:", output.shape)
+Now, let's create a version using the LlamaRMSNorm
 kernel loaded via kernels
 .
 File: rmsnorm_kernel.py
 # /// script
 # dependencies = [
-# &quot;numpy&quot;,
-# &quot;torch&quot;,
-# &quot;kernels&quot;,
+# "numpy",
+# "torch",
+# "kernels",
 # ]
 # ///
 import torch
@@ -187,14 +197,14 @@ from kernels import get_kernel, use_kernel_forward_from_hub
 # reuse the model from the previous snippet or copy the class
 # definition here to run this script independently
 from rmsnorm_baseline import BaselineModel
-DEVICE = &quot;cuda&quot;
+DEVICE = "cuda"
 DTYPE = torch.float16 # Use float16 for better kernel performance potential
-layer_norm_kernel_module = get_kernel(&quot;kernels-community/triton-layer-norm&quot;)
+layer_norm_kernel_module = get_kernel("kernels-community/triton-layer-norm")
 # Simply add the decorator to the LlamaRMSNorm class to automatically replace the forward function
 # with the optimized kernel version
 #
 # Note: note all kernels ship with layers already mapped, and would require calling the function directly
-# Howeber in this case, the LlamaRMSNorm class is already mapped to the kernel function. Otherwise we&#39;d need to
+# Howeber in this case, the LlamaRMSNorm class is already mapped to the kernel function. Otherwise we'd need to
 # call the function directly like this:
 # ```python
 # layer_norm_kernel_module.rms_norm_fn(
@@ -208,7 +218,7 @@ layer_norm_kernel_module = get_kernel(&quot;kernels-community/triton-layer-norm&
 # residual_in_fp32=False,
 # )
 # ```
-@use_kernel_forward_from_hub(&quot;LlamaRMSNorm&quot;)
+@use_kernel_forward_from_hub("LlamaRMSNorm")
 class OriginalRMSNorm(nn.Module):
 def __init__(self, hidden_size, variance_epsilon=1e-5):
 super().__init__()
@@ -229,7 +239,7 @@ self,
 input_size,
 hidden_size,
 output_size,
-device=&quot;cuda&quot;,
+device="cuda",
 dtype=torch.float16,
 eps=1e-5,
 ):
@@ -273,16 +283,16 @@ BaselineModel(input_size, hidden_size, output_size, eps=eps_val)
 dummy_input = torch.randn(32, input_size, device=DEVICE, dtype=DTYPE) # Batch of 32
 output = baseline_model(dummy_input)
 output_kernel = kernel_model(dummy_input)
-print(&quot;Kernel RMSNorm model output shape:&quot;, output_kernel.shape)
+print("Kernel RMSNorm model output shape:", output_kernel.shape)
 # Verify outputs are close (RMSNorm implementations should be numerically close)
 try:
 torch.testing.assert_close(output, output_kernel, rtol=1e-2, atol=1e-2)
-print(&quot;\nBaseline and Kernel RMSNorm model outputs match!&quot;)
+print("\nBaseline and Kernel RMSNorm model outputs match!")
 except AssertionError as e:
-print(&quot;\nBaseline and Kernel RMSNorm model outputs differ slightly:&quot;)
+print("\nBaseline and Kernel RMSNorm model outputs differ slightly:")
 print(e)
 except NameError:
-print(&quot;\nSkipping output comparison as kernel model output was not generated.&quot;)
+print("\nSkipping output comparison as kernel model output was not generated.")
 Important Notes on the KernelModel
 :
 - Kernel Inheritance: The
@@ -293,7 +303,7 @@ layer_norm_kernel_module.layers.LlamaRMSNorm.forward
 ,layer_norm_kernel_module.rms_norm_forward
 , or something else) depends entirely on how the kernel creator structured the repository on the Hub. You may need to inspect the loadedlayer_norm_kernel_module
 object (e.g., usingdir()
-) or check the kernel&#39;s documentation on the Hub to find the correct function/method and its signature. I&#39;ve usedrms_norm_forward
+) or check the kernel's documentation on the Hub to find the correct function/method and its signature. I've usedrms_norm_forward
 as a plausible placeholder and added error handling. - Parameters: We now only define
 rms_norm_weight
 (no bias), consistent with RMSNorm.
@@ -302,9 +312,9 @@ How much faster is the optimized Triton RMSNorm kernel compared to the standard 
 File: rmsnorm_benchmark.py
 # /// script
 # dependencies = [
-# &quot;numpy&quot;,
-# &quot;torch&quot;,
-# &quot;kernels&quot;,
+# "numpy",
+# "torch",
+# "kernels",
 # ]
 # ///
 import torch
@@ -312,7 +322,7 @@ import torch
 # definitions here to run this script independently
 from rmsnorm_baseline import BaselineModel
 from rmsnorm_kernel import KernelModel
-DEVICE = &quot;cuda&quot;
+DEVICE = "cuda"
 DTYPE = torch.float16 # Use float16 for better kernel performance potential
 # Use torch.cuda.Event for accurate GPU timing (ensure function is defined)
 def benchmark_model(model, input_tensor, num_runs=100, warmup_runs=10):
@@ -375,9 +385,9 @@ batch_sizes = [
 32768,
 ]
 print(
-f&quot;{&#39;Batch Size&#39;:&lt;12} | {&#39;Baseline Time (ms)&#39;:&lt;18} | {&#39;Kernel Time (ms)&#39;:&lt;18} | {&#39;Speedup&#39;}&quot;
+f"{'Batch Size':<12} | {'Baseline Time (ms)':<18} | {'Kernel Time (ms)':<18} | {'Speedup'}"
 )
-print(&quot;-&quot; * 74)
+print("-" * 74)
 for batch_size in batch_sizes:
 # Call cuda synchronize to ensure all previous GPU operations are complete
 torch.cuda.synchronize()
@@ -390,14 +400,14 @@ kernel_time = -1 # Sentinel value
 kernel_time = benchmark_model(kernel_model_bench, bench_input)
 baseline_time = round(baseline_time, 4)
 kernel_time = round(kernel_time, 4)
-speedup = round(baseline_time / kernel_time, 2) if kernel_time &gt; 0 else &quot;N/A&quot;
-if kernel_time &lt; baseline_time:
-speedup = f&quot;{speedup:.2f}x&quot;
+speedup = round(baseline_time / kernel_time, 2) if kernel_time > 0 else "N/A"
+if kernel_time < baseline_time:
+speedup = f"{speedup:.2f}x"
 elif kernel_time == baseline_time:
-speedup = &quot;1.00x (identical)&quot;
+speedup = "1.00x (identical)"
 else:
-speedup = f&quot;{kernel_time / baseline_time:.2f}x slower&quot;
-print(f&quot;{batch_size:&lt;12} | {baseline_time:&lt;18} | {kernel_time:&lt;18} | {speedup}&quot;)
+speedup = f"{kernel_time / baseline_time:.2f}x slower"
+print(f"{batch_size:<12} | {baseline_time:<18} | {kernel_time:<18} | {speedup}")
 Expected Outcome:
 As with LayerNorm, a well-tuned RMSNorm implementation using Triton can deliver substantial speedups over PyTorch’s default version—especially for memory-bound workloads on compatible hardware (e.g., NVIDIA Ampere or Hopper GPUs) and with low-precision types like float16
 or bfloat16
@@ -407,7 +417,7 @@ Keep in Mind:
 - Microbenchmarks can misrepresent real-world performance.
 - Performance hinges on the quality of the kernel implementation.
 - Optimized kernels might not benefit small batch sizes due to overhead.
-Actual results will depend on your hardware and the specific kernel implementation. Here&#39;s an example of what you might see (on a L4 GPU):
+Actual results will depend on your hardware and the specific kernel implementation. Here's an example of what you might see (on a L4 GPU):
 | Batch Size | Baseline Time (ms) | Kernel Time (ms) | Speedup |
 |---|---|---|---|
 | 256 | 0.2122 | 0.2911 | 0.72x |
@@ -428,7 +438,7 @@ library to load optimized kernels for text generation tasks, improving performan
 kernels
 library to use drop in optimized layers without requiring any changes to the model code. This allows users to easily switch between standard and optimized implementations.
 Get Started and Next Steps!
-You&#39;ve seen how easy it is to fetch and use optimized kernels with the Hugging Face Kernel Hub. Ready to try it yourself?
+You've seen how easy it is to fetch and use optimized kernels with the Hugging Face Kernel Hub. Ready to try it yourself?
 Install the library:
 pip install kernels torch numpy
 Ensure you have a compatible PyTorch version and gpu driver installed.
@@ -436,27 +446,10 @@ Browse the Hub: Explore available kernels on the Hugging Face Hub under the
 kernels
 tag or within organizations likekernels-community
 . Look for kernels relevant to your operations (activations, attention, normalization like LayerNorm/RMSNorm, etc.).Experiment: Try replacing components in your own models. Use
-get_kernel(&quot;user-or-org/kernel-name&quot;)
+get_kernel("user-or-org/kernel-name")
 . Crucially, inspect the loaded kernel object (e.g.,print(dir(loaded_kernel))
-) or check its Hub repository documentation to understand how to correctly call its functions/methods and what parameters (weights, biases, inputs, epsilon) it expects.Benchmark: Measure the performance impact on your specific hardware and workload. Don&#39;t forget to check for numerical correctness (
+) or check its Hub repository documentation to understand how to correctly call its functions/methods and what parameters (weights, biases, inputs, epsilon) it expects.Benchmark: Measure the performance impact on your specific hardware and workload. Don't forget to check for numerical correctness (
 torch.testing.assert_close
 ).(Advanced) Contribute: If you develop optimized kernels, consider sharing them on the Hub!
 Conclusion
-The Hugging Face Kernel Hub provides a powerful yet simple way to access and leverage optimized compute kernels. By replacing standard PyTorch components with optimized versions for operations like RMS Normalization, you can potentially unlock significant performance improvements without the traditional complexities of custom builds. Remember to check the specifics of each kernel on the Hub for correct usage. Give it a try and see how it can accelerate your workflows! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
-← 一覧へ戻る
-</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
-      const base = document.getElementById('baseScript')?.dataset.base || '';
-      console.log("✅ base:", base);
-
-      const params = new URL(window.location.href).searchParams;
-      const fromPage = params.get("fromPage") || "1";
-      const fromSort = params.get("fromSort") || "date";
-
-      const backLink = document.getElementById("backLink");
-      if (backLink) {
-        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
-        console.log("✅ backLink.href:", backLink.href);
-      } else {
-        console.warn("⚠️ backLink not found");
-      }
-    </script> </body> </html>
+The Hugging Face Kernel Hub provides a powerful yet simple way to access and leverage optimized compute kernels. By replacing standard PyTorch components with optimized versions for operations like RMS Normalization, you can potentially unlock significant performance improvements without the traditional complexities of custom builds. Remember to check the specifics of each kernel on the Hub for correct usage. Give it a try and see how it can accelerate your workflows!

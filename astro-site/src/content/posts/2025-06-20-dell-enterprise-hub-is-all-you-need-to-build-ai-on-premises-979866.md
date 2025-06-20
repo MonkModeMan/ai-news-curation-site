@@ -1,6 +1,16 @@
-<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>Dell Enterprise Hub is all you need to build AI on premises</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.D9FskRcQ.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 Dell Enterprise Hub is all you need to build AI on premises</h1> <p class="text-sm text-gray-500"> 2025/5/23 – Hugging Face Blog  <a href="https://huggingface.co/blog/dell-ai-applications" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
-元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> Dell Enterprise Hub is all you need to build AI on premises
+---
+title: Dell Enterprise Hub is all you need to build AI on premises
+description: ''
+pubDate: Fri, 23 May 2025 00:00:00 GMT
+source: Hugging Face Blog
+tags:
+- huggingface
+- transformers
+- nlp
+url: https://huggingface.co/blog/dell-ai-applications
+---
+
+Dell Enterprise Hub is all you need to build AI on premises
 This week at Dell Tech World, we announced the new version of Dell Enterprise Hub, with a complete suite of models and applications to easily build AI running on premises with Dell AI servers and AI PCs.
 Models Ready for Action
 If you go to the Dell Enterprise Hub today, you can find some of the most popular models, like Meta Llama 4 Maverick, DeepSeek R1 or Google Gemma 3, available for deployment and training in a few clicks.
@@ -33,21 +43,4 @@ As a Dell customer, that means you can very quickly, within an hour instead of w
 - roll out an in-network chat assistant powered by the latest open LLMs, and connect it to your internal storage systems (ex. Dell PowerScale) using MCP, all in an air gapped environment
 - give access to complex agentic systems, with granular access controls and SSO, that can work with internal text, code, images, audio and documents and access the web for current context
 - set up employees with on-device, private transcription powered by a fleet of Dell AI PCs in a fully managed way
-If you are using Dell Enterprise Hub today, we would love to hear from you in the comments! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
-← 一覧へ戻る
-</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
-      const base = document.getElementById('baseScript')?.dataset.base || '';
-      console.log("✅ base:", base);
-
-      const params = new URL(window.location.href).searchParams;
-      const fromPage = params.get("fromPage") || "1";
-      const fromSort = params.get("fromSort") || "date";
-
-      const backLink = document.getElementById("backLink");
-      if (backLink) {
-        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
-        console.log("✅ backLink.href:", backLink.href);
-      } else {
-        console.warn("⚠️ backLink not found");
-      }
-    </script> </body> </html>
+If you are using Dell Enterprise Hub today, we would love to hear from you in the comments!

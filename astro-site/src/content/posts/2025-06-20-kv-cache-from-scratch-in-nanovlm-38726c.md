@@ -1,6 +1,16 @@
-<!DOCTYPE html><html lang="ja"> <head><meta charset="UTF-8"><title>KV Cache from scratch in nanoVLM</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/ai-news-curation-site/_astro/index.D9FskRcQ.css"></head> <body class="bg-gray-100 text-gray-800 font-sans px-4 py-6"> <div class="max-w-3xl mx-auto"> <!-- ✅ タイトル --> <header class="mb-6"> <h1 class="text-3xl font-extrabold text-sky-500 mb-2">📰 KV Cache from scratch in nanoVLM</h1> <p class="text-sm text-gray-500"> 2025/6/4 – Hugging Face Blog  <a href="https://huggingface.co/blog/kv-cache" target="_blank" rel="noopener noreferrer" class="text-sky-500 hover:text-gray-500 no-underline border-b border-transparent hover:border-gray-300 transition">
-元記事
-</a>  </p> </header> <!-- ✅ 本文 --> <article class="prose prose-sm sm:prose lg:prose-lg max-w-none bg-white rounded-lg shadow p-6"> KV Cache from scratch in nanoVLM
+---
+title: KV Cache from scratch in nanoVLM
+description: ''
+pubDate: Wed, 04 Jun 2025 00:00:00 GMT
+source: Hugging Face Blog
+tags:
+- huggingface
+- transformers
+- nlp
+url: https://huggingface.co/blog/kv-cache
+---
+
+KV Cache from scratch in nanoVLM
 TL;DR
 We have implemented KV Caching from scratch in our nanoVLM repository (a small codebase to train your own Vision Language Model with pure PyTorch). This gave us a 38% speedup in generation. In this blog post we cover KV Caching and all our experiences while implementing it. The lessons learnt are general and can be applied to all autoregressive language model generations. Implementing from scratch on a small codebase is a great learning experience, come along for the ride!
 Introduction
@@ -48,7 +58,7 @@ d_k = K.shape[-1]
 attention_scores = (Q @ K.T) / math.sqrt(d_k)
 # Lower triangular mask to prevent future token access
 causal_mask = torch.tril(torch.ones(input_seq_length, input_seq_length))
-masked_scores = attention_scores.masked_fill(causal_mask == 0, float(&#39;-inf&#39;))
+masked_scores = attention_scores.masked_fill(causal_mask == 0, float('-inf'))
 attention_weights = F.softmax(masked_scores, dim=-1)
 output = attention_weights @ V
 Where Redundancy Creeps In
@@ -79,7 +89,7 @@ To eliminate this inefficiency, we use KV Caching:
 - During generation, we only compute and for the new token, and append them to the cache.
 - We compute for the current token and use it with the cached and to get the output.
 This changes generation from full-sequence re-computation to a lightweight, incremental update.
-✅ In practice, this cache is a per-layer dictionary with keys &quot;key&quot; and &quot;value&quot;, each of shape (
+✅ In practice, this cache is a per-layer dictionary with keys "key" and "value", each of shape (
 batch_size
 ,num_heads
 ,seq_len_cached
@@ -87,7 +97,7 @@ batch_size
 ).
 This is the foundation of how modern LLMs can generate long outputs efficiently.
 KV Caching in nanoVLM: From Theory to Practice
-Now that we understand the theory behind KV Caching, let’s see how it’s implemented in practice inside our nanoVLM repository. This is an ideal testbed, as it&#39;s a super concise and self-contained codebase.
+Now that we understand the theory behind KV Caching, let’s see how it’s implemented in practice inside our nanoVLM repository. This is an ideal testbed, as it's a super concise and self-contained codebase.
 KV caching is enabled across three key components in our model:
 - The Attention block that uses and updates the KV cache
 - The Language model that tracks cache per layer
@@ -104,14 +114,14 @@ B, T_curr, C = x.size()
 # Project inputs to Q, K, V
 q_curr, k_curr, v_curr = project_current_tokens(x)
 q, k_rotated = apply_rotary_pos_embd(q_curr, k_curr, cos, sin)
-if not is_prefill and block_kv_cache[&#39;key&#39;] is not None:
+if not is_prefill and block_kv_cache['key'] is not None:
 # Append new keys and values to the cache
-k = torch.cat([block_kv_cache[&#39;key&#39;], k_rotated], dim=2)
-v = torch.cat([block_kv_cache[&#39;value&#39;], v_curr], dim=2)
+k = torch.cat([block_kv_cache['key'], k_rotated], dim=2)
+v = torch.cat([block_kv_cache['value'], v_curr], dim=2)
 else:
 # First pass (prefill) — no cache
 k, v = k_rotated, v_curr
-block_kv_cache = {&#39;key&#39;: k, &#39;value&#39;: v}
+block_kv_cache = {'key': k, 'value': v}
 return attention_output, block_kv_cache
 2. Tracking Cache Across Layers
 In the LanguageModel
@@ -136,9 +146,9 @@ We split generation into two stages:
 - PREFILL PHASE: Encode the full prompt and build the initial cache.
 - DECODE PHASE: Generate tokens one at a time using cached keys/values.
 PREFILL PHASE (cache construction)
-[Prompt: &quot;What is&quot;] → [Transformer] → [Cache: K, V for all layers]
+[Prompt: "What is"] → [Transformer] → [Cache: K, V for all layers]
 DECODE PHASE (token-by-token)
-[Token: &quot;the&quot;] → [Q(&quot;the&quot;) + cached K/V] → [next token: &quot;?&quot;] → ...
+[Token: "the"] → [Q("the") + cached K/V] → [next token: "?"] → ...
 Here’s the corresponding code:
 # PREFILL: Process the input prompt, fill the cache
 prompt_output, kv_cache_list = self.forward(
@@ -171,21 +181,4 @@ Summary: Why KV Caching Matters
 | Incremental growth | Cache grows by one row per new token |
 | Position-aware decoding | start_pos ensures correctness of position encoding calculations |
 | Efficiency | Reduces per-token inference to O(seq len ) instead of quadratic |
-KV caching eliminates unnecessary computation during autoregressive generation, enabling faster and more efficient inference, especially in long sequences and real-time applications. This is a trade-off between speed and memory, and its drawbacks can be more complex code and restricting fancier inference schemes, like beam-search, etc. KV caching is a popular method for speeding up LLM inference, making it possible to run them on consumer hardware, and now you know how it works too! </article> <!-- ✅ 戻るボタン --> <div class="mt-10 text-center"> <a id="backLink" href="#" class="inline-block px-4 py-2 border border-sky-600 text-sky-600 rounded hover:bg-gray-100 transition">
-← 一覧へ戻る
-</a> </div> </div> <!-- ✅ base を正しく埋め込む --> <script id="baseScript" data-base="/ai-news-curation-site"></script> <!-- ✅ 戻るリンクを正しく構築 --> <script>
-      const base = document.getElementById('baseScript')?.dataset.base || '';
-      console.log("✅ base:", base);
-
-      const params = new URL(window.location.href).searchParams;
-      const fromPage = params.get("fromPage") || "1";
-      const fromSort = params.get("fromSort") || "date";
-
-      const backLink = document.getElementById("backLink");
-      if (backLink) {
-        backLink.href = `${base}/page/${fromSort}/${fromPage}`;
-        console.log("✅ backLink.href:", backLink.href);
-      } else {
-        console.warn("⚠️ backLink not found");
-      }
-    </script> </body> </html>
+KV caching eliminates unnecessary computation during autoregressive generation, enabling faster and more efficient inference, especially in long sequences and real-time applications. This is a trade-off between speed and memory, and its drawbacks can be more complex code and restricting fancier inference schemes, like beam-search, etc. KV caching is a popular method for speeding up LLM inference, making it possible to run them on consumer hardware, and now you know how it works too!
